@@ -187,13 +187,67 @@
 
 .ac-is-card h3 {
     margin: 0 0 12px 0;
-    font-size: 1rem;
+    font-size: 0.95rem;
     color: #64748b;
+    font-weight: 600;
 }
 
 .ac-is-card .value {
     font-size: 1.8rem;
     font-weight: 800;
+}
+
+/* Horizontal Metrics Cards */
+.ac-is-metrics-row {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.ac-is-metric-card {
+    flex: 1;
+    background: #fff;
+    padding: 20px;
+    border-right: 4px solid var(--ac-primary);
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    border: 1px solid var(--ac-border);
+    border-right: 4px solid var(--ac-primary);
+}
+
+.ac-is-metric-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    flex-shrink: 0;
+}
+
+.ac-is-metric-content {
+    flex-grow: 1;
+}
+
+.ac-is-metric-title {
+    font-size: 0.85rem;
+    color: #64748b;
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+.ac-is-metric-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--ac-text);
+}
+
+@media (max-width: 768px) {
+    .ac-is-metrics-row {
+        flex-direction: column;
+    }
 }
 
 /* Form Styles - Reduced Gaps & Padding */

@@ -10,17 +10,17 @@ class AC_IS_Shortcode {
 	}
 
 	public function render_dashboard() {
-		if ( ! is_user_logged_in() ) {
-			return '<p>' . __( 'يرجى تسجيل الدخول للوصول إلى النظام.', 'ac-inventory-system' ) . '</p>';
+		ob_start();
+
+		if ( ! AC_IS_Auth::is_logged_in() ) {
+			include AC_IS_PATH . 'templates/login.php';
+			return ob_get_clean();
 		}
 
 		$view = isset( $_GET['ac_view'] ) ? sanitize_text_field( $_GET['ac_view'] ) : 'dashboard';
-		
-		ob_start();
-		include AC_IS_PATH . 'templates/header.php';
+		$is_admin = AC_IS_Auth::is_admin();
 
-		// Capability check for Admin vs Staff
-		$is_admin = current_user_can( 'manage_options' );
+		include AC_IS_PATH . 'templates/header.php';
 
 		switch ( $view ) {
 			case 'inventory':
@@ -55,6 +55,13 @@ class AC_IS_Shortcode {
 					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
 				} else {
 					include AC_IS_PATH . 'templates/branches.php';
+				}
+				break;
+			case 'settings':
+				if ( ! $is_admin ) {
+					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
+				} else {
+					include AC_IS_PATH . 'templates/settings.php';
 				}
 				break;
 			default:

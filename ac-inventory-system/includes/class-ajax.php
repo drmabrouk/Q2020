@@ -13,6 +13,12 @@ class AC_IS_Ajax {
 		add_action( 'wp_ajax_ac_is_save_branch', array( $this, 'save_branch' ) );
 		add_action( 'wp_ajax_ac_is_search_products', array( $this, 'search_products' ) );
 		add_action( 'wp_ajax_ac_is_get_customer', array( $this, 'get_customer' ) );
+		add_action( 'wp_ajax_nopriv_ac_is_login', array( $this, 'login' ) );
+		add_action( 'wp_ajax_ac_is_login', array( $this, 'login' ) );
+		add_action( 'wp_ajax_ac_is_logout', array( $this, 'logout' ) );
+		add_action( 'wp_ajax_ac_is_add_staff', array( $this, 'add_staff' ) );
+		add_action( 'wp_ajax_ac_is_delete_staff', array( $this, 'delete_staff' ) );
+		add_action( 'wp_ajax_ac_is_save_settings', array( $this, 'save_settings' ) );
 	}
 
 	public function save_product() {
@@ -98,6 +104,71 @@ class AC_IS_Ajax {
 		wp_send_json_success( 'Branch saved' );
 	}
 
+	public function login() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		$username = sanitize_text_field( $_POST['username'] );
+		$password = $_POST['password'];
+
+		if ( AC_IS_Auth::login( $username, $password ) ) {
+			wp_send_json_success();
+		} else {
+			wp_send_json_error();
+		}
+	}
+
+	public function logout() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		AC_IS_Auth::logout();
+		wp_send_json_success();
+	}
+
+	public function add_staff() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_staff';
+
+		$data = array(
+			'username' => sanitize_text_field( $_POST['staff_username'] ),
+			'password' => password_hash( $_POST['staff_password'], PASSWORD_DEFAULT ),
+			'name'     => sanitize_text_field( $_POST['staff_name'] ),
+			'role'     => sanitize_text_field( $_POST['staff_role'] ),
+		);
+
+		$wpdb->insert( $table, $data );
+		wp_send_json_success();
+	}
+
+	public function delete_staff() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		$id = intval( $_POST['id'] );
+		global $wpdb;
+		$wpdb->delete( $wpdb->prefix . 'ac_is_staff', array( 'id' => $id ) );
+		wp_send_json_success();
+	}
+
+	public function save_settings() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_settings';
+
+		foreach ( $_POST as $key => $value ) {
+			if ( strpos( $key, 'ac_is_' ) === false && $key !== 'action' && $key !== 'nonce' ) {
+				$wpdb->replace( $table, array(
+					'setting_key'   => sanitize_key( $key ),
+					'setting_value' => sanitize_text_field( $value )
+				) );
+			}
+		}
+
+		wp_send_json_success();
+	}
+
 	public function search_products() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
 
@@ -143,12 +214,15 @@ class AC_IS_Ajax {
 			$customer_id = AC_IS_Customers::add_customer( $customer_data );
 		}
 
+		$current_user = AC_IS_Auth::current_user();
+		$operator_id  = $current_user ? $current_user->id : 0;
+
 		// Create Invoice
 		$wpdb->insert( $wpdb->prefix . 'ac_is_invoices', array(
 			'customer_id' => $customer_id,
 			'total_amount' => floatval( $_POST['total_amount'] ),
 			'branch_id'   => $branch_id,
-			'operator_id' => get_current_user_id(),
+			'operator_id' => $operator_id,
 		) );
 		$invoice_id = $wpdb->insert_id;
 

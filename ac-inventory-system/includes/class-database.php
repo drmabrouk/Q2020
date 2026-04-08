@@ -15,6 +15,8 @@ class AC_IS_Database {
 		$table_branches  = $wpdb->prefix . 'ac_is_branches';
 		$table_customers = $wpdb->prefix . 'ac_is_customers';
 		$table_invoices  = $wpdb->prefix . 'ac_is_invoices';
+		$table_staff     = $wpdb->prefix . 'ac_is_staff';
+		$table_settings  = $wpdb->prefix . 'ac_is_settings';
 
 		$sql = "CREATE TABLE $table_branches (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
@@ -72,11 +74,57 @@ class AC_IS_Database {
 			operator_id bigint(20) UNSIGNED NOT NULL,
 			sale_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
+		) $charset_collate;
+
+		CREATE TABLE $table_staff (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			username varchar(100) NOT NULL,
+			password varchar(255) NOT NULL,
+			name varchar(255),
+			role varchar(50) DEFAULT 'staff',
+			created_at datetime DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id),
+			UNIQUE KEY username (username)
+		) $charset_collate;
+
+		CREATE TABLE $table_settings (
+			setting_key varchar(100) NOT NULL,
+			setting_value text,
+			PRIMARY KEY  (setting_key)
 		) $charset_collate;";
 
 		if ( file_exists( ABSPATH . 'wp-admin/includes/upgrade.php' ) ) {
 			require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 			dbDelta( $sql );
+		}
+
+		// Seed initial data
+		self::seed_data();
+	}
+
+	private static function seed_data() {
+		global $wpdb;
+		$table_staff    = $wpdb->prefix . 'ac_is_staff';
+		$table_settings = $wpdb->prefix . 'ac_is_settings';
+
+		// Default admin if not exists
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table_staff WHERE username = %s", 'admin' ) );
+		if ( ! $exists ) {
+			$wpdb->insert( $table_staff, array(
+				'username' => 'admin',
+				'password' => password_hash( 'admin123', PASSWORD_DEFAULT ),
+				'name'     => 'System Admin',
+				'role'     => 'admin'
+			) );
+		}
+
+		// Default full screen password
+		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT setting_value FROM $table_settings WHERE setting_key = %s", 'fullscreen_password' ) );
+		if ( ! $exists ) {
+			$wpdb->insert( $table_settings, array(
+				'setting_key'   => 'fullscreen_password',
+				'setting_value' => '123456789'
+			) );
 		}
 	}
 }

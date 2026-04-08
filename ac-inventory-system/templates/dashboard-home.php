@@ -40,7 +40,7 @@ $recent_sales = $wpdb->get_results("
 ");
 ?>
 
-<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('لوحة المعلومات / التقارير', 'ac-inventory-system'); ?></h2>
     <div style="display:flex; gap:10px;">
         <a href="<?php echo add_query_arg('ac_view', 'add-product'); ?>" class="ac-is-btn"><?php _e('إضافة منتج', 'ac-inventory-system'); ?></a>
@@ -48,52 +48,64 @@ $recent_sales = $wpdb->get_results("
     </div>
 </div>
 
-<div class="ac-is-summary-cards" style="gap:15px;">
-    <div class="ac-is-card">
-        <h3 style="font-size:0.9rem;"><?php _e('مبيعات اليوم', 'ac-inventory-system'); ?></h3>
-        <div class="value" style="font-size:1.6rem;"><?php echo number_format($today_sales_total, 2); ?> <small style="font-size:0.8rem; color:#64748b;">EGP</small></div>
-        <div style="margin-top:5px; font-weight:600; color:#059669; font-size:0.8rem;">
-            <span class="dashicons dashicons-cart" style="font-size:14px; width:14px; height:14px;"></span> <?php echo $today_sales_count; ?> <?php _e('عمليات', 'ac-inventory-system'); ?>
+<!-- Horizontal Professional Metrics -->
+<div class="ac-is-metrics-row">
+    <div class="ac-is-metric-card" style="border-right-color: #059669;">
+        <div class="ac-is-metric-icon" style="background: #ecfdf5; color: #059669;">
+            <span class="dashicons dashicons-cart"></span>
+        </div>
+        <div class="ac-is-metric-content">
+            <div class="ac-is-metric-title"><?php _e('مبيعات اليوم', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value"><?php echo number_format($today_sales_total, 2); ?> <small style="font-size:0.8rem;">EGP</small></div>
+            <div style="font-size: 0.75rem; color: #059669; font-weight: 600;"><?php echo $today_sales_count; ?> <?php _e('عملية', 'ac-inventory-system'); ?></div>
         </div>
     </div>
-    <div class="ac-is-card">
-        <h3 style="font-size:0.9rem;"><?php _e('تنبيهات المخزون', 'ac-inventory-system'); ?></h3>
-        <div class="value" style="color:var(--ac-danger-text); font-size:1.6rem;"><?php echo $low_stock_count; ?></div>
-        <div style="margin-top:5px; font-weight:600; color:var(--ac-danger-text); font-size:0.8rem;">
-            <span class="dashicons dashicons-warning" style="font-size:14px; width:14px; height:14px;"></span> <?php _e('نقص مخزون', 'ac-inventory-system'); ?>
+
+    <div class="ac-is-metric-card" style="border-right-color: #dc2626;">
+        <div class="ac-is-metric-icon" style="background: #fef2f2; color: #dc2626;">
+            <span class="dashicons dashicons-warning"></span>
+        </div>
+        <div class="ac-is-metric-content">
+            <div class="ac-is-metric-title"><?php _e('تنبيهات المخزون', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value" style="color: #dc2626;"><?php echo $low_stock_count; ?></div>
+            <div style="font-size: 0.75rem; color: #64748b;"><?php _e('منتجات منخفضة', 'ac-inventory-system'); ?></div>
         </div>
     </div>
-    <div class="ac-is-card">
-        <h3 style="font-size:0.9rem;"><?php _e('إجمالي المخزون', 'ac-inventory-system'); ?></h3>
-        <div class="value" style="font-size:1.6rem;"><?php echo number_format($total_stock_qty); ?></div>
-        <div style="margin-top:5px; font-weight:600; color:#64748b; font-size:0.8rem;">
-            <span class="dashicons dashicons-database" style="font-size:14px; width:14px; height:14px;"></span> <?php echo $total_products; ?> <?php _e('صنف', 'ac-inventory-system'); ?>
+
+    <div class="ac-is-metric-card" style="border-right-color: #2563eb;">
+        <div class="ac-is-metric-icon" style="background: #eff6ff; color: #2563eb;">
+            <span class="dashicons dashicons-database"></span>
+        </div>
+        <div class="ac-is-metric-content">
+            <div class="ac-is-metric-title"><?php _e('إجمالي المخزون', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value"><?php echo number_format($total_stock_qty); ?></div>
+            <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;"><?php echo $total_products; ?> <?php _e('صنف مسجل', 'ac-inventory-system'); ?></div>
         </div>
     </div>
 </div>
 
-<div class="ac-is-grid" style="margin-top:25px; gap:15px;">
+<div class="ac-is-grid" style="gap:20px;">
     <!-- Sales Chart -->
     <div class="ac-is-card" style="grid-column: span 2;">
-        <h3 style="font-size:0.9rem;"><?php _e('تحليل المبيعات (7 أيام)', 'ac-inventory-system'); ?></h3>
-        <canvas id="ac-is-sales-chart" height="80"></canvas>
+        <h3><?php _e('تحليل المبيعات (7 أيام)', 'ac-inventory-system'); ?></h3>
+        <canvas id="ac-is-sales-chart" height="70"></canvas>
     </div>
 
     <!-- Top Products -->
-    <div class="ac-is-card" style="padding:15px;">
-        <h3 style="font-size:0.9rem;"><?php _e('الأكثر مبيعاً', 'ac-inventory-system'); ?></h3>
+    <div class="ac-is-card">
+        <h3><?php _e('الأكثر مبيعاً', 'ac-inventory-system'); ?></h3>
         <table class="ac-is-table">
             <thead>
                 <tr>
-                    <th style="padding:8px;"><?php _e('المنتج', 'ac-inventory-system'); ?></th>
-                    <th style="padding:8px;"><?php _e('الكمية', 'ac-inventory-system'); ?></th>
+                    <th style="padding:10px;"><?php _e('المنتج', 'ac-inventory-system'); ?></th>
+                    <th style="padding:10px;"><?php _e('الكمية', 'ac-inventory-system'); ?></th>
                 </tr>
             </thead>
             <tbody>
                 <?php foreach($top_products as $tp): ?>
                     <tr>
-                        <td style="padding:8px; font-size:0.8rem;"><strong><?php echo esc_html($tp->name); ?></strong></td>
-                        <td style="padding:8px;"><span class="ac-is-capsule capsule-primary" style="font-size:0.7rem;"><?php echo $tp->total_qty; ?></span></td>
+                        <td style="padding:10px; font-size:0.8rem;"><strong><?php echo esc_html($tp->name); ?></strong></td>
+                        <td style="padding:10px;"><span class="ac-is-capsule capsule-primary" style="font-size:0.7rem;"><?php echo $tp->total_qty; ?></span></td>
                     </tr>
                 <?php endforeach; ?>
             </tbody>
@@ -101,11 +113,11 @@ $recent_sales = $wpdb->get_results("
     </div>
 
     <!-- Recent Activity -->
-    <div class="ac-is-card" style="padding:15px;">
-        <h3 style="font-size:0.9rem;"><?php _e('آخر عمليات البيع', 'ac-inventory-system'); ?></h3>
+    <div class="ac-is-card">
+        <h3><?php _e('آخر عمليات البيع', 'ac-inventory-system'); ?></h3>
         <div class="ac-is-recent-list">
             <?php foreach($recent_sales as $rs): ?>
-                <div style="display:flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f1f5f9;">
+                <div style="display:flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
                     <div style="font-size:0.8rem;">
                         <strong><?php echo esc_html($rs->product_name); ?></strong><br>
                         <small style="color:#94a3b8; font-size:0.7rem;"><?php echo date('H:i - d/m', strtotime($rs->sale_date)); ?></small>
