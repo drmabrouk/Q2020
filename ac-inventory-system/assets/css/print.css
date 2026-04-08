@@ -1,0 +1,16 @@
+@media print {
+    .ac-is-nav, .ac-is-export-actions, .ac-is-quick-actions, .ac-is-upload-btn, .ac-is-btn {
+        display: none !important;
+    }
+    .ac-is-dashboard {
+        border: none;
+        background: none;
+        padding: 0;
+    }
+    .ac-is-content {
+        box-shadow: none;
+    }
+    .ac-is-table th, .ac-is-table td {
+        border: 1px solid #000;
+    }
+}

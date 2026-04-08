@@ -1,0 +1,67 @@
+<?php
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
+
+class AC_IS_Shortcode {
+
+	public function __construct() {
+		add_shortcode( 'ac_inventory_system', array( $this, 'render_dashboard' ) );
+	}
+
+	public function render_dashboard() {
+		if ( ! is_user_logged_in() ) {
+			return '<p>' . __( 'يرجى تسجيل الدخول للوصول إلى النظام.', 'ac-inventory-system' ) . '</p>';
+		}
+
+		$view = isset( $_GET['ac_view'] ) ? sanitize_text_field( $_GET['ac_view'] ) : 'dashboard';
+		
+		ob_start();
+		include AC_IS_PATH . 'templates/header.php';
+
+		// Capability check for Admin vs Staff
+		$is_admin = current_user_can( 'manage_options' );
+
+		switch ( $view ) {
+			case 'inventory':
+				include AC_IS_PATH . 'templates/inventory.php';
+				break;
+			case 'add-product':
+			case 'edit-product':
+				if ( ! $is_admin ) {
+					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
+				} else {
+					include AC_IS_PATH . 'templates/product-form.php';
+				}
+				break;
+			case 'sales':
+				include AC_IS_PATH . 'templates/sales-form.php';
+				break;
+			case 'sales-history':
+				include AC_IS_PATH . 'templates/sales-history.php';
+				break;
+			case 'reports':
+				if ( ! $is_admin ) {
+					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
+				} else {
+					include AC_IS_PATH . 'templates/reports.php';
+				}
+				break;
+			case 'branches':
+				if ( ! $is_admin ) {
+					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
+				} else {
+					include AC_IS_PATH . 'templates/branches.php';
+				}
+				break;
+			default:
+				include AC_IS_PATH . 'templates/dashboard-home.php';
+				break;
+		}
+
+		include AC_IS_PATH . 'templates/footer.php';
+		return ob_get_clean();
+	}
+}
+
+new AC_IS_Shortcode();
