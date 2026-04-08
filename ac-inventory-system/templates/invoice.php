@@ -10,17 +10,6 @@ $company_phone = $settings['company_phone']->setting_value ?? '';
 $company_email = $settings['company_email']->setting_value ?? '';
 $company_address = $settings['company_address']->setting_value ?? '';
 $company_logo = $settings['company_logo']->setting_value ?? '';
-
-$branches = AC_IS_Inventory::get_branches();
-$branch_name = '';
-if($invoice) {
-    foreach($branches as $b) {
-        if($b->id == $invoice->branch_id) {
-            $branch_name = $b->name;
-            break;
-        }
-    }
-}
 ?>
 
 <div class="ac-is-header-flex no-print" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -41,7 +30,6 @@ if($invoice) {
                 <?php endif; ?>
                 <div>
                     <h1 style="margin:0; font-size:2rem; font-weight:900; color:#0f172a;"><?php echo esc_html($company_name); ?></h1>
-                    <p style="margin:5px 0; font-weight:700; color:#64748b;"><?php echo $branch_name; ?></p>
                     <small style="color:#64748b;"><?php echo esc_html($company_address); ?></small>
                 </div>
             </div>

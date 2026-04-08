@@ -1,10 +1,16 @@
 <?php
 $daily = AC_IS_Reports::get_daily_sales();
-$weekly = AC_IS_Reports::get_weekly_sales();
 $monthly = AC_IS_Reports::get_monthly_sales();
 $low_stock = AC_IS_Reports::get_stock_overview();
+
+global $wpdb;
+$settings = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ac_is_settings", OBJECT_K );
+$company_name = $settings['company_name']->setting_value ?? get_bloginfo('name');
 ?>
-<h2><?php _e('تقارير المبيعات والمخزون', 'ac-inventory-system'); ?></h2>
+<div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2><?php _e('تقارير المبيعات والمخزون', 'ac-inventory-system'); ?></h2>
+    <h3 class="print-only" style="margin:0;"><?php echo esc_html($company_name); ?></h3>
+</div>
 
 <div class="ac-is-summary-cards">
     <div class="ac-is-card">
@@ -93,6 +99,8 @@ $low_stock = AC_IS_Reports::get_stock_overview();
 </div>
 
 <div class="ac-is-export-actions" style="margin-top:40px; display:flex; gap:15px; justify-content:center;">
-    <a href="<?php echo add_query_arg('ac_export', 'sales'); ?>" class="ac-is-btn" style="background:#28a745;"><?php _e('تصدير التقرير (CSV)', 'ac-inventory-system'); ?></a>
+        <?php if(AC_IS_Auth::is_admin()): ?>
+            <a href="<?php echo add_query_arg('ac_export', 'sales'); ?>" class="ac-is-btn" style="background:#28a745;"><?php _e('تصدير التقرير (CSV)', 'ac-inventory-system'); ?></a>
+        <?php endif; ?>
     <button onclick="window.print();" class="ac-is-btn" style="background:#6c757d;"><?php _e('طباعة التقرير', 'ac-inventory-system'); ?></button>
 </div>

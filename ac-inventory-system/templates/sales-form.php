@@ -119,12 +119,6 @@ $branches = AC_IS_Inventory::get_branches();
         <div class="ac-is-card">
             <h3><?php _e('ملخص العميل', 'ac-inventory-system'); ?></h3>
             <div id="review-customer-info" style="margin-top:15px; line-height:2;"></div>
-            <div class="ac-is-form-group" style="margin-top:20px;">
-                <label><?php _e('الفرع البائع', 'ac-inventory-system'); ?></label>
-                <select id="ac-is-sale-branch">
-                    <?php foreach($branches as $branch): ?><option value="<?php echo $branch->id; ?>"><?php echo esc_html($branch->name); ?></option><?php endforeach; ?>
-                </select>
-            </div>
             <button type="button" id="ac-is-finalize-sale" class="ac-is-btn" style="width:100%; height:60px; margin-top:30px; background:#059669; font-size:1.2rem;">
                 <?php _e('تأكيد وإصدار الفاتورة', 'ac-inventory-system'); ?>
             </button>

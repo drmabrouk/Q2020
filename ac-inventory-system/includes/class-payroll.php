@@ -12,7 +12,8 @@ class AC_IS_Payroll {
 		$table_staff = $wpdb->prefix . 'ac_is_staff';
 		$table_attendance = $wpdb->prefix . 'ac_is_attendance';
 
-		$staff_list = $wpdb->get_results( "SELECT * FROM $table_staff ORDER BY name ASC" );
+		// Hide system admin from payroll
+		$staff_list = $wpdb->get_results( "SELECT * FROM $table_staff WHERE username != 'admin' ORDER BY name ASC" );
 		$payroll = array();
 
 		foreach ( $staff_list as $staff ) {
@@ -36,15 +37,29 @@ class AC_IS_Payroll {
 			$daily_rate = $staff->base_salary / ($staff->working_days ?: 26);
 			$hourly_rate = $daily_rate / ($staff->working_hours ?: 8);
 
+			// Constants for schedule
+			$work_start = "09:00:00";
+			$work_end   = "22:00:00";
+
 			// Simple deduction: base salary - (missed days * daily rate)
 			$missed_days = max(0, $staff->working_days - $days_present);
 			$deductions = $missed_days * $daily_rate;
 
-			// Optional: delay deduction if hours are less than expected
-			$expected_hours = $days_present * $staff->working_hours;
+			// Delay and Early exit deductions
 			$delay_deduction = 0;
-			if ( $total_hours < $expected_hours ) {
-				$delay_deduction = ($expected_hours - $total_hours) * $hourly_rate;
+			foreach ( $attendance as $a ) {
+				if ( $a->status === 'present' && $a->check_in && $a->check_out ) {
+					// Check delay
+					if ( strtotime($a->check_in) > strtotime($work_start) ) {
+						$delay_sec = strtotime($a->check_in) - strtotime($work_start);
+						$delay_deduction += ($delay_sec / 3600) * $hourly_rate;
+					}
+					// Check early exit
+					if ( strtotime($a->check_out) < strtotime($work_end) ) {
+						$early_sec = strtotime($work_end) - strtotime($a->check_out);
+						$delay_deduction += ($early_sec / 3600) * $hourly_rate;
+					}
+				}
 			}
 
 			$final_salary = $staff->base_salary - $deductions - $delay_deduction;

@@ -141,11 +141,19 @@ jQuery(document).ready(function($) {
         let found = false;
         $('#ac-is-sale-product option').each(function() {
             if ($(this).data('barcode') == query || $(this).data('serial') == query) {
-                addProductToCart($(this).val(), $(this).data('serial'), 1);
+                if (addProductToCart($(this).val(), $(this).data('serial'), 1)) {
+                    showScanConfirmation();
+                }
                 found = true; return false;
             }
         });
         return found;
+    }
+
+    function showScanConfirmation() {
+        const overlay = $('#ac-is-scan-conf-overlay');
+        overlay.css('display', 'flex').hide().fadeIn(200);
+        setTimeout(() => overlay.fadeOut(300), 1200);
     }
 
     // Reuse existing utility/logic...
@@ -159,7 +167,23 @@ jQuery(document).ready(function($) {
     $(document).ajaxStart(function() { if(currentStep !== 2) showSync(); });
     $(document).ajaxStop(function() { hideSync(); });
 
-    $('#ac-is-refresh-btn').on('click', function() { location.reload(); });
+    $('#ac-is-refresh-btn').on('click', function() {
+        showSync('جاري مسح التخزين المؤقت وتحديث البيانات...');
+
+        // Clear caches
+        if (window.sessionStorage) window.sessionStorage.clear();
+        if (window.localStorage) {
+            // Only clear our keys if possible, or everything for a hard reset
+            Object.keys(localStorage).forEach(key => {
+                if (key.includes('ac_is_')) localStorage.removeItem(key);
+            });
+        }
+
+        // Hard reload from server
+        setTimeout(() => {
+            window.location.reload(true);
+        }, 500);
+    });
 
     const systemRoot = document.getElementById('ac-is-system-root');
     const fullscreenBtn = $('#ac-is-fullscreen-btn');

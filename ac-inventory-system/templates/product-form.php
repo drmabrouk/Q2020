@@ -1,7 +1,6 @@
 <?php
 $product_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
 $product = $product_id ? AC_IS_Inventory::get_product($product_id) : null;
-$branches = AC_IS_Inventory::get_branches();
 ?>
 
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
@@ -32,14 +31,6 @@ $branches = AC_IS_Inventory::get_branches();
             <input type="text" name="subcategory" placeholder="<?php _e('مثال: سبليت، مركزي، 5 مراحل', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->subcategory) : ''; ?>">
         </div>
 
-        <div class="ac-is-form-group">
-            <label><?php _e('الفرع', 'ac-inventory-system'); ?></label>
-            <select name="branch_id">
-                <?php foreach($branches as $branch): ?>
-                    <option value="<?php echo $branch->id; ?>" <?php selected($product ? $product->branch_id : '', $branch->id); ?>><?php echo esc_html($branch->name); ?></option>
-                <?php endforeach; ?>
-            </select>
-        </div>
 
         <div class="ac-is-form-group">
             <label><?php _e('السعر الأصلي', 'ac-inventory-system'); ?></label>

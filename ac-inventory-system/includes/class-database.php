@@ -12,20 +12,12 @@ class AC_IS_Database {
 
 		$table_products  = $wpdb->prefix . 'ac_is_products';
 		$table_sales     = $wpdb->prefix . 'ac_is_sales';
-		$table_branches  = $wpdb->prefix . 'ac_is_branches';
 		$table_customers = $wpdb->prefix . 'ac_is_customers';
 		$table_invoices  = $wpdb->prefix . 'ac_is_invoices';
 		$table_staff     = $wpdb->prefix . 'ac_is_staff';
 		$table_settings  = $wpdb->prefix . 'ac_is_settings';
 
-		$sql = "CREATE TABLE $table_branches (
-			id mediumint(9) NOT NULL AUTO_INCREMENT,
-			name varchar(255) NOT NULL,
-			location text,
-			PRIMARY KEY  (id)
-		) $charset_collate;
-
-		CREATE TABLE $table_products (
+		$sql = "CREATE TABLE $table_products (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
 			category varchar(100),
@@ -36,7 +28,6 @@ class AC_IS_Database {
 			final_price decimal(10,2) DEFAULT '0.00',
 			purchase_cost decimal(10,2) DEFAULT '0.00',
 			stock_quantity int DEFAULT 0,
-			branch_id mediumint(9),
 			image_url text,
 			serial_number varchar(255),
 			barcode varchar(255),
@@ -59,7 +50,6 @@ class AC_IS_Database {
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			customer_id mediumint(9),
 			total_amount decimal(10,2) NOT NULL,
-			branch_id mediumint(9) NOT NULL,
 			operator_id bigint(20) UNSIGNED NOT NULL,
 			invoice_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
@@ -72,7 +62,6 @@ class AC_IS_Database {
 			serial_number varchar(255),
 			quantity int NOT NULL,
 			total_price decimal(10,2) NOT NULL,
-			branch_id mediumint(9) NOT NULL,
 			operator_id varchar(100) NOT NULL,
 			sale_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
