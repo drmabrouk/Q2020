@@ -126,6 +126,49 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
             <button type="submit" class="ac-is-btn" style="background:#1e293b; width:100%; height:45px;"><?php _e('حفظ كافة الإعدادات', 'ac-inventory-system'); ?></button>
         </form>
     </div>
+
+    <!-- Brand Management -->
+    <div class="ac-is-card">
+        <h3><?php _e('إدارة العلامات التجارية (البراندات)', 'ac-inventory-system'); ?></h3>
+        <form id="ac-is-brand-form" style="margin-bottom:20px; padding:15px; background:#f8fafc; border:1px solid #e2e8f0;">
+            <input type="hidden" name="id" id="brand-id">
+            <div class="ac-is-form-group">
+                <label><?php _e('اسم البراند', 'ac-inventory-system'); ?></label>
+                <input type="text" name="name" id="brand-name" required>
+            </div>
+            <div class="ac-is-form-group">
+                <label><?php _e('شعار البراند (Logo)', 'ac-inventory-system'); ?></label>
+                <div style="display:flex; gap:10px;">
+                    <input type="text" name="logo_url" id="brand-logo-url">
+                    <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b;"><?php _e('رفع شعار', 'ac-inventory-system'); ?></button>
+                </div>
+            </div>
+            <button type="submit" class="ac-is-btn" style="width:100%;"><?php _e('حفظ البراند', 'ac-inventory-system'); ?></button>
+        </form>
+
+        <?php $brands = AC_IS_Brands::get_brands(); ?>
+        <table class="ac-is-table">
+            <thead>
+                <tr>
+                    <th><?php _e('الشعار', 'ac-inventory-system'); ?></th>
+                    <th><?php _e('الاسم', 'ac-inventory-system'); ?></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach($brands as $b): ?>
+                    <tr data-brand='<?php echo json_encode($b); ?>'>
+                        <td><?php if($b->logo_url): ?><img src="<?php echo esc_url($b->logo_url); ?>" style="height:30px;"><?php endif; ?></td>
+                        <td><?php echo esc_html($b->name); ?></td>
+                        <td>
+                            <button class="ac-is-edit-brand" style="background:none; border:none; color:blue; cursor:pointer;"><span class="dashicons dashicons-edit"></span></button>
+                            <button class="ac-is-delete-brand" data-id="<?php echo $b->id; ?>" style="background:none; border:none; color:red; cursor:pointer;"><span class="dashicons dashicons-trash"></span></button>
+                        </td>
+                    </tr>
+                <?php endforeach; ?>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <script>
@@ -156,6 +199,33 @@ jQuery(document).ready(function($) {
             if (response.success) {
                 location.reload();
             }
+        });
+    });
+
+    // Brand logic
+    $(document).on('click', '.ac-is-edit-brand', function() {
+        const b = $(this).closest('tr').data('brand');
+        $('#brand-id').val(b.id);
+        $('#brand-name').val(b.name);
+        $('#brand-logo-url').val(b.logo_url);
+    });
+
+    $('#ac-is-brand-form').on('submit', function(e) {
+        e.preventDefault();
+        const data = $(this).serialize() + '&action=ac_is_save_brand&nonce=' + ac_is_ajax.nonce;
+        $.post(ac_is_ajax.ajax_url, data, function(response) {
+            if (response.success) location.reload();
+        });
+    });
+
+    $('.ac-is-delete-brand').on('click', function() {
+        if (!confirm('حذف هذا البراند؟')) return;
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_delete_brand',
+            id: $(this).data('id'),
+            nonce: ac_is_ajax.nonce
+        }, function(response) {
+            if (response.success) location.reload();
         });
     });
 

@@ -10,7 +10,7 @@ class AC_IS_Ajax {
 			'save_product', 'delete_product', 'record_sale', 'multi_sale',
 			'search_products', 'get_customer', 'delete_invoice',
 			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
-			'save_customer', 'delete_customer'
+			'save_customer', 'delete_customer', 'save_brand', 'delete_brand'
 		);
 
 		foreach ( $actions as $action ) {
@@ -36,7 +36,9 @@ class AC_IS_Ajax {
 			'discount'       => floatval( $_POST['discount'] ),
 			'final_price'    => floatval( $_POST['final_price'] ),
 			'stock_quantity' => intval( $_POST['stock_quantity'] ),
-			'image_url'      => esc_url_raw( $_POST['image_url'] ),
+			'brand_id'       => intval( $_POST['brand_id'] ),
+			'model_number'   => sanitize_text_field( $_POST['model_number'] ),
+			'filter_stages'  => intval( $_POST['filter_stages'] ),
 			'serial_number'  => sanitize_text_field( $_POST['serial_number'] ),
 			'barcode'        => sanitize_text_field( $_POST['barcode'] ),
 		);
@@ -215,6 +217,33 @@ class AC_IS_Ajax {
 
 		$invoice_id = intval( $_POST['invoice_id'] );
 		AC_IS_Sales::delete_invoice( $invoice_id );
+		wp_send_json_success();
+	}
+
+	public function save_brand() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
+		$data = array(
+			'name'     => sanitize_text_field( $_POST['name'] ),
+			'logo_url' => esc_url_raw( $_POST['logo_url'] ),
+		);
+
+		if ( $id ) {
+			AC_IS_Brands::update_brand( $id, $data );
+		} else {
+			AC_IS_Brands::add_brand( $data );
+		}
+		wp_send_json_success();
+	}
+
+	public function delete_brand() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		$id = intval( $_POST['id'] );
+		AC_IS_Brands::delete_brand( $id );
 		wp_send_json_success();
 	}
 

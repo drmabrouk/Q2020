@@ -150,7 +150,7 @@ jQuery(document).ready(function($) {
                 }
                 $('#customer-details-fields').slideDown();
             });
-        }, 400); // Debounce
+        }, 400);
     });
 
     // --- Finalize Sale ---
@@ -214,14 +214,11 @@ jQuery(document).ready(function($) {
         }
     });
 
-    // Logout
-    $('#ac-is-logout-btn').on('click', function() {
-        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_logout', nonce: ac_is_ajax.nonce }, () => location.reload());
-    });
-
-    // Product calculations
+    // Product calculations (Enhanced)
     $('#original-price, #discount').on('input', function() {
-        $('#final-price').val(($('#original-price').val() - $('#discount').val()).toFixed(2));
+        const original = parseFloat($('#original-price').val()) || 0;
+        const discount = parseFloat($('#discount').val()) || 0;
+        $('#final-price').val((original - (original * (discount/100))).toFixed(2));
     });
 
     // Barcode Sticker Printing (Professional)
@@ -240,25 +237,68 @@ jQuery(document).ready(function($) {
         setTimeout(() => $('body').removeClass('ac-is-printing-sticker'), 1000);
     });
 
-    // Product Barcode Generation in Form
+    // Product Barcode Generation (Enhanced)
+    function generateBarcodeImage(value) {
+        if (!value) return;
+
+        $('#barcode-canvas-container').empty().append('<canvas id="barcode-canvas"></canvas>');
+        JsBarcode("#barcode-canvas", value, {
+            format: "CODE128",
+            width: 3,
+            height: 100,
+            displayValue: true,
+            fontSize: 20
+        });
+        $('#barcode-image-preview').fadeIn();
+    }
+
     $('#ac-is-barcode-input').on('input', function() {
-        generateBarcode("#barcode-svg", $(this).val());
-        if ($(this).val()) $('#barcode-preview').show();
+        generateBarcodeImage($(this).val());
     });
+
+    if ($('#ac-is-barcode-input').val()) {
+        generateBarcodeImage($('#ac-is-barcode-input').val());
+    }
 
     $('#generate-barcode').on('click', function() {
         const randomBarcode = 'AC-' + Math.floor(Math.random() * 100000000);
         $('#ac-is-barcode-input').val(randomBarcode).trigger('input');
+        if (!$('#ac-is-serial-input').val()) {
+            $('#ac-is-serial-input').val(randomBarcode);
+        }
+    });
+
+    // Product Save
+    $('#ac-is-product-form').on('submit', function(e) {
+        e.preventDefault();
+        $.post(ac_is_ajax.ajax_url, $(this).serialize() + '&action=ac_is_save_product&nonce=' + ac_is_ajax.nonce, function(res) {
+            if (res.success) window.location.href = '?ac_view=inventory';
+        });
+    });
+
+    $(document).on('click', '.ac-is-delete-product', function(e) {
+        if (!confirm('حذف؟')) return;
+        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_delete_product', id: $(this).data('id'), nonce: ac_is_ajax.nonce }, () => location.reload());
     });
 
     // Image Upload Handler
     $('.ac-is-upload-btn').on('click', function(e) {
         e.preventDefault();
-        const frame = wp.media({ title: 'اختر صورة المنتج', multiple: false }).open();
+        const frame = wp.media({ title: 'اختر صورة', multiple: false }).open();
         frame.on('select', function() {
             const attachment = frame.state().get('selection').first().toJSON();
-            $('#ac-is-image-url').val(attachment.url);
+            const target = e.target.previousElementSibling;
+            if (target && target.tagName === 'INPUT') {
+                $(target).val(attachment.url);
+            } else {
+                $('#brand-logo-url').val(attachment.url);
+            }
         });
+    });
+
+    // Logout
+    $('#ac-is-logout-btn').on('click', function() {
+        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_logout', nonce: ac_is_ajax.nonce }, () => location.reload());
     });
 
     // Product Search

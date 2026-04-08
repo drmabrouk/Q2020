@@ -16,8 +16,16 @@ class AC_IS_Database {
 		$table_invoices  = $wpdb->prefix . 'ac_is_invoices';
 		$table_staff     = $wpdb->prefix . 'ac_is_staff';
 		$table_settings  = $wpdb->prefix . 'ac_is_settings';
+		$table_brands    = $wpdb->prefix . 'ac_is_brands';
 
-		$sql = "CREATE TABLE $table_products (
+		$sql = "CREATE TABLE $table_brands (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			name varchar(255) NOT NULL,
+			logo_url text,
+			PRIMARY KEY  (id)
+		) $charset_collate;
+
+		CREATE TABLE $table_products (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
 			category varchar(100),
@@ -28,7 +36,9 @@ class AC_IS_Database {
 			final_price decimal(10,2) DEFAULT '0.00',
 			purchase_cost decimal(10,2) DEFAULT '0.00',
 			stock_quantity int DEFAULT 0,
-			image_url text,
+			brand_id mediumint(9),
+			model_number varchar(100),
+			filter_stages int,
 			serial_number varchar(255),
 			barcode varchar(255),
 			created_at datetime DEFAULT CURRENT_TIMESTAMP,
@@ -110,6 +120,7 @@ class AC_IS_Database {
 		global $wpdb;
 		$table_staff    = $wpdb->prefix . 'ac_is_staff';
 		$table_settings = $wpdb->prefix . 'ac_is_settings';
+		$table_brands   = $wpdb->prefix . 'ac_is_brands';
 
 		// Default admin if not exists
 		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table_staff WHERE username = %s", 'admin' ) );
@@ -137,6 +148,12 @@ class AC_IS_Database {
 					'setting_value' => $value
 				) );
 			}
+		}
+
+		// Default brand
+		$exists = $wpdb->get_var( "SELECT id FROM $table_brands LIMIT 1" );
+		if ( ! $exists ) {
+			$wpdb->insert( $table_brands, array( 'name' => 'General' ) );
 		}
 	}
 }
