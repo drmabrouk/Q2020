@@ -34,6 +34,7 @@ class AC_IS_Ajax {
 			'category'       => sanitize_text_field( $_POST['category'] ),
 			'subcategory'    => sanitize_text_field( $_POST['subcategory'] ),
 			'original_price' => floatval( $_POST['original_price'] ),
+			'purchase_cost'  => floatval( $_POST['purchase_cost'] ),
 			'discount'       => floatval( $_POST['discount'] ),
 			'final_price'    => floatval( $_POST['final_price'] ),
 			'stock_quantity' => intval( $_POST['stock_quantity'] ),

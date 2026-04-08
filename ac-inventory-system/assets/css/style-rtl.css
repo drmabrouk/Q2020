@@ -207,13 +207,19 @@
 .ac-is-metric-card {
     flex: 1;
     background: #fff;
-    padding: 20px;
-    border-right: 4px solid var(--ac-primary);
+    padding: 22px;
+    border-right: 5px solid var(--ac-primary);
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 22px;
     border: 1px solid var(--ac-border);
-    border-right: 4px solid var(--ac-primary);
+    border-right: 5px solid var(--ac-primary);
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.ac-is-metric-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .ac-is-metric-icon {

@@ -55,6 +55,7 @@ class AC_Inventory_System {
 	private function init_hooks() {
 		register_activation_hook( __FILE__, array( 'AC_IS_Database', 'create_tables' ) );
 		add_action( 'init', array( 'AC_IS_Auth', 'init' ) );
+		add_action( 'init', array( 'AC_IS_Reports', 'export_sales_csv' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 

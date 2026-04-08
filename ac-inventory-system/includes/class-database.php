@@ -34,6 +34,7 @@ class AC_IS_Database {
 			original_price decimal(10,2) DEFAULT '0.00',
 			discount decimal(10,2) DEFAULT '0.00',
 			final_price decimal(10,2) DEFAULT '0.00',
+			purchase_cost decimal(10,2) DEFAULT '0.00',
 			stock_quantity int DEFAULT 0,
 			branch_id mediumint(9),
 			image_url text,

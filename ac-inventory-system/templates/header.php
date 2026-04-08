@@ -16,6 +16,9 @@
             <a href="<?php echo add_query_arg('ac_view', 'sales-history'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'sales-history') ? 'active' : ''; ?>">
                 <span class="dashicons dashicons-list-view"></span> <?php _e('سجل المبيعات', 'ac-inventory-system'); ?>
             </a>
+            <a href="<?php echo add_query_arg('ac_view', 'customers'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'customers') ? 'active' : ''; ?>">
+                <span class="dashicons dashicons-groups"></span> <?php _e('إدارة العملاء', 'ac-inventory-system'); ?>
+            </a>
             <?php if ( AC_IS_Auth::is_admin() ) : ?>
                 <a href="<?php echo add_query_arg('ac_view', 'branches'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'branches') ? 'active' : ''; ?>">
                     <span class="dashicons dashicons-store"></span> <?php _e('الفروع', 'ac-inventory-system'); ?>

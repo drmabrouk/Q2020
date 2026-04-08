@@ -40,6 +40,9 @@ class AC_IS_Shortcode {
 			case 'sales-history':
 				include AC_IS_PATH . 'templates/sales-history.php';
 				break;
+			case 'customers':
+				include AC_IS_PATH . 'templates/customers.php';
+				break;
 			case 'invoice':
 				include AC_IS_PATH . 'templates/invoice.php';
 				break;
