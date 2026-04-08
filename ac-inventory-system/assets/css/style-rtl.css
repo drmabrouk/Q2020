@@ -206,6 +206,44 @@
     font-size: 0.85rem;
 }
 
+/* Quick Sales Mode Toggles */
+.ac-is-mode-toggles {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.ac-is-mode-box {
+    padding: 6px 15px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 4px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    color: #64748b;
+    border: 1px solid transparent;
+}
+
+.ac-is-mode-box:hover {
+    background: #f8fafc;
+}
+
+.ac-is-mode-box.active {
+    background: var(--ac-primary);
+    color: #fff;
+    box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
+}
+
+.ac-is-mode-box .dashicons {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.ac-is-mode-box small {
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
 /* Mobile Barcode Scanner Professional UI */
 #ac-is-reader-container {
     position: relative;

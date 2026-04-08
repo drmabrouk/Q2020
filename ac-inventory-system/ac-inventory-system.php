@@ -42,15 +42,18 @@ class AC_Inventory_System {
 	}
 
 	private function includes() {
+		// Module classes
 		require_once AC_IS_PATH . 'includes/class-database.php';
 		require_once AC_IS_PATH . 'includes/class-auth.php';
 		require_once AC_IS_PATH . 'includes/class-customers.php';
 		require_once AC_IS_PATH . 'includes/class-payroll.php';
 		require_once AC_IS_PATH . 'includes/class-inventory.php';
 		require_once AC_IS_PATH . 'includes/class-sales.php';
+		require_once AC_IS_PATH . 'includes/class-reports.php';
+
+		// Infrastructure
 		require_once AC_IS_PATH . 'includes/class-shortcode.php';
 		require_once AC_IS_PATH . 'includes/class-ajax.php';
-		require_once AC_IS_PATH . 'includes/class-reports.php';
 	}
 
 	private function init_hooks() {

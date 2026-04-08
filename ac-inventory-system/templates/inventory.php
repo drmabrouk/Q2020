@@ -33,13 +33,6 @@ $products = AC_IS_Inventory::get_products();
             <?php if ( $products ) : foreach ( $products as $product ) :
                 $stock_class = ($product->stock_quantity < 5) ? 'capsule-danger' : (($product->stock_quantity < 15) ? 'capsule-warning' : 'capsule-success');
                 $category_name = ($product->category == 'ac') ? __('مكيفات', 'ac-inventory-system') : (($product->category == 'cooling') ? __('تبريد', 'ac-inventory-system') : __('فلاتر', 'ac-inventory-system'));
-                $branch_name = __('غير محدد', 'ac-inventory-system');
-                foreach($branches as $b) {
-                    if($b->id == $product->branch_id) {
-                        $branch_name = $b->name;
-                        break;
-                    }
-                }
             ?>
                 <tr data-id="<?php echo $product->id; ?>">
                     <td><?php if($product->image_url): ?><img src="<?php echo esc_url($product->image_url); ?>" class="ac-is-product-img" style="border-radius:4px; max-width:60px;"><?php endif; ?></td>

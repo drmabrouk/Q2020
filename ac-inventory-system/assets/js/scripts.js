@@ -1,149 +1,109 @@
 jQuery(document).ready(function($) {
-    // Multi-step Sales Flow Logic
+    // Shared State
     let cart = [];
-    let currentStep = 1;
-    let customerData = { is_quick: true };
     let salesMode = 'manual';
+    let customerData = { is_quick: true };
+    let html5QrCode;
 
-    function goToStep(step) {
-        $('.ac-is-sale-step').hide();
-        $(`#step-${step}`).fadeIn();
-        $(`.step-item[data-step="${step}"]`).addClass('active').prevAll().addClass('complete');
-        currentStep = step;
+    // --- Core Operations ---
 
-        if (step === 4) renderReview();
-    }
-
-    $('.ac-is-mode-select').on('click', function() {
-        salesMode = $(this).data('mode');
-        if (salesMode === 'scan') {
-            $('#ac-is-reader-container').show();
-            $('#ac-is-manual-search-box').hide();
-            startScanner();
-        } else {
-            $('#ac-is-reader-container').hide();
-            $('#ac-is-manual-search-box').show();
-        }
-        goToStep(2);
-    });
-
-    $('.ac-is-next-step').on('click', function() {
-        const next = $(this).data('next');
-        if (next == 3 && cart.length === 0) { alert('يرجى إضافة منتجات أولاً'); return; }
-        goToStep(next);
-    });
-
-    $('#ac-is-quick-customer').on('click', function() {
-        customerData = { is_quick: true, name: 'عميل سريع', phone: '-' };
-        goToStep(4);
-    });
-
-    // Cart Logic
     function addProductToCart(product_id, serial = '', quantity = 1) {
         const option = $(`#ac-is-sale-product option[value="${product_id}"]`);
         if (!option.length) return false;
 
+        const product_name = option.data('name');
+        const price = parseFloat(option.data('price'));
+        const stock = parseInt(option.data('stock'));
+
+        if (quantity > stock) {
+            alert('الكمية المطلوبة أكبر من المتوفر');
+            return false;
+        }
+
         cart.push({
             product_id: product_id,
-            product_name: option.data('name'),
+            product_name: product_name,
             quantity: quantity,
             serial_number: serial,
-            unit_price: parseFloat(option.data('price')),
-            total_price: (parseFloat(option.data('price')) * quantity).toFixed(2)
+            unit_price: price,
+            total_price: (price * quantity).toFixed(2)
         });
 
         renderCart();
         return true;
     }
 
-    $('#ac-is-add-to-list').on('click', function() {
-        const pid = $('#ac-is-sale-product').val();
-        if (!pid) return;
-        addProductToCart(pid, $('#ac-is-sale-serial').val(), parseInt($('#ac-is-sale-qty').val()));
-        $('#ac-is-sale-product').val('').trigger('change');
-        $('#ac-is-sale-serial').val('');
-        $('#ac-is-sale-qty').val(1);
-    });
-
     function renderCart() {
         const body = $('#ac-is-cart-body');
         body.empty();
         let total = 0;
-        cart.forEach((item, index) => {
-            total += parseFloat(item.total_price);
-            body.append(`<tr><td>${item.product_name}<br><small>${item.serial_number}</small></td><td>x${item.quantity}</td><td>${item.total_price}</td></tr>`);
-        });
+
+        if (cart.length === 0) {
+            body.append('<tr class="empty-cart"><td colspan="3" style="text-align:center; padding:40px; color:#94a3b8;">سلة المشتريات فارغة</td></tr>');
+        } else {
+            cart.forEach((item, index) => {
+                total += parseFloat(item.total_price);
+                body.append(`
+                    <tr>
+                        <td style="padding:12px;"><strong>${item.product_name}</strong><br><small>SN: ${item.serial_number || '-'}</small></td>
+                        <td style="padding:12px;">x${item.quantity}</td>
+                        <td style="padding:12px; text-align:left;">${item.total_price} EGP <button type="button" class="ac-is-remove-item" data-index="${index}" style="margin-right:10px; background:none; border:none; color:red; cursor:pointer;"><span class="dashicons dashicons-no-alt"></span></button></td>
+                    </tr>
+                `);
+            });
+        }
         $('#ac-is-cart-total').text(total.toFixed(2));
     }
 
-    // Customer Lookup
-    $('#ac-is-customer-phone').on('blur', function() {
-        const phone = $(this).val();
-        if (phone.length < 5) return;
-        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_get_customer', phone: phone, nonce: ac_is_ajax.nonce }, function(res) {
-            if (res.success) {
-                customerData = res.data;
-                customerData.is_quick = false;
-                $('#ac-is-customer-name').val(res.data.name);
-                $('#ac-is-customer-address').val(res.data.address);
-                $('#ac-is-customer-email').val(res.data.email);
-            } else {
-                customerData = { is_quick: false, phone: phone };
-            }
-            $('#customer-details-fields').slideDown();
-        });
+    $(document).on('click', '.ac-is-remove-item', function() {
+        cart.splice($(this).data('index'), 1);
+        renderCart();
     });
 
-    function renderReview() {
-        // Build tables and info for Step 4
-        $('#review-cart-table').html($('#ac-is-cart-body').html());
-        $('#review-total').text($('#ac-is-cart-total').text());
-
-        let custHtml = `<strong>العميل:</strong> ${$('#ac-is-customer-name').val() || customerData.name || '---'}<br>`;
-        custHtml += `<strong>الهاتف:</strong> ${$('#ac-is-customer-phone').val() || customerData.phone}<br>`;
-        $('#review-customer-info').html(custHtml);
-    }
-
-    $('#ac-is-finalize-sale').on('click', function() {
-        const data = {
-            action: 'ac_is_multi_sale',
-            nonce: ac_is_ajax.nonce,
-            items: cart,
-            total_amount: $('#ac-is-cart-total').text(),
-            branch_id: $('#ac-is-sale-branch').val(),
-            customer_name: $('#ac-is-customer-name').val() || 'عميل سريع',
-            customer_phone: $('#ac-is-customer-phone').val() || '-',
-            customer_address: $('#ac-is-customer-address').val() || '',
-            customer_email: $('#ac-is-customer-email').val() || '',
-            send_email: 1
-        };
-
-        $.post(ac_is_ajax.ajax_url, data, function(res) {
-            if (res.success) {
-                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&invoice_id=' + res.data.invoice_id + '&autoprint=1';
-            }
-        });
+    $('#ac-is-add-to-list').on('click', function() {
+        const pid = $('#ac-is-sale-product').val();
+        if (!pid) return;
+        if (addProductToCart(pid, $('#ac-is-sale-serial').val(), parseInt($('#ac-is-sale-qty').val()))) {
+            $('#ac-is-sale-product').val('').trigger('change');
+            $('#ac-is-sale-serial').val('');
+            $('#ac-is-sale-qty').val(1);
+            $('#ac-is-sale-product-search').val('');
+        }
     });
 
-    // Re-integrated Scanner (Html5Qrcode implementation)
-    let html5QrCode;
+    // --- Mode Selection & Scanning ---
+
+    $('.ac-is-mode-box').on('click', function() {
+        salesMode = $(this).data('mode');
+        $('.ac-is-mode-box').removeClass('active');
+        $(this).addClass('active');
+
+        if (salesMode === 'scan') {
+            $('#ac-is-reader-container').show();
+            $('#ac-is-manual-entry-area').hide();
+            startScanner();
+        } else {
+            $('#ac-is-reader-container').hide();
+            $('#ac-is-manual-entry-area').show();
+            if (html5QrCode) html5QrCode.stop().catch(err => console.error(err));
+        }
+    });
+
     function startScanner() {
         if (!html5QrCode) html5QrCode = new Html5Qrcode("ac-is-reader");
-        html5QrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: 250 }, (text) => {
-            if (addProductToCartByScan(text)) {
-                $('.ac-is-scan-status').text('تم إضافة المنتج').css('color', 'green');
+        html5QrCode.start({ facingMode: "environment" }, { fps: 30, qrbox: { width: 250, height: 150 } }, (text) => {
+            if (processScannedBarcode(text)) {
+                showScanConfirmation();
                 if (window.navigator.vibrate) window.navigator.vibrate(100);
             }
         });
     }
 
-    function addProductToCartByScan(query) {
+    function processScannedBarcode(query) {
         let found = false;
         $('#ac-is-sale-product option').each(function() {
             if ($(this).data('barcode') == query || $(this).data('serial') == query) {
-                if (addProductToCart($(this).val(), $(this).data('serial'), 1)) {
-                    showScanConfirmation();
-                }
+                addProductToCart($(this).val(), $(this).data('serial'), 1);
                 found = true; return false;
             }
         });
@@ -156,78 +116,166 @@ jQuery(document).ready(function($) {
         setTimeout(() => overlay.fadeOut(300), 1200);
     }
 
-    // Reuse existing utility/logic...
-    // [Including previous Fullscreen, Price Calc, and Auth logic below]
+    // --- Real-time Customer Recognition ---
 
-    // Real-time Sync & Visual Feedback
+    let customerTimeout;
+    $('#ac-is-customer-phone').on('input', function() {
+        clearTimeout(customerTimeout);
+        const phone = $(this).val().trim();
+        if (phone.length < 5) {
+            $('#customer-details-fields').slideUp();
+            return;
+        }
+
+        customerTimeout = setTimeout(() => {
+            $.post(ac_is_ajax.ajax_url, {
+                action: 'ac_is_get_customer',
+                phone: phone,
+                nonce: ac_is_ajax.nonce
+            }, function(res) {
+                if (res.success) {
+                    const c = res.data;
+                    $('#ac-is-customer-name').val(c.name);
+                    $('#ac-is-customer-address').val(c.address);
+                    $('#ac-is-customer-email').val(c.email);
+                    customerData = c;
+                    customerData.is_quick = false;
+                    $('#ac-is-customer-phone').css('border-color', '#059669');
+                } else {
+                    $('#ac-is-customer-name').val('');
+                    $('#ac-is-customer-address').val('');
+                    $('#ac-is-customer-email').val('');
+                    customerData = { is_quick: false, phone: phone };
+                    $('#ac-is-customer-phone').css('border-color', 'var(--ac-primary)');
+                }
+                $('#customer-details-fields').slideDown();
+            });
+        }, 400); // Debounce
+    });
+
+    // --- Finalize Sale ---
+
+    $('#ac-is-finalize-sale').on('click', function() {
+        if (cart.length === 0) { alert('يرجى إضافة منتجات أولاً'); return; }
+
+        const data = {
+            action: 'ac_is_multi_sale',
+            nonce: ac_is_ajax.nonce,
+            items: cart,
+            total_amount: $('#ac-is-cart-total').text(),
+            customer_name: $('#ac-is-customer-name').val() || 'عميل سريع',
+            customer_phone: $('#ac-is-customer-phone').val() || '-',
+            customer_address: $('#ac-is-customer-address').val() || '',
+            customer_email: $('#ac-is-customer-email').val() || '',
+            send_email: $('#ac-is-send-email').is(':checked') ? 1 : 0
+        };
+
+        $.post(ac_is_ajax.ajax_url, data, function(res) {
+            if (res.success) {
+                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&invoice_id=' + res.data.invoice_id + '&autoprint=1';
+            }
+        });
+    });
+
+    // --- Infrastructure & Other Logic ---
+
     const syncLoader = $('#ac-is-sync-loader');
     function showSync(text = 'جارٍ تحميل البيانات...') { syncLoader.find('.loader-text').text(text); syncLoader.fadeIn(200); }
     function hideSync() { syncLoader.find('.loader-text').text('تم التحديث بنجاح'); setTimeout(() => syncLoader.fadeOut(400), 1000); }
 
-    $(document).ajaxStart(function() { if(currentStep !== 2) showSync(); });
+    $(document).ajaxStart(function() { showSync(); });
     $(document).ajaxStop(function() { hideSync(); });
 
     $('#ac-is-refresh-btn').on('click', function() {
         showSync('جاري مسح التخزين المؤقت وتحديث البيانات...');
-
-        // Clear caches
         if (window.sessionStorage) window.sessionStorage.clear();
-        if (window.localStorage) {
-            // Only clear our keys if possible, or everything for a hard reset
-            Object.keys(localStorage).forEach(key => {
-                if (key.includes('ac_is_')) localStorage.removeItem(key);
-            });
-        }
-
-        // Hard reload from server
-        setTimeout(() => {
-            window.location.reload(true);
-        }, 500);
+        setTimeout(() => { window.location.reload(true); }, 500);
     });
 
     const systemRoot = document.getElementById('ac-is-system-root');
-    const fullscreenBtn = $('#ac-is-fullscreen-btn');
-    const unlockOverlay = $('#ac-is-unlock-overlay');
     const EXIT_PASSWORD = ac_is_ajax.fullscreen_password;
 
-    fullscreenBtn.on('click', function() {
+    $('#ac-is-fullscreen-btn').on('click', function() {
         if (!document.fullscreenElement) {
             if (systemRoot.requestFullscreen) systemRoot.requestFullscreen();
             else if (systemRoot.webkitRequestFullscreen) systemRoot.webkitRequestFullscreen();
         } else {
-            unlockOverlay.css('display', 'flex').hide().fadeIn(300);
+            $('#ac-is-unlock-overlay').css('display', 'flex').hide().fadeIn(300);
             $('#ac-is-unlock-pass').focus();
         }
     });
 
     $('#ac-is-unlock-submit').on('click', function() {
         if ($('#ac-is-unlock-pass').val() === EXIT_PASSWORD) {
-            unlockOverlay.fadeOut(300, function() {
+            $('#ac-is-unlock-overlay').fadeOut(300, function() {
                 if (document.exitFullscreen) document.exitFullscreen();
                 $('#ac-is-unlock-pass').val('');
             });
         }
     });
 
-    // Product Form calculations
+    // Logout
+    $('#ac-is-logout-btn').on('click', function() {
+        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_logout', nonce: ac_is_ajax.nonce }, () => location.reload());
+    });
+
+    // Product calculations
     $('#original-price, #discount').on('input', function() {
         $('#final-price').val(($('#original-price').val() - $('#discount').val()).toFixed(2));
     });
 
-    // Product Save
-    $('#ac-is-product-form').on('submit', function(e) {
+    // Barcode Sticker Printing (Professional)
+    $(document).on('click', '.ac-is-print-barcode', function(e) {
         e.preventDefault();
-        $.post(ac_is_ajax.ajax_url, $(this).serialize() + '&action=ac_is_save_product&nonce=' + ac_is_ajax.nonce, function(res) {
-            if (res.success) window.location.href = '?ac_view=inventory';
+        const barcode = $(this).data('barcode');
+        const name = $(this).data('name');
+        const serial = $(this).data('serial');
+        if (!barcode) { alert('لا يوجد باركود لهذا المنتج'); return; }
+
+        $('#print-product-name').text(name + (serial ? ' (' + serial + ')' : ''));
+        generateBarcode("#print-barcode-svg", barcode);
+
+        $('body').addClass('ac-is-printing-sticker');
+        window.print();
+        setTimeout(() => $('body').removeClass('ac-is-printing-sticker'), 1000);
+    });
+
+    // Product Barcode Generation in Form
+    $('#ac-is-barcode-input').on('input', function() {
+        generateBarcode("#barcode-svg", $(this).val());
+        if ($(this).val()) $('#barcode-preview').show();
+    });
+
+    $('#generate-barcode').on('click', function() {
+        const randomBarcode = 'AC-' + Math.floor(Math.random() * 100000000);
+        $('#ac-is-barcode-input').val(randomBarcode).trigger('input');
+    });
+
+    // Image Upload Handler
+    $('.ac-is-upload-btn').on('click', function(e) {
+        e.preventDefault();
+        const frame = wp.media({ title: 'اختر صورة المنتج', multiple: false }).open();
+        frame.on('select', function() {
+            const attachment = frame.state().get('selection').first().toJSON();
+            $('#ac-is-image-url').val(attachment.url);
         });
     });
 
-    $(document).on('click', '.ac-is-delete-product', function(e) {
-        if (!confirm('حذف؟')) return;
-        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_delete_product', id: $(this).data('id'), nonce: ac_is_ajax.nonce }, () => location.reload());
+    // Product Search
+    $('#ac-is-sale-product-search').on('input', function() {
+        const query = $(this).val().toLowerCase();
+        if (query.length < 2) return;
+        $('#ac-is-sale-product option').each(function() {
+            const barcode = String($(this).data('barcode')).toLowerCase();
+            const name = $(this).text().toLowerCase();
+            if (barcode == query || name.includes(query)) {
+                $('#ac-is-sale-product').val($(this).val()).trigger('change');
+                return false;
+            }
+        });
     });
 
-    $('#ac-is-logout-btn').on('click', function() {
-        $.post(ac_is_ajax.ajax_url, { action: 'ac_is_logout', nonce: ac_is_ajax.nonce }, () => location.reload());
-    });
+    if (window.location.search.indexOf('autoprint=1') > -1) {
+        setTimeout(function() { window.print(); }, 1000);
+    }
 });
