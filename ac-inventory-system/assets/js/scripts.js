@@ -1,4 +1,116 @@
 jQuery(document).ready(function($) {
+    // Multi-Product Cart Logic
+    let cart = [];
+
+    $('#ac-is-add-to-list').on('click', function() {
+        const product_id = $('#ac-is-sale-product').val();
+        if (!product_id) { alert('يرجى اختيار منتج'); return; }
+
+        const product_name = $('#ac-is-sale-product option:selected').data('name');
+        const price = parseFloat($('#ac-is-sale-product option:selected').data('price'));
+        const quantity = parseInt($('#ac-is-sale-qty').val());
+        const serial = $('#ac-is-sale-serial').val();
+        const stock = parseInt($('#ac-is-sale-product option:selected').data('stock'));
+
+        if (quantity > stock) {
+            alert('الكمية المطلوبة أكبر من المتوفر');
+            return;
+        }
+
+        cart.push({
+            product_id: product_id,
+            product_name: product_name,
+            quantity: quantity,
+            serial_number: serial,
+            unit_price: price,
+            total_price: (price * quantity).toFixed(2)
+        });
+
+        renderCart();
+        // Reset product selection
+        $('#ac-is-sale-product').val('').trigger('change');
+        $('#ac-is-sale-serial').val('');
+        $('#ac-is-sale-qty').val(1);
+    });
+
+    function renderCart() {
+        const body = $('#ac-is-cart-body');
+        body.empty();
+        let total = 0;
+
+        if (cart.length === 0) {
+            body.append('<tr class="empty-cart"><td colspan="4" style="text-align:center;">لم يتم اختيار منتجات</td></tr>');
+        } else {
+            cart.forEach((item, index) => {
+                total += parseFloat(item.total_price);
+                body.append(`
+                    <tr>
+                        <td><strong>${item.product_name}</strong><br><small>${item.serial_number || ''}</small></td>
+                        <td>${item.quantity}</td>
+                        <td>${item.total_price}</td>
+                        <td><button type="button" class="ac-is-remove-item" data-index="${index}" style="background:none; border:none; color:red; cursor:pointer;"><span class="dashicons dashicons-no-alt"></span></button></td>
+                    </tr>
+                `);
+            });
+        }
+        $('#ac-is-cart-total').text(total.toFixed(2));
+    }
+
+    $(document).on('click', '.ac-is-remove-item', function() {
+        const index = $(this).data('index');
+        cart.splice(index, 1);
+        renderCart();
+    });
+
+    // Customer Lookup Logic
+    $('#ac-is-customer-phone').on('blur', function() {
+        const phone = $(this).val();
+        if (phone.length < 5) return;
+
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_get_customer',
+            phone: phone,
+            nonce: ac_is_ajax.nonce
+        }, function(response) {
+            if (response.success) {
+                const c = response.data;
+                $('#ac-is-customer-name').val(c.name);
+                $('#ac-is-customer-address').val(c.address);
+                $('#ac-is-customer-email').val(c.email);
+                $('#customer-details-fields').slideDown();
+                // Visual feedback
+                $('#ac-is-customer-phone').css('border-color', '#059669');
+            } else {
+                $('#ac-is-customer-phone').css('border-color', '#cbd5e1');
+            }
+        });
+    });
+
+    // Submit Multi-Product Sale
+    $('#ac-is-multi-sale-form').on('submit', function(e) {
+        e.preventDefault();
+        if (cart.length === 0) { alert('يرجى إضافة منتجات أولاً'); return; }
+
+        const formData = $(this).serializeArray();
+        const data = {
+            action: 'ac_is_multi_sale',
+            nonce: ac_is_ajax.nonce,
+            items: cart,
+            total_amount: $('#ac-is-cart-total').text()
+        };
+
+        formData.forEach(item => data[item.name] = item.value);
+
+        $.post(ac_is_ajax.ajax_url, data, function(response) {
+            if (response.success) {
+                alert('تم تسجيل الفاتورة بنجاح');
+                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&invoice_id=' + response.data.invoice_id + '&autoprint=1';
+            } else {
+                alert('فشل تسجيل العملية: ' + response.data);
+            }
+        });
+    });
+
     // Utility: Generate Barcode
     function generateBarcode(id, value) {
         if (!value) return;
@@ -113,6 +225,18 @@ jQuery(document).ready(function($) {
         $('#final-price').val((original - discount).toFixed(2));
     });
 
+    // Save branch
+    $('#ac-is-branch-form').on('submit', function(e) {
+        e.preventDefault();
+        var data = $(this).serialize() + '&action=ac_is_save_branch&nonce=' + ac_is_ajax.nonce;
+        $.post(ac_is_ajax.ajax_url, data, function(response) {
+            if (response.success) {
+                alert('تم حفظ الفرع');
+                location.reload();
+            }
+        });
+    });
+
     // Save product
     $('#ac-is-product-form').on('submit', function(e) {
         e.preventDefault();
@@ -157,7 +281,6 @@ jQuery(document).ready(function($) {
         $('body').addClass('ac-is-printing-sticker');
         window.print();
 
-        // Remove class after print dialog is closed
         setTimeout(function() {
             $('body').removeClass('ac-is-printing-sticker');
         }, 1000);
@@ -167,7 +290,7 @@ jQuery(document).ready(function($) {
     var searchTimeout;
     $('#ac-is-inventory-search, #ac-is-inventory-category').on('input change', function() {
         clearTimeout(searchTimeout);
-        $('#ac-is-inventory-table-body').css('opacity', '0.5'); // Visual feedback
+        $('#ac-is-inventory-table-body').css('opacity', '0.5');
         searchTimeout = setTimeout(function() {
             var search = $('#ac-is-inventory-search').val();
             var category = $('#ac-is-inventory-category').val();
@@ -183,7 +306,7 @@ jQuery(document).ready(function($) {
                     renderInventory(response.data);
                 }
             });
-        }, 300); // Faster search
+        }, 300);
     });
 
     function renderInventory(products) {
@@ -194,19 +317,19 @@ jQuery(document).ready(function($) {
             $.each(products, function(i, p) {
                 var stockClass = (p.stock_quantity < 5) ? 'capsule-danger' : ((p.stock_quantity < 15) ? 'capsule-warning' : 'capsule-success');
                 var categoryName = (p.category == 'ac') ? 'مكيفات' : ((p.category == 'cooling') ? 'تبريد' : 'فلاتر');
-                html += '<tr>' +
-                    '<td>' + (p.image_url ? '<img src="' + p.image_url + '" class="ac-is-product-img" style="border-radius:4px; max-width:50px;">' : '') + '</td>' +
-                    '<td><strong>' + p.name + '</strong><br><span class="ac-is-capsule capsule-primary">' + categoryName + '</span> ' + (p.subcategory ? '<small style="color:#666;"> (' + p.subcategory + ')</small>' : '') + '</td>' +
-                    '<td><small>B: ' + (p.barcode || 'N/A') + '</small><br><small>S/N: ' + (p.serial_number || 'N/A') + '</small></td>' +
-                    '<td><span style="font-weight:bold; color:var(--ac-primary);">' + parseFloat(p.final_price).toFixed(2) + ' EGP</span>' + (p.discount > 0 ? '<br><del style="font-size:0.7rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : '') + '</td>' +
-                    '<td><span class="ac-is-capsule ' + stockClass + '">' + p.stock_quantity + '</span></td>' +
-                    '<td>' + p.branch_id + '</td>' +
-                    '<td><div style="display:flex; gap:5px;">' +
-                        '<a href="?ac_view=edit-product&id=' + p.id + '" class="ac-is-btn" style="padding: 4px 8px; font-size:0.75rem; background:#3b82f6;">تعديل</a>' +
-                        '<button class="ac-is-btn ac-is-print-barcode" data-barcode="' + p.barcode + '" data-name="' + p.name + '" data-serial="' + p.serial_number + '" style="padding: 4px 8px; font-size:0.75rem; background:#64748b;">باركود</button>' +
-                        '<button class="ac-is-delete-product ac-is-btn" data-id="' + p.id + '" style="padding: 4px 8px; font-size:0.75rem; background:#ef4444;">حذف</button>' +
-                    '</div></td>' +
-                '</tr>';
+                html += `<tr>
+                    <td>${p.image_url ? '<img src="' + p.image_url + '" class="ac-is-product-img" style="border-radius:4px; max-width:50px;">' : ''}</td>
+                    <td><strong>${p.name}</strong><br><span class="ac-is-capsule capsule-primary">${categoryName}</span> ${p.subcategory ? '<small style="color:#666;"> (' + p.subcategory + ')</small>' : ''}</td>
+                    <td><small>B: ${p.barcode || 'N/A'}</small><br><small>S/N: ${p.serial_number || 'N/A'}</small></td>
+                    <td><span style="font-weight:bold; color:var(--ac-primary);">${parseFloat(p.final_price).toFixed(2)} EGP</span>${p.discount > 0 ? '<br><del style="font-size:0.7rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : ''}</td>
+                    <td><span class="ac-is-capsule ${stockClass}">${p.stock_quantity}</span></td>
+                    <td>${p.branch_id}</td>
+                    <td><div style="display:flex; gap:5px;">
+                        <a href="?ac_view=edit-product&id=${p.id}" class="ac-is-btn" style="padding: 4px 8px; font-size:0.75rem; background:#3b82f6;">تعديل</a>
+                        <button class="ac-is-btn ac-is-print-barcode" data-barcode="${p.barcode}" data-name="${p.name}" data-serial="${p.serial_number}" style="padding: 4px 8px; font-size:0.75rem; background:#64748b;">باركود</button>
+                        <button class="ac-is-delete-product ac-is-btn" data-id="${p.id}" style="padding: 4px 8px; font-size:0.75rem; background:#ef4444;">حذف</button>
+                    </div></td>
+                </tr>`;
             });
         }
         $('#ac-is-inventory-table-body').html(html);
@@ -247,7 +370,7 @@ jQuery(document).ready(function($) {
         }
     }
 
-    // Sale search product (Enhanced Live Search)
+    // Sale search product
     $('#ac-is-sale-product-search').on('input', function() {
         var query = $(this).val().trim();
         if (query.length < 2) return;
@@ -263,7 +386,6 @@ jQuery(document).ready(function($) {
                 if (serial == query || barcode == query) {
                     $('#ac-is-sale-serial').val(serial || barcode);
                 }
-                $(this).parent().css('background', '#f0fdf4'); // Instant feedback
                 found = true;
                 return false;
             }
@@ -282,39 +404,6 @@ jQuery(document).ready(function($) {
                 }
             });
         }
-    });
-
-    // Sale price calculation
-    $('#ac-is-sale-product, #ac-is-sale-qty').on('change input', function() {
-        var product = $('#ac-is-sale-product option:selected');
-        var price = parseFloat(product.data('price')) || 0;
-        var qty = parseInt($('#ac-is-sale-qty').val()) || 0;
-        $('#ac-is-sale-total').val((price * qty).toFixed(2));
-    });
-
-    // Record sale
-    $('#ac-is-sales-form').on('submit', function(e) {
-        e.preventDefault();
-        var product = $('#ac-is-sale-product option:selected');
-        if (!product.val()) { alert('يرجى اختيار منتج'); return; }
-
-        var stock = parseInt(product.data('stock'));
-        var qty = parseInt($('#ac-is-sale-qty').val());
-
-        if (qty > stock) {
-            alert('الكمية المطلوبة أكبر من المتوفر في المخزون');
-            return;
-        }
-
-        var data = $(this).serialize() + '&action=ac_is_record_sale&nonce=' + ac_is_ajax.nonce;
-        $.post(ac_is_ajax.ajax_url, data, function(response) {
-            if (response.success) {
-                alert('تم تسجيل البيع بنجاح');
-                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&sale_id=' + response.data.sale_id + '&autoprint=1';
-            } else {
-                alert('فشل تسجيل البيع: ' + response.data);
-            }
-        });
     });
 
     if (window.location.search.indexOf('autoprint=1') > -1) {
