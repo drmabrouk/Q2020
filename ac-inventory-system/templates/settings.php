@@ -13,26 +13,46 @@ $fullscreen_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_
     <div class="ac-is-card">
         <h3><?php _e('إدارة طاقم العمل', 'ac-inventory-system'); ?></h3>
         <form id="ac-is-staff-form" style="margin-bottom:20px; padding:15px; background:#f8fafc; border:1px solid #e2e8f0;">
-            <div class="ac-is-form-group">
-                <label><?php _e('اسم المستخدم', 'ac-inventory-system'); ?></label>
-                <input type="text" name="staff_username" required>
+            <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="ac-is-form-group">
+                    <label><?php _e('اسم المستخدم', 'ac-inventory-system'); ?></label>
+                    <input type="text" name="staff_username" required>
+                </div>
+                <div class="ac-is-form-group">
+                    <label><?php _e('كلمة المرور', 'ac-inventory-system'); ?></label>
+                    <input type="password" name="staff_password" required>
+                </div>
             </div>
-            <div class="ac-is-form-group">
-                <label><?php _e('كلمة المرور', 'ac-inventory-system'); ?></label>
-                <input type="password" name="staff_password" required>
+            <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="ac-is-form-group">
+                    <label><?php _e('الاسم بالكامل', 'ac-inventory-system'); ?></label>
+                    <input type="text" name="staff_name" required>
+                </div>
+                <div class="ac-is-form-group">
+                    <label><?php _e('الصلاحية', 'ac-inventory-system'); ?></label>
+                    <select name="staff_role">
+                        <option value="employee"><?php _e('موظف مبيعات', 'ac-inventory-system'); ?></option>
+                        <option value="manager"><?php _e('مدير مبيعات', 'ac-inventory-system'); ?></option>
+                        <option value="admin"><?php _e('مدير نظام', 'ac-inventory-system'); ?></option>
+                    </select>
+                </div>
             </div>
-            <div class="ac-is-form-group">
-                <label><?php _e('الاسم بالكامل', 'ac-inventory-system'); ?></label>
-                <input type="text" name="staff_name" required>
+            <hr style="margin:15px 0; border:0; border-top:1px solid #eee;">
+            <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr 1fr; gap:10px;">
+                <div class="ac-is-form-group">
+                    <label><?php _e('الراتب الأساسي', 'ac-inventory-system'); ?></label>
+                    <input type="number" step="0.01" name="base_salary" value="0.00">
+                </div>
+                <div class="ac-is-form-group">
+                    <label><?php _e('أيام العمل بالشهر', 'ac-inventory-system'); ?></label>
+                    <input type="number" name="working_days" value="26">
+                </div>
+                <div class="ac-is-form-group">
+                    <label><?php _e('ساعات العمل باليوم', 'ac-inventory-system'); ?></label>
+                    <input type="number" name="working_hours" value="8">
+                </div>
             </div>
-            <div class="ac-is-form-group">
-                <label><?php _e('الصلاحية', 'ac-inventory-system'); ?></label>
-                <select name="staff_role">
-                    <option value="staff"><?php _e('موظف مبيعات', 'ac-inventory-system'); ?></option>
-                    <option value="admin"><?php _e('مدير نظام', 'ac-inventory-system'); ?></option>
-                </select>
-            </div>
-            <button type="submit" class="ac-is-btn" style="width:100%;"><?php _e('إضافة موظف جديد', 'ac-inventory-system'); ?></button>
+            <button type="submit" class="ac-is-btn" style="width:100%; margin-top:10px;"><?php _e('إضافة موظف جديد', 'ac-inventory-system'); ?></button>
         </form>
 
         <table class="ac-is-table">
@@ -41,6 +61,7 @@ $fullscreen_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_
                     <th><?php _e('المستخدم', 'ac-inventory-system'); ?></th>
                     <th><?php _e('الاسم', 'ac-inventory-system'); ?></th>
                     <th><?php _e('الصلاحية', 'ac-inventory-system'); ?></th>
+                    <th><?php _e('الراتب', 'ac-inventory-system'); ?></th>
                     <th></th>
                 </tr>
             </thead>
@@ -49,7 +70,12 @@ $fullscreen_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_
                     <tr>
                         <td><?php echo esc_html($s->username); ?></td>
                         <td><?php echo esc_html($s->name); ?></td>
-                        <td><?php echo ($s->role == 'admin' ? __('مدير', 'ac-inventory-system') : __('موظف', 'ac-inventory-system')); ?></td>
+                        <td><?php
+                            if($s->role == 'admin') _e('مدير نظام', 'ac-inventory-system');
+                            elseif($s->role == 'manager') _e('مدير مبيعات', 'ac-inventory-system');
+                            else _e('موظف', 'ac-inventory-system');
+                        ?></td>
+                        <td><?php echo number_format($s->base_salary, 2); ?></td>
                         <td>
                             <?php if($s->username != 'admin'): ?>
                                 <button class="ac-is-delete-staff" data-id="<?php echo $s->id; ?>" style="background:none; border:none; color:red; cursor:pointer;"><span class="dashicons dashicons-trash"></span></button>

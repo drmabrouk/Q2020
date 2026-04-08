@@ -82,10 +82,23 @@ class AC_IS_Database {
 			username varchar(100) NOT NULL,
 			password varchar(255) NOT NULL,
 			name varchar(255),
-			role varchar(50) DEFAULT 'staff',
+			role varchar(50) DEFAULT 'employee',
+			base_salary decimal(10,2) DEFAULT '0.00',
+			working_days int DEFAULT 26,
+			working_hours int DEFAULT 8,
 			created_at datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id),
 			UNIQUE KEY username (username)
+		) $charset_collate;
+
+		CREATE TABLE {$wpdb->prefix}ac_is_attendance (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			staff_id mediumint(9) NOT NULL,
+			work_date date NOT NULL,
+			check_in time,
+			check_out time,
+			status varchar(50) DEFAULT 'present',
+			PRIMARY KEY  (id)
 		) $charset_collate;
 
 		CREATE TABLE $table_settings (

@@ -45,6 +45,7 @@ class AC_Inventory_System {
 		require_once AC_IS_PATH . 'includes/class-database.php';
 		require_once AC_IS_PATH . 'includes/class-auth.php';
 		require_once AC_IS_PATH . 'includes/class-customers.php';
+		require_once AC_IS_PATH . 'includes/class-payroll.php';
 		require_once AC_IS_PATH . 'includes/class-inventory.php';
 		require_once AC_IS_PATH . 'includes/class-sales.php';
 		require_once AC_IS_PATH . 'includes/class-shortcode.php';
