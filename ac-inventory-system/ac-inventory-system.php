@@ -59,7 +59,11 @@ class AC_Inventory_System {
 		wp_enqueue_media();
 		wp_enqueue_style( 'ac-is-rtl-style', AC_IS_URL . 'assets/css/style-rtl.css', array(), AC_IS_VERSION );
 		wp_enqueue_style( 'ac-is-print-style', AC_IS_URL . 'assets/css/print.css', array(), AC_IS_VERSION, 'print' );
-		wp_enqueue_script( 'ac-is-scripts', AC_IS_URL . 'assets/js/scripts.js', array( 'jquery' ), AC_IS_VERSION, true );
+
+		// Enqueue JsBarcode from CDN
+		wp_enqueue_script( 'jsbarcode', 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js', array(), '3.11.5', true );
+
+		wp_enqueue_script( 'ac-is-scripts', AC_IS_URL . 'assets/js/scripts.js', array( 'jquery', 'jsbarcode' ), AC_IS_VERSION, true );
 
 		wp_localize_script( 'ac-is-scripts', 'ac_is_ajax', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),

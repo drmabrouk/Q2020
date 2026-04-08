@@ -8,19 +8,25 @@ class AC_IS_Reports {
 	public static function get_daily_sales() {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_sales';
-		return $wpdb->get_results( "SELECT DATE(sale_date) as date, SUM(total_price) as total FROM $table GROUP BY DATE(sale_date) ORDER BY date DESC LIMIT 7" );
+		return $wpdb->get_results( "SELECT DATE(sale_date) as date, SUM(total_price) as total, COUNT(*) as count FROM $table GROUP BY DATE(sale_date) ORDER BY date DESC LIMIT 7" );
 	}
 
 	public static function get_weekly_sales() {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_sales';
-		return $wpdb->get_results( "SELECT YEARWEEK(sale_date) as week, SUM(total_price) as total FROM $table GROUP BY YEARWEEK(sale_date) ORDER BY week DESC LIMIT 4" );
+		return $wpdb->get_results( "SELECT YEARWEEK(sale_date) as week, SUM(total_price) as total, COUNT(*) as count FROM $table GROUP BY YEARWEEK(sale_date) ORDER BY week DESC LIMIT 4" );
+	}
+
+	public static function get_monthly_sales() {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_sales';
+		return $wpdb->get_results( "SELECT DATE_FORMAT(sale_date, '%Y-%m') as month, SUM(total_price) as total, COUNT(*) as count FROM $table GROUP BY DATE_FORMAT(sale_date, '%Y-%m') ORDER BY month DESC LIMIT 6" );
 	}
 
 	public static function get_stock_overview() {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_products';
-		return $wpdb->get_results( "SELECT name, stock_quantity FROM $table WHERE stock_quantity < 10 ORDER BY stock_quantity ASC" );
+		return $wpdb->get_results( "SELECT name, category, stock_quantity FROM $table WHERE stock_quantity < 10 ORDER BY stock_quantity ASC" );
 	}
 
 	public static function export_sales_csv() {
@@ -36,16 +42,18 @@ class AC_IS_Reports {
 		$table_sales = $wpdb->prefix . 'ac_is_sales';
 		$table_products = $wpdb->prefix . 'ac_is_products';
 		$sales = $wpdb->get_results("
-			SELECT s.sale_date, p.name as product_name, s.quantity, s.total_price 
+			SELECT s.id as sale_id, s.sale_date, p.name as product_name, s.serial_number, s.quantity, s.total_price
 			FROM $table_sales s
 			JOIN $table_products p ON s.product_id = p.id
 			ORDER BY s.sale_date DESC
 		");
 
 		header('Content-Type: text/csv; charset=utf-8');
-		header('Content-Disposition: attachment; filename=sales_report.csv');
+		header('Content-Disposition: attachment; filename=sales_report_' . date('Y-m-d') . '.csv');
 		$output = fopen('php://output', 'w');
-		fputcsv($output, array('Date', 'Product', 'Quantity', 'Total Price'));
+		// Output UTF-8 BOM for Excel Arabic support
+		fputs($output, $bom = ( chr(0xEF) . chr(0xBB) . chr(0xBF) ));
+		fputcsv($output, array('رقم الفاتورة', 'التاريخ', 'اسم المنتج', 'السيريال', 'الكمية', 'الإجمالي'));
 		foreach ($sales as $sale) {
 			fputcsv($output, (array)$sale);
 		}

@@ -10,6 +10,7 @@ class AC_IS_Ajax {
 		add_action( 'wp_ajax_ac_is_delete_product', array( $this, 'delete_product' ) );
 		add_action( 'wp_ajax_ac_is_record_sale', array( $this, 'record_sale' ) );
 		add_action( 'wp_ajax_ac_is_save_branch', array( $this, 'save_branch' ) );
+		add_action( 'wp_ajax_ac_is_search_products', array( $this, 'search_products' ) );
 	}
 
 	public function save_product() {
@@ -23,12 +24,15 @@ class AC_IS_Ajax {
 		$data = array(
 			'name'           => sanitize_text_field( $_POST['name'] ),
 			'category'       => sanitize_text_field( $_POST['category'] ),
+			'subcategory'    => sanitize_text_field( $_POST['subcategory'] ),
 			'original_price' => floatval( $_POST['original_price'] ),
 			'discount'       => floatval( $_POST['discount'] ),
 			'final_price'    => floatval( $_POST['final_price'] ),
 			'stock_quantity' => intval( $_POST['stock_quantity'] ),
 			'branch_id'      => intval( $_POST['branch_id'] ),
 			'image_url'      => esc_url_raw( $_POST['image_url'] ),
+			'serial_number'  => sanitize_text_field( $_POST['serial_number'] ),
+			'barcode'        => sanitize_text_field( $_POST['barcode'] ),
 		);
 
 		if ( $id ) {
@@ -60,10 +64,11 @@ class AC_IS_Ajax {
 		}
 
 		$data = array(
-			'product_id'  => intval( $_POST['product_id'] ),
-			'quantity'    => intval( $_POST['quantity'] ),
-			'total_price' => floatval( $_POST['total_price'] ),
-			'branch_id'   => intval( $_POST['branch_id'] ),
+			'product_id'    => intval( $_POST['product_id'] ),
+			'serial_number' => sanitize_text_field( $_POST['serial_number'] ),
+			'quantity'      => intval( $_POST['quantity'] ),
+			'total_price'   => floatval( $_POST['total_price'] ),
+			'branch_id'     => intval( $_POST['branch_id'] ),
 		);
 
 		$sale_id = AC_IS_Sales::record_sale( $data );
@@ -89,6 +94,18 @@ class AC_IS_Ajax {
 
 		AC_IS_Inventory::add_branch( $data );
 		wp_send_json_success( 'Branch saved' );
+	}
+
+	public function search_products() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+
+		$args = array(
+			'search'   => sanitize_text_field( $_POST['search'] ),
+			'category' => sanitize_text_field( $_POST['category'] ),
+		);
+
+		$products = AC_IS_Inventory::get_products( $args );
+		wp_send_json_success( $products );
 	}
 }
 
