@@ -2,19 +2,17 @@ jQuery(document).ready(function($) {
     // Multi-Product Cart Logic
     let cart = [];
 
-    $('#ac-is-add-to-list').on('click', function() {
-        const product_id = $('#ac-is-sale-product').val();
-        if (!product_id) { alert('يرجى اختيار منتج'); return; }
+    function addProductToCart(product_id, serial = '', quantity = 1) {
+        const option = $(`#ac-is-sale-product option[value="${product_id}"]`);
+        if (!option.length) return false;
 
-        const product_name = $('#ac-is-sale-product option:selected').data('name');
-        const price = parseFloat($('#ac-is-sale-product option:selected').data('price'));
-        const quantity = parseInt($('#ac-is-sale-qty').val());
-        const serial = $('#ac-is-sale-serial').val();
-        const stock = parseInt($('#ac-is-sale-product option:selected').data('stock'));
+        const product_name = option.data('name');
+        const price = parseFloat(option.data('price'));
+        const stock = parseInt(option.data('stock'));
 
         if (quantity > stock) {
             alert('الكمية المطلوبة أكبر من المتوفر');
-            return;
+            return false;
         }
 
         cart.push({
@@ -27,10 +25,23 @@ jQuery(document).ready(function($) {
         });
 
         renderCart();
-        // Reset product selection
-        $('#ac-is-sale-product').val('').trigger('change');
-        $('#ac-is-sale-serial').val('');
-        $('#ac-is-sale-qty').val(1);
+        return true;
+    }
+
+    $('#ac-is-add-to-list').on('click', function() {
+        const product_id = $('#ac-is-sale-product').val();
+        if (!product_id) { alert('يرجى اختيار منتج'); return; }
+
+        const serial = $('#ac-is-sale-serial').val();
+        const quantity = parseInt($('#ac-is-sale-qty').val());
+
+        if (addProductToCart(product_id, serial, quantity)) {
+            // Reset product selection
+            $('#ac-is-sale-product').val('').trigger('change');
+            $('#ac-is-sale-serial').val('');
+            $('#ac-is-sale-qty').val(1);
+            $('#ac-is-sale-product-search').val('');
+        }
     });
 
     function renderCart() {
@@ -78,7 +89,6 @@ jQuery(document).ready(function($) {
                 $('#ac-is-customer-address').val(c.address);
                 $('#ac-is-customer-email').val(c.email);
                 $('#customer-details-fields').slideDown();
-                // Visual feedback
                 $('#ac-is-customer-phone').css('border-color', '#059669');
             } else {
                 $('#ac-is-customer-phone').css('border-color', '#cbd5e1');
@@ -109,6 +119,111 @@ jQuery(document).ready(function($) {
                 alert('فشل تسجيل العملية: ' + response.data);
             }
         });
+    });
+
+    // Camera Scanning Logic (Professional Implementation)
+    let html5QrCode;
+    let lastScannedCode = "";
+    let lastScannedTime = 0;
+
+    function startScanner() {
+        if (!html5QrCode) {
+            html5QrCode = new Html5Qrcode("ac-is-reader");
+        }
+
+        const config = {
+            fps: 30,
+            qrbox: { width: 280, height: 160 },
+            aspectRatio: 1.0
+        };
+
+        html5QrCode.start(
+            { facingMode: "environment" },
+            config,
+            onScanSuccess,
+            onScanError
+        ).catch(err => {
+            console.error("Unable to start scanner", err);
+            $('.ac-is-scan-status').text("خطأ في تشغيل الكاميرا").css('color', 'red').show();
+        });
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        const now = Date.now();
+        // Debounce logic: 3 seconds for same code
+        if (decodedText === lastScannedCode && (now - lastScannedTime) < 3000) {
+            return;
+        }
+
+        lastScannedCode = decodedText;
+        lastScannedTime = now;
+
+        // Visual feedback
+        $('#ac-is-reader-container').addClass('scan-success-flash');
+        setTimeout(() => $('#ac-is-reader-container').removeClass('scan-success-flash'), 500);
+
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(100);
+        }
+
+        processScannedBarcode(decodedText);
+    }
+
+    function onScanError(errorMessage) {
+        // Just silent console error for continuous scanning
+        // console.warn(`Scan error: ${errorMessage}`);
+    }
+
+    function processScannedBarcode(query) {
+        let found = false;
+        $('#ac-is-sale-product option').each(function() {
+            const barcode = String($(this).data('barcode'));
+            const serial = String($(this).data('serial'));
+
+            if (barcode == query || serial == query) {
+                const product_id = $(this).val();
+                if (addProductToCart(product_id, serial || barcode, 1)) {
+                    $('.ac-is-scan-status').text('تم إضافة: ' + $(this).data('name')).fadeIn().delay(2000).fadeOut();
+                    found = true;
+                }
+                return false;
+            }
+        });
+
+        if (!found) {
+            $.post(ac_is_ajax.ajax_url, {
+                action: 'ac_is_search_products',
+                search: query,
+                nonce: ac_is_ajax.nonce
+            }, function(response) {
+                if (response.success && response.data.length > 0) {
+                    const p = response.data[0];
+                    if (addProductToCart(p.id, p.serial_number || p.barcode, 1)) {
+                        $('.ac-is-scan-status').text('تم إضافة: ' + p.name).fadeIn().delay(2000).fadeOut();
+                    }
+                } else {
+                    $('.ac-is-scan-status').text('المنتج غير موجود: ' + query).css('color', 'red').fadeIn().delay(2000).fadeOut();
+                }
+            });
+        }
+    }
+
+    $('.ac-is-mode-btn').on('click', function() {
+        const mode = $(this).data('mode');
+        $('.ac-is-mode-btn').removeClass('active').css({'background':'#fff', 'color':'inherit', 'border-color':'#ddd'});
+        $(this).addClass('active').css({'background': 'var(--ac-primary)', 'color': '#fff', 'border-color': 'var(--ac-primary)'});
+
+        if (mode === 'scan') {
+            $('#ac-is-reader-container').show();
+            $('#ac-is-manual-search').hide();
+            startScanner();
+        } else {
+            $('#ac-is-reader-container').hide();
+            $('#ac-is-manual-search').show();
+            if (html5QrCode) {
+                html5QrCode.stop().catch(err => console.error(err));
+            }
+        }
     });
 
     // Utility: Generate Barcode
@@ -347,81 +462,6 @@ jQuery(document).ready(function($) {
             });
         }
         $('#ac-is-inventory-table-body').html(html);
-    }
-
-    // Sales Mode Toggles
-    $('.ac-is-mode-btn').on('click', function() {
-        var mode = $(this).data('mode');
-        $('.ac-is-mode-btn').removeClass('active').css({'background':'#fff', 'color':'inherit', 'border-color':'#ddd'});
-        $(this).addClass('active').css({'background': 'var(--ac-primary)', 'color': '#fff', 'border-color': 'var(--ac-primary)'});
-
-        if (mode === 'scan') {
-            $('#ac-is-reader-container').show();
-            $('#ac-is-manual-search').hide();
-            startScanner();
-        } else {
-            $('#ac-is-reader-container').hide();
-            $('#ac-is-manual-search').show();
-            if (html5QrcodeScanner) html5QrcodeScanner.clear();
-        }
-    });
-
-    // Camera Scanning Logic
-    var html5QrcodeScanner;
-    function startScanner() {
-        html5QrcodeScanner = new Html5QrcodeScanner("ac-is-reader", {
-            fps: 30,
-            qrbox: {width: 250, height: 150},
-            aspectRatio: 1.0
-        });
-        html5QrcodeScanner.render(onScanSuccess);
-    }
-
-    function onScanSuccess(decodedText, decodedResult) {
-        $('#ac-is-sale-product-search').val(decodedText).trigger('input');
-        if (window.navigator && window.navigator.vibrate) {
-            window.navigator.vibrate(100);
-        }
-    }
-
-    // Sale search product
-    $('#ac-is-sale-product-search').on('input', function() {
-        var query = $(this).val().trim();
-        if (query.length < 2) return;
-
-        var found = false;
-        $('#ac-is-sale-product option').each(function() {
-            var barcode = String($(this).data('barcode'));
-            var serial = String($(this).data('serial'));
-            var name = $(this).text().toLowerCase();
-
-            if (barcode == query || serial == query || name.includes(query.toLowerCase())) {
-                $('#ac-is-sale-product').val($(this).val()).trigger('change');
-                if (serial == query || barcode == query) {
-                    $('#ac-is-sale-serial').val(serial || barcode);
-                }
-                found = true;
-                return false;
-            }
-        });
-
-        if (!found && query.length > 5) {
-            $.post(ac_is_ajax.ajax_url, {
-                action: 'ac_is_search_products',
-                search: query,
-                nonce: ac_is_ajax.nonce
-            }, function(response) {
-                if (response.success && response.data.length > 0) {
-                    var p = response.data[0];
-                    $('#ac-is-sale-product').val(p.id).trigger('change');
-                    $('#ac-is-sale-serial').val(p.serial_number || p.barcode);
-                }
-            });
-        }
-    });
-
-    if (window.location.search.indexOf('autoprint=1') > -1) {
-        setTimeout(function() { window.print(); }, 1000);
     }
 
     // Independent Logout
