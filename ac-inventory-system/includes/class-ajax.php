@@ -9,7 +9,8 @@ class AC_IS_Ajax {
 		$actions = array(
 			'save_product', 'delete_product', 'record_sale', 'multi_sale',
 			'save_branch', 'search_products', 'get_customer', 'delete_invoice',
-			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings'
+			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
+			'save_customer', 'delete_customer'
 		);
 
 		foreach ( $actions as $action ) {
@@ -180,6 +181,36 @@ class AC_IS_Ajax {
 		wp_send_json_success();
 	}
 
+	public function save_customer() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error( 'Unauthorized' );
+
+		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
+		$data = array(
+			'name'            => sanitize_text_field( $_POST['name'] ),
+			'phone'           => sanitize_text_field( $_POST['phone'] ),
+			'phone_secondary' => sanitize_text_field( $_POST['phone_secondary'] ),
+			'address'         => sanitize_text_field( $_POST['address'] ),
+			'email'           => sanitize_email( $_POST['email'] ),
+		);
+
+		if ( $id ) {
+			AC_IS_Customers::update_customer( $id, $data );
+		} else {
+			AC_IS_Customers::add_customer( $data );
+		}
+		wp_send_json_success();
+	}
+
+	public function delete_customer() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error( 'Unauthorized' );
+
+		$id = intval( $_POST['id'] );
+		AC_IS_Customers::delete_customer( $id );
+		wp_send_json_success();
+	}
+
 	public function delete_invoice() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
 		if ( ! AC_IS_Auth::can_delete_records() ) wp_send_json_error( 'Unauthorized' );
@@ -215,8 +246,6 @@ class AC_IS_Ajax {
 	public function multi_sale() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
 		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
-		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
-		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
 
 		global $wpdb;
 		$items = $_POST['items'];
@@ -229,12 +258,15 @@ class AC_IS_Ajax {
 		);
 
 		// Handle customer
-		$customer = AC_IS_Customers::get_customer_by_phone( $customer_data['phone'] );
-		if ( $customer ) {
-			AC_IS_Customers::update_customer( $customer->id, $customer_data );
-			$customer_id = $customer->id;
-		} else {
-			$customer_id = AC_IS_Customers::add_customer( $customer_data );
+		$customer_id = null;
+		if ( $customer_data['phone'] !== '-' ) {
+			$customer = AC_IS_Customers::get_customer_by_phone( $customer_data['phone'] );
+			if ( $customer ) {
+				AC_IS_Customers::update_customer( $customer->id, $customer_data );
+				$customer_id = $customer->id;
+			} else {
+				$customer_id = AC_IS_Customers::add_customer( $customer_data );
+			}
 		}
 
 		$current_user = AC_IS_Auth::current_user();

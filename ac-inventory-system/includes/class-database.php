@@ -48,6 +48,7 @@ class AC_IS_Database {
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
 			phone varchar(50) NOT NULL,
+			phone_secondary varchar(50),
 			address text,
 			email varchar(255),
 			created_at datetime DEFAULT CURRENT_TIMESTAMP,
