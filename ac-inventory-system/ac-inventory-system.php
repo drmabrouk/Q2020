@@ -63,7 +63,10 @@ class AC_Inventory_System {
 		// Enqueue JsBarcode from CDN
 		wp_enqueue_script( 'jsbarcode', 'https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js', array(), '3.11.5', true );
 
-		wp_enqueue_script( 'ac-is-scripts', AC_IS_URL . 'assets/js/scripts.js', array( 'jquery', 'jsbarcode' ), AC_IS_VERSION, true );
+		// Enqueue Html5Qrcode for camera scanning
+		wp_enqueue_script( 'html5-qrcode', 'https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js', array(), '2.3.8', true );
+
+		wp_enqueue_script( 'ac-is-scripts', AC_IS_URL . 'assets/js/scripts.js', array( 'jquery', 'jsbarcode', 'html5-qrcode' ), AC_IS_VERSION, true );
 
 		wp_localize_script( 'ac-is-scripts', 'ac_is_ajax', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),

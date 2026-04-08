@@ -4,9 +4,12 @@ $product = $product_id ? AC_IS_Inventory::get_product($product_id) : null;
 $branches = AC_IS_Inventory::get_branches();
 ?>
 
-<h2><?php echo $product ? __('تعديل منتج', 'ac-inventory-system') : __('إضافة منتج جديد', 'ac-inventory-system'); ?></h2>
+<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+    <h2><?php echo $product ? __('تعديل منتج', 'ac-inventory-system') : __('إضافة منتج جديد', 'ac-inventory-system'); ?></h2>
+    <a href="<?php echo add_query_arg('ac_view', 'inventory'); ?>" class="ac-is-btn" style="background:#64748b;"><?php _e('العودة للمخزون', 'ac-inventory-system'); ?></a>
+</div>
 
-<form id="ac-is-product-form" class="ac-is-form">
+<form id="ac-is-product-form" class="ac-is-form" style="background:#fff; padding:30px; border-radius:12px; border:1px solid var(--ac-border);">
     <input type="hidden" name="id" value="<?php echo $product_id; ?>">
 
     <div class="ac-is-grid">
@@ -49,7 +52,7 @@ $branches = AC_IS_Inventory::get_branches();
         </div>
 
         <div class="ac-is-form-group">
-            <label><?php _e('السعر النهائي', 'ac-inventory-system'); ?></label>
+            <label><?php _e('السعر النهائي (EGP)', 'ac-inventory-system'); ?></label>
             <input type="number" step="0.01" name="final_price" id="final-price" placeholder="0.00" value="<?php echo $product ? $product->final_price : '0.00'; ?>" readonly>
         </div>
 
@@ -59,31 +62,33 @@ $branches = AC_IS_Inventory::get_branches();
         </div>
 
         <div class="ac-is-form-group">
-            <label><?php _e('الرقم التسلسلي (Serial Number)', 'ac-inventory-system'); ?></label>
-            <input type="text" name="serial_number" placeholder="<?php _e('أدخل الرقم التسلسلي الفريد', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->serial_number) : ''; ?>">
-        </div>
-
-        <div class="ac-is-form-group">
             <label><?php _e('الباركود (Barcode)', 'ac-inventory-system'); ?></label>
             <div style="display:flex; gap:10px;">
                 <input type="text" name="barcode" id="ac-is-barcode-input" placeholder="<?php _e('أدخل أو ولد باركود', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->barcode) : ''; ?>">
-                <button type="button" id="generate-barcode" class="ac-is-btn" style="padding: 10px;"><?php _e('توليد', 'ac-inventory-system'); ?></button>
+                <button type="button" id="generate-barcode" class="ac-is-btn" style="padding: 10px; background:#475569;"><?php _e('توليد', 'ac-inventory-system'); ?></button>
             </div>
-            <div id="barcode-preview" style="margin-top:10px;">
-                <svg id="barcode-svg"></svg>
-            </div>
+        </div>
+
+        <div class="ac-is-form-group">
+            <label><?php _e('الرقم التسلسلي (S/N)', 'ac-inventory-system'); ?></label>
+            <input type="text" name="serial_number" placeholder="<?php _e('يترك فارغاً للتوليد التلقائي من الباركود', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->serial_number) : ''; ?>">
         </div>
 
         <div class="ac-is-form-group" style="grid-column: span 2;">
             <label><?php _e('رابط الصورة', 'ac-inventory-system'); ?></label>
             <div style="display:flex; gap:10px;">
                 <input type="text" name="image_url" id="ac-is-image-url" placeholder="https://..." value="<?php echo $product ? esc_url($product->image_url) : ''; ?>">
-                <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#6c757d;"><?php _e('رفع صورة', 'ac-inventory-system'); ?></button>
+                <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b;"><?php _e('رفع صورة', 'ac-inventory-system'); ?></button>
             </div>
         </div>
     </div>
 
-    <div style="margin-top:20px; text-align: left;">
-        <button type="submit" class="ac-is-btn" style="min-width:200px;"><?php _e('حفظ المنتج', 'ac-inventory-system'); ?></button>
+    <div style="margin-top:30px; text-align: left; border-top: 1px solid #eee; padding-top: 20px;">
+        <button type="submit" class="ac-is-btn" style="min-width:240px; font-size: 1.1rem;"><?php _e('حفظ بيانات المنتج', 'ac-inventory-system'); ?></button>
     </div>
 </form>
+
+<div id="barcode-preview" style="margin-top:30px; text-align: center; display:none;">
+    <h3><?php _e('معاينة الباركود', 'ac-inventory-system'); ?></h3>
+    <svg id="barcode-svg"></svg>
+</div>

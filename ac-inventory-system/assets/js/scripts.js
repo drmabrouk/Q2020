@@ -13,14 +13,16 @@ jQuery(document).ready(function($) {
     // Barcode Preview in Product Form
     $('#ac-is-barcode-input').on('input', function() {
         generateBarcode("#barcode-svg", $(this).val());
+        if ($(this).val()) $('#barcode-preview').show();
     });
 
     if ($('#ac-is-barcode-input').val()) {
         generateBarcode("#barcode-svg", $('#ac-is-barcode-input').val());
+        $('#barcode-preview').show();
     }
 
     $('#generate-barcode').on('click', function() {
-        var randomBarcode = Math.floor(Math.random() * 1000000000);
+        var randomBarcode = 'AC-' + Math.floor(Math.random() * 100000000);
         $('#ac-is-barcode-input').val(randomBarcode).trigger('input');
     });
 
@@ -78,9 +80,10 @@ jQuery(document).ready(function($) {
         e.preventDefault();
         var barcode = $(this).data('barcode');
         var name = $(this).data('name');
+        var serial = $(this).data('serial');
         if (!barcode) { alert('لا يوجد باركود لهذا المنتج'); return; }
 
-        $('#print-product-name').text(name);
+        $('#print-product-name').text(name + (serial ? ' (' + serial + ')' : ''));
         generateBarcode("#print-barcode-svg", barcode);
         window.print();
     });
@@ -120,10 +123,10 @@ jQuery(document).ready(function($) {
                     '<td><small>B: ' + (p.barcode || 'N/A') + '</small><br><small>S/N: ' + (p.serial_number || 'N/A') + '</small></td>' +
                     '<td><span style="font-weight:bold; color:var(--ac-primary);">' + parseFloat(p.final_price).toFixed(2) + '</span>' + (p.discount > 0 ? '<br><del style="font-size:0.8rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : '') + '</td>' +
                     '<td><span class="ac-is-capsule ' + stockClass + '">' + p.stock_quantity + '</span></td>' +
-                    '<td>' + p.branch_id + '</td>' + // Simplified as we'd need more logic to match branch name in JS
+                    '<td>' + p.branch_id + '</td>' +
                     '<td><div style="display:flex; gap:5px;">' +
                         '<a href="?ac_view=edit-product&id=' + p.id + '" class="ac-is-btn" style="padding: 5px 10px; font-size:0.8rem; background:#4a90e2;">تعديل</a>' +
-                        '<button class="ac-is-btn ac-is-print-barcode" data-barcode="' + p.barcode + '" data-name="' + p.name + '" style="padding: 5px 10px; font-size:0.8rem; background:#6c757d;">باركود</button>' +
+                        '<button class="ac-is-btn ac-is-print-barcode" data-barcode="' + p.barcode + '" data-name="' + p.name + '" data-serial="' + p.serial_number + '" style="padding: 5px 10px; font-size:0.8rem; background:#6c757d;">باركود</button>' +
                         '<button class="ac-is-delete-product ac-is-btn" data-id="' + p.id + '" style="padding: 5px 10px; font-size:0.8rem; background:#e53e3e;">حذف</button>' +
                     '</div></td>' +
                 '</tr>';
@@ -132,21 +135,63 @@ jQuery(document).ready(function($) {
         $('#ac-is-inventory-table-body').html(html);
     }
 
-    // Sale search product by barcode/serial
+    // Camera Scanning Logic
+    var html5QrcodeScanner;
+    $('#ac-is-toggle-scanner').on('click', function() {
+        if ($('#ac-is-reader').is(':visible')) {
+            $('#ac-is-reader').hide();
+            if (html5QrcodeScanner) html5QrcodeScanner.clear();
+        } else {
+            $('#ac-is-reader').show();
+            startScanner();
+        }
+    });
+
+    function startScanner() {
+        html5QrcodeScanner = new Html5QrcodeScanner("ac-is-reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner.render(onScanSuccess);
+    }
+
+    function onScanSuccess(decodedText, decodedResult) {
+        $('#ac-is-sale-product-search').val(decodedText).trigger('input');
+        html5QrcodeScanner.clear();
+        $('#ac-is-reader').hide();
+    }
+
+    // Sale search product by barcode/serial/name
     $('#ac-is-sale-product-search').on('input', function() {
         var query = $(this).val();
         if (query.length < 3) return;
 
-        $.post(ac_is_ajax.ajax_url, {
-            action: 'ac_is_search_products',
-            search: query,
-            nonce: ac_is_ajax.nonce
-        }, function(response) {
-            if (response.success && response.data.length > 0) {
-                var p = response.data[0]; // Take first match
-                $('#ac-is-sale-product').val(p.id).trigger('change');
+        // Local search first
+        var found = false;
+        $('#ac-is-sale-product option').each(function() {
+            var barcode = $(this).data('barcode');
+            var serial = $(this).data('serial');
+            var name = $(this).text();
+
+            if (barcode == query || serial == query || name.includes(query)) {
+                $('#ac-is-sale-product').val($(this).val()).trigger('change');
+                if (serial == query) $('#ac-is-sale-serial').val(serial);
+                found = true;
+                return false;
             }
         });
+
+        if (!found) {
+            // AJAX search fallback
+            $.post(ac_is_ajax.ajax_url, {
+                action: 'ac_is_search_products',
+                search: query,
+                nonce: ac_is_ajax.nonce
+            }, function(response) {
+                if (response.success && response.data.length > 0) {
+                    var p = response.data[0];
+                    $('#ac-is-sale-product').val(p.id).trigger('change');
+                    if (p.serial_number == query) $('#ac-is-sale-serial').val(p.serial_number);
+                }
+            });
+        }
     });
 
     // Sale price calculation
