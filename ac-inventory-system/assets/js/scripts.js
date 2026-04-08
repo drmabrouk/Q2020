@@ -75,7 +75,7 @@ jQuery(document).ready(function($) {
         });
     });
 
-    // Print Barcode Button
+    // Print Barcode Button (Sticker Only)
     $(document).on('click', '.ac-is-print-barcode', function(e) {
         e.preventDefault();
         var barcode = $(this).data('barcode');
@@ -85,6 +85,8 @@ jQuery(document).ready(function($) {
 
         $('#print-product-name').text(name + (serial ? ' (' + serial + ')' : ''));
         generateBarcode("#print-barcode-svg", barcode);
+
+        // Use a small window for sticker printing if possible, or just print
         window.print();
     });
 
@@ -112,7 +114,7 @@ jQuery(document).ready(function($) {
     function renderInventory(products) {
         var html = '';
         if (products.length === 0) {
-            html = '<tr><td colspan="7" style="text-align:center;">لا توجد منتجات.</td></tr>';
+            html = '<tr><td colspan="7" style="text-align:center; padding:40px;">لا توجد منتجات.</td></tr>';
         } else {
             $.each(products, function(i, p) {
                 var stockClass = (p.stock_quantity < 5) ? 'capsule-danger' : ((p.stock_quantity < 15) ? 'capsule-warning' : 'capsule-success');
@@ -121,13 +123,13 @@ jQuery(document).ready(function($) {
                     '<td>' + (p.image_url ? '<img src="' + p.image_url + '" class="ac-is-product-img" style="border-radius:4px; max-width:60px;">' : '') + '</td>' +
                     '<td><strong>' + p.name + '</strong><br><span class="ac-is-capsule capsule-primary">' + categoryName + '</span> ' + (p.subcategory ? '<small style="color:#666;"> (' + p.subcategory + ')</small>' : '') + '</td>' +
                     '<td><small>B: ' + (p.barcode || 'N/A') + '</small><br><small>S/N: ' + (p.serial_number || 'N/A') + '</small></td>' +
-                    '<td><span style="font-weight:bold; color:var(--ac-primary);">' + parseFloat(p.final_price).toFixed(2) + '</span>' + (p.discount > 0 ? '<br><del style="font-size:0.8rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : '') + '</td>' +
+                    '<td><span style="font-weight:bold; color:var(--ac-primary);">' + parseFloat(p.final_price).toFixed(2) + ' EGP</span>' + (p.discount > 0 ? '<br><del style="font-size:0.8rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : '') + '</td>' +
                     '<td><span class="ac-is-capsule ' + stockClass + '">' + p.stock_quantity + '</span></td>' +
                     '<td>' + p.branch_id + '</td>' +
                     '<td><div style="display:flex; gap:5px;">' +
-                        '<a href="?ac_view=edit-product&id=' + p.id + '" class="ac-is-btn" style="padding: 5px 10px; font-size:0.8rem; background:#4a90e2;">تعديل</a>' +
-                        '<button class="ac-is-btn ac-is-print-barcode" data-barcode="' + p.barcode + '" data-name="' + p.name + '" data-serial="' + p.serial_number + '" style="padding: 5px 10px; font-size:0.8rem; background:#6c757d;">باركود</button>' +
-                        '<button class="ac-is-delete-product ac-is-btn" data-id="' + p.id + '" style="padding: 5px 10px; font-size:0.8rem; background:#e53e3e;">حذف</button>' +
+                        '<a href="?ac_view=edit-product&id=' + p.id + '" class="ac-is-btn" style="padding: 6px 12px; font-size:0.85rem; background:#3b82f6;">تعديل</a>' +
+                        '<button class="ac-is-btn ac-is-print-barcode" data-barcode="' + p.barcode + '" data-name="' + p.name + '" data-serial="' + p.serial_number + '" style="padding: 6px 12px; font-size:0.85rem; background:#64748b;">باركود</button>' +
+                        '<button class="ac-is-delete-product ac-is-btn" data-id="' + p.id + '" style="padding: 6px 12px; font-size:0.85rem; background:#ef4444;">حذف</button>' +
                     '</div></td>' +
                 '</tr>';
             });
@@ -135,51 +137,66 @@ jQuery(document).ready(function($) {
         $('#ac-is-inventory-table-body').html(html);
     }
 
-    // Camera Scanning Logic
-    var html5QrcodeScanner;
-    $('#ac-is-toggle-scanner').on('click', function() {
-        if ($('#ac-is-reader').is(':visible')) {
-            $('#ac-is-reader').hide();
-            if (html5QrcodeScanner) html5QrcodeScanner.clear();
-        } else {
-            $('#ac-is-reader').show();
+    // Sales Mode Toggles
+    $('.ac-is-mode-btn').on('click', function() {
+        var mode = $(this).data('mode');
+        $('.ac-is-mode-btn').removeClass('active').css({'background':'#fff', 'color':'inherit', 'border-color':'#ddd'});
+        $(this).addClass('active').css({'background': 'var(--ac-primary)', 'color': '#fff', 'border-color': 'var(--ac-primary)'});
+
+        if (mode === 'scan') {
+            $('#ac-is-reader-container').show();
+            $('#ac-is-manual-search').hide();
             startScanner();
+        } else {
+            $('#ac-is-reader-container').hide();
+            $('#ac-is-manual-search').show();
+            if (html5QrcodeScanner) html5QrcodeScanner.clear();
         }
     });
 
+    // Camera Scanning Logic
+    var html5QrcodeScanner;
     function startScanner() {
-        html5QrcodeScanner = new Html5QrcodeScanner("ac-is-reader", { fps: 10, qrbox: 250 });
+        html5QrcodeScanner = new Html5QrcodeScanner("ac-is-reader", {
+            fps: 30, // Faster scanning
+            qrbox: {width: 300, height: 150},
+            aspectRatio: 1.0
+        });
         html5QrcodeScanner.render(onScanSuccess);
     }
 
     function onScanSuccess(decodedText, decodedResult) {
         $('#ac-is-sale-product-search').val(decodedText).trigger('input');
-        html5QrcodeScanner.clear();
-        $('#ac-is-reader').hide();
+        // Vibrate if supported
+        if (window.navigator && window.navigator.vibrate) {
+            window.navigator.vibrate(100);
+        }
+        // Don't stop scanner immediately, maybe they want to scan another?
+        // Actually for this UI we'll just fill the form.
     }
 
-    // Sale search product by barcode/serial/name
+    // Sale search product by barcode/serial/name (Improved reliability)
     $('#ac-is-sale-product-search').on('input', function() {
-        var query = $(this).val();
-        if (query.length < 3) return;
+        var query = $(this).val().trim();
+        if (query.length < 2) return;
 
-        // Local search first
         var found = false;
         $('#ac-is-sale-product option').each(function() {
             var barcode = $(this).data('barcode');
             var serial = $(this).data('serial');
-            var name = $(this).text();
+            var name = $(this).text().toLowerCase();
 
-            if (barcode == query || serial == query || name.includes(query)) {
+            if (barcode == query || serial == query || name.includes(query.toLowerCase())) {
                 $('#ac-is-sale-product').val($(this).val()).trigger('change');
-                if (serial == query) $('#ac-is-sale-serial').val(serial);
+                if (serial == query || barcode == query) {
+                    $('#ac-is-sale-serial').val(serial || barcode);
+                }
                 found = true;
                 return false;
             }
         });
 
-        if (!found) {
-            // AJAX search fallback
+        if (!found && query.length > 5) {
             $.post(ac_is_ajax.ajax_url, {
                 action: 'ac_is_search_products',
                 search: query,
@@ -188,7 +205,7 @@ jQuery(document).ready(function($) {
                 if (response.success && response.data.length > 0) {
                     var p = response.data[0];
                     $('#ac-is-sale-product').val(p.id).trigger('change');
-                    if (p.serial_number == query) $('#ac-is-sale-serial').val(p.serial_number);
+                    $('#ac-is-sale-serial').val(p.serial_number || p.barcode);
                 }
             });
         }
@@ -206,6 +223,8 @@ jQuery(document).ready(function($) {
     $('#ac-is-sales-form').on('submit', function(e) {
         e.preventDefault();
         var product = $('#ac-is-sale-product option:selected');
+        if (!product.val()) { alert('يرجى اختيار منتج'); return; }
+
         var stock = parseInt(product.data('stock'));
         var qty = parseInt($('#ac-is-sale-qty').val());
 
@@ -218,24 +237,17 @@ jQuery(document).ready(function($) {
         $.post(ac_is_ajax.ajax_url, data, function(response) {
             if (response.success) {
                 alert('تم تسجيل البيع بنجاح');
-                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&sale_id=' + response.data.sale_id;
+                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&sale_id=' + response.data.sale_id + '&autoprint=1';
             } else {
                 alert('فشل تسجيل البيع: ' + response.data);
             }
         });
     });
 
-    // Simple media uploader
-    $('.ac-is-upload-btn').click(function(e) {
-        e.preventDefault();
-        var image = wp.media({ 
-            title: 'رفع صورة المنتج',
-            multiple: false
-        }).open()
-        .on('select', function(e){
-            var uploaded_image = image.state().get('selection').first();
-            var image_url = uploaded_image.toJSON().url;
-            $('#ac-is-image-url').val(image_url);
-        });
-    });
+    // Auto-print invoice if requested
+    if (window.location.search.indexOf('autoprint=1') > -1) {
+        setTimeout(function() {
+            window.print();
+        }, 1000);
+    }
 });
