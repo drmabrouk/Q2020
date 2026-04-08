@@ -1,4 +1,28 @@
 jQuery(document).ready(function($) {
+    // Real-time Sync & Visual Feedback
+    const syncLoader = $('#ac-is-sync-loader');
+
+    function showSync(text = 'جارٍ تحميل البيانات...') {
+        syncLoader.find('.loader-text').text(text);
+        syncLoader.fadeIn(200);
+    }
+
+    function hideSync(success = true) {
+        if (success) {
+            syncLoader.find('.loader-text').text('تم التحديث بنجاح');
+            setTimeout(() => syncLoader.fadeOut(400), 1000);
+        } else {
+            syncLoader.fadeOut(200);
+        }
+    }
+
+    $(document).ajaxStart(function() { showSync(); });
+    $(document).ajaxStop(function() { hideSync(); });
+
+    $('#ac-is-refresh-btn').on('click', function() {
+        location.reload();
+    });
+
     // Multi-Product Cart Logic
     let cart = [];
 

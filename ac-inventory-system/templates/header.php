@@ -1,7 +1,10 @@
 <div class="ac-is-dashboard" id="ac-is-system-root">
     <aside class="ac-is-sidebar">
         <div class="ac-is-sidebar-logo">
-            <h2>نظام البيع</h2>
+            <h2><?php
+                global $wpdb;
+                echo esc_html($wpdb->get_var("SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'system_name'") ?: 'نظام البيع');
+            ?></h2>
         </div>
         <nav class="ac-is-sidebar-nav">
             <a href="<?php echo add_query_arg('ac_view', 'dashboard'); ?>" class="<?php echo (!isset($_GET['ac_view']) || $_GET['ac_view'] == 'dashboard') ? 'active' : ''; ?>">
@@ -36,12 +39,21 @@
         </nav>
 
         <div class="ac-is-sidebar-footer" style="padding: 15px; border-top: 1px solid var(--ac-sidebar-hover);">
+            <button id="ac-is-refresh-btn" class="ac-is-btn" style="width:100%; background:rgba(255,255,255,0.1); margin-bottom:10px; padding:8px; font-size:0.8rem;">
+                <span class="dashicons dashicons-update" style="margin-left:5px;"></span> <?php _e('تحديث البيانات', 'ac-inventory-system'); ?>
+            </button>
             <button id="ac-is-fullscreen-btn" class="ac-is-btn" style="width:100%; background:#475569; padding: 10px; font-size: 0.85rem;">
                 <span class="dashicons dashicons-fullscreen-alt" style="margin-left:8px;"></span>
                 <span class="btn-text"><?php _e('ملء الشاشة', 'ac-inventory-system'); ?></span>
             </button>
         </div>
     </aside>
+
+    <div id="ac-is-sync-loader" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--ac-primary); color:#fff; padding:10px 20px; border-radius:30px; z-index:10000; box-shadow:0 4px 12px rgba(0,0,0,0.2); font-weight:600;">
+        <span class="dashicons dashicons-update spin" style="margin-left:8px; vertical-align:middle;"></span>
+        <span class="loader-text"><?php _e('جارٍ تحميل البيانات...', 'ac-inventory-system'); ?></span>
+    </div>
+
     <main class="ac-is-main-content">
         <div class="ac-is-content-inner">
 

@@ -57,7 +57,17 @@ class AC_Inventory_System {
 		register_activation_hook( __FILE__, array( 'AC_IS_Database', 'create_tables' ) );
 		add_action( 'init', array( 'AC_IS_Auth', 'init' ) );
 		add_action( 'init', array( 'AC_IS_Reports', 'export_sales_csv' ) );
+		add_action( 'init', array( $this, 'send_nocache_headers' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+	}
+
+	public function send_nocache_headers() {
+		if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'ac-inventory' ) !== false ) {
+			nocache_headers();
+		}
+		if ( defined( 'DOING_AJAX' ) && DOING_AJAX && isset( $_REQUEST['action'] ) && strpos( $_REQUEST['action'], 'ac_is_' ) === 0 ) {
+			nocache_headers();
+		}
 	}
 
 	public function enqueue_assets() {
