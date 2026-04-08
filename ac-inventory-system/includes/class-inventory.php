@@ -10,9 +10,6 @@ class AC_IS_Inventory {
 		$table = $wpdb->prefix . 'ac_is_products';
 		
 		$where = "1=1";
-		if ( ! empty( $args['branch_id'] ) ) {
-			$where .= $wpdb->prepare( " AND branch_id = %d", $args['branch_id'] );
-		}
 
 		if ( ! empty( $args['search'] ) ) {
 			$search = '%' . $wpdb->esc_like( $args['search'] ) . '%';
@@ -65,15 +62,4 @@ class AC_IS_Inventory {
 		return $wpdb->delete( $table, array( 'id' => $id ) );
 	}
 
-	public static function get_branches() {
-		global $wpdb;
-		$table = $wpdb->prefix . 'ac_is_branches';
-		return $wpdb->get_results( "SELECT * FROM $table" );
-	}
-
-	public static function add_branch( $data ) {
-		global $wpdb;
-		$table = $wpdb->prefix . 'ac_is_branches';
-		return $wpdb->insert( $table, $data );
-	}
 }

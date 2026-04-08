@@ -23,7 +23,6 @@ class AC_IS_Sales {
 			'serial_number' => $data['serial_number'],
 			'quantity'      => $data['quantity'],
 			'total_price'   => $data['total_price'],
-			'branch_id'     => $data['branch_id'],
 			'operator_id'   => $operator_id,
 			'sale_date'     => current_time('mysql'),
 		);

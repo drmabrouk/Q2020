@@ -1,6 +1,5 @@
 <?php
 $products = AC_IS_Inventory::get_products();
-$branches = AC_IS_Inventory::get_branches();
 ?>
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <h2><?php _e('إدارة المخزون', 'ac-inventory-system'); ?></h2>
@@ -63,7 +62,6 @@ $branches = AC_IS_Inventory::get_branches();
                     <td>
                         <span class="ac-is-capsule <?php echo $stock_class; ?>"><?php echo esc_html( $product->stock_quantity ); ?></span>
                     </td>
-                    <td><?php echo esc_html($branch_name); ?></td>
                     <td>
                         <div style="display:flex; gap:5px;">
                             <a href="<?php echo add_query_arg( array('ac_view' => 'edit-product', 'id' => $product->id) ); ?>" class="ac-is-btn" style="padding: 6px 12px; font-size:0.85rem; background:#3b82f6;"><?php _e('تعديل', 'ac-inventory-system'); ?></a>

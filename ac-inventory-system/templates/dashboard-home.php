@@ -2,7 +2,6 @@
 global $wpdb;
 $table_products = $wpdb->prefix . 'ac_is_products';
 $table_sales    = $wpdb->prefix . 'ac_is_sales';
-$table_branches = $wpdb->prefix . 'ac_is_branches';
 
 // Statistics
 $total_products = $wpdb->get_var("SELECT COUNT(*) FROM $table_products");

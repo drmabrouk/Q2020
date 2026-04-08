@@ -56,13 +56,6 @@ class AC_IS_Shortcode {
 					include AC_IS_PATH . 'templates/reports.php';
 				}
 				break;
-			case 'branches':
-				if ( ! $is_admin ) {
-					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
-				} else {
-					include AC_IS_PATH . 'templates/branches.php';
-				}
-				break;
 			case 'settings':
 				if ( ! $is_admin ) {
 					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';

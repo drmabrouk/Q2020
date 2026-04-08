@@ -8,7 +8,7 @@ class AC_IS_Ajax {
 	public function __construct() {
 		$actions = array(
 			'save_product', 'delete_product', 'record_sale', 'multi_sale',
-			'save_branch', 'search_products', 'get_customer', 'delete_invoice',
+			'search_products', 'get_customer', 'delete_invoice',
 			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
 			'save_customer', 'delete_customer'
 		);
@@ -36,7 +36,6 @@ class AC_IS_Ajax {
 			'discount'       => floatval( $_POST['discount'] ),
 			'final_price'    => floatval( $_POST['final_price'] ),
 			'stock_quantity' => intval( $_POST['stock_quantity'] ),
-			'branch_id'      => intval( $_POST['branch_id'] ),
 			'image_url'      => esc_url_raw( $_POST['image_url'] ),
 			'serial_number'  => sanitize_text_field( $_POST['serial_number'] ),
 			'barcode'        => sanitize_text_field( $_POST['barcode'] ),
@@ -69,7 +68,6 @@ class AC_IS_Ajax {
 			'serial_number' => sanitize_text_field( $_POST['serial_number'] ),
 			'quantity'      => intval( $_POST['quantity'] ),
 			'total_price'   => floatval( $_POST['total_price'] ),
-			'branch_id'     => intval( $_POST['branch_id'] ),
 		);
 
 		$sale_id = AC_IS_Sales::record_sale( $data );
@@ -249,7 +247,6 @@ class AC_IS_Ajax {
 
 		global $wpdb;
 		$items = $_POST['items'];
-		$branch_id = intval( $_POST['branch_id'] );
 		$customer_data = array(
 			'name'    => sanitize_text_field( $_POST['customer_name'] ),
 			'phone'   => sanitize_text_field( $_POST['customer_phone'] ),
@@ -276,7 +273,6 @@ class AC_IS_Ajax {
 		$wpdb->insert( $wpdb->prefix . 'ac_is_invoices', array(
 			'customer_id' => $customer_id,
 			'total_amount' => floatval( $_POST['total_amount'] ),
-			'branch_id'   => $branch_id,
 			'operator_id' => $operator_id,
 		) );
 		$invoice_id = $wpdb->insert_id;
@@ -289,7 +285,6 @@ class AC_IS_Ajax {
 				'serial_number' => sanitize_text_field( $item['serial_number'] ),
 				'quantity'      => intval( $item['quantity'] ),
 				'total_price'   => floatval( $item['total_price'] ),
-				'branch_id'     => $branch_id,
 			) );
 		}
 

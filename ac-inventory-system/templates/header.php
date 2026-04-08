@@ -26,9 +26,6 @@
                 <span class="dashicons dashicons-money-alt"></span> <?php _e('المرتبات', 'ac-inventory-system'); ?>
             </a>
             <?php if ( AC_IS_Auth::is_admin() ) : ?>
-                <a href="<?php echo add_query_arg('ac_view', 'branches'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'branches') ? 'active' : ''; ?>">
-                    <span class="dashicons dashicons-store"></span> <?php _e('الفروع', 'ac-inventory-system'); ?>
-                </a>
                 <a href="<?php echo add_query_arg('ac_view', 'settings'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'settings') ? 'active' : ''; ?>">
                     <span class="dashicons dashicons-admin-generic"></span> <?php _e('الإعدادات', 'ac-inventory-system'); ?>
                 </a>
@@ -52,6 +49,14 @@
     <div id="ac-is-sync-loader" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--ac-primary); color:#fff; padding:10px 20px; border-radius:30px; z-index:10000; box-shadow:0 4px 12px rgba(0,0,0,0.2); font-weight:600;">
         <span class="dashicons dashicons-update spin" style="margin-left:8px; vertical-align:middle;"></span>
         <span class="loader-text"><?php _e('جارٍ تحميل البيانات...', 'ac-inventory-system'); ?></span>
+    </div>
+
+    <!-- Scan Confirmation Overlay -->
+    <div id="ac-is-scan-conf-overlay" style="display:none; position:fixed; top:50%; left:50%; transform:translate(-50%, -50%); background:rgba(255,255,255,0.95); padding:30px; border-radius:20px; z-index:10002; flex-direction:column; align-items:center; box-shadow:0 10px 40px rgba(0,0,0,0.2); border: 2px solid #059669; animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);">
+        <div style="width:80px; height:80px; background:#dcfce7; color:#059669; border-radius:50%; display:flex; align-items:center; justify-content:center; margin-bottom:15px;">
+            <span class="dashicons dashicons-yes-alt" style="font-size:50px; width:50px; height:50px;"></span>
+        </div>
+        <h2 style="margin:0; color:#1e293b; font-size:1.4rem;"><?php _e('تم إضافة المنتج', 'ac-inventory-system'); ?></h2>
     </div>
 
     <main class="ac-is-main-content">
