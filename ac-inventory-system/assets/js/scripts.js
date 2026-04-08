@@ -126,7 +126,7 @@ jQuery(document).ready(function($) {
     const systemRoot = document.getElementById('ac-is-system-root');
     const fullscreenBtn = $('#ac-is-fullscreen-btn');
     const unlockOverlay = $('#ac-is-unlock-overlay');
-    const EXIT_PASSWORD = '123456789';
+    const EXIT_PASSWORD = ac_is_ajax.fullscreen_password;
 
     fullscreenBtn.on('click', function() {
         if (!document.fullscreenElement) {
@@ -409,4 +409,15 @@ jQuery(document).ready(function($) {
     if (window.location.search.indexOf('autoprint=1') > -1) {
         setTimeout(function() { window.print(); }, 1000);
     }
+
+    // Independent Logout
+    $('#ac-is-logout-btn').on('click', function(e) {
+        e.preventDefault();
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_logout',
+            nonce: ac_is_ajax.nonce
+        }, function() {
+            location.reload();
+        });
+    });
 });

@@ -43,6 +43,7 @@ class AC_Inventory_System {
 
 	private function includes() {
 		require_once AC_IS_PATH . 'includes/class-database.php';
+		require_once AC_IS_PATH . 'includes/class-auth.php';
 		require_once AC_IS_PATH . 'includes/class-customers.php';
 		require_once AC_IS_PATH . 'includes/class-inventory.php';
 		require_once AC_IS_PATH . 'includes/class-sales.php';
@@ -53,8 +54,8 @@ class AC_Inventory_System {
 
 	private function init_hooks() {
 		register_activation_hook( __FILE__, array( 'AC_IS_Database', 'create_tables' ) );
+		add_action( 'init', array( 'AC_IS_Auth', 'init' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-		add_action( 'init', array( 'AC_IS_Database', 'create_tables' ) );
 	}
 
 	public function enqueue_assets() {
@@ -73,9 +74,13 @@ class AC_Inventory_System {
 
 		wp_enqueue_script( 'ac-is-scripts', AC_IS_URL . 'assets/js/scripts.js', array( 'jquery', 'jsbarcode', 'html5-qrcode', 'chartjs' ), AC_IS_VERSION, true );
 
+		global $wpdb;
+		$fullscreen_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'fullscreen_password'" ) ?: '123456789';
+
 		wp_localize_script( 'ac-is-scripts', 'ac_is_ajax', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'ac_is_nonce' ),
+			'fullscreen_password' => $fullscreen_pass,
 		) );
 	}
 }

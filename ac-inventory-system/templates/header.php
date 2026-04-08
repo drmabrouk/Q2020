@@ -16,11 +16,17 @@
             <a href="<?php echo add_query_arg('ac_view', 'sales-history'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'sales-history') ? 'active' : ''; ?>">
                 <span class="dashicons dashicons-list-view"></span> <?php _e('سجل المبيعات', 'ac-inventory-system'); ?>
             </a>
-            <?php if ( current_user_can('manage_options') ) : ?>
+            <?php if ( AC_IS_Auth::is_admin() ) : ?>
                 <a href="<?php echo add_query_arg('ac_view', 'branches'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'branches') ? 'active' : ''; ?>">
                     <span class="dashicons dashicons-store"></span> <?php _e('الفروع', 'ac-inventory-system'); ?>
                 </a>
+                <a href="<?php echo add_query_arg('ac_view', 'settings'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'settings') ? 'active' : ''; ?>">
+                    <span class="dashicons dashicons-admin-generic"></span> <?php _e('الإعدادات', 'ac-inventory-system'); ?>
+                </a>
             <?php endif; ?>
+            <a href="#" id="ac-is-logout-btn">
+                <span class="dashicons dashicons-logout"></span> <?php _e('تسجيل الخروج', 'ac-inventory-system'); ?>
+            </a>
         </nav>
 
         <div class="ac-is-sidebar-footer" style="padding: 15px; border-top: 1px solid var(--ac-sidebar-hover);">

@@ -14,6 +14,9 @@ class AC_IS_Sales {
 		$wpdb->query('START TRANSACTION');
 
 		// Insert sale record
+		$current_user = AC_IS_Auth::current_user();
+		$operator_id  = $current_user ? $current_user->id : 0;
+
 		$sale_data = array(
 			'invoice_id'    => $data['invoice_id'],
 			'product_id'    => $data['product_id'],
@@ -21,7 +24,7 @@ class AC_IS_Sales {
 			'quantity'      => $data['quantity'],
 			'total_price'   => $data['total_price'],
 			'branch_id'     => $data['branch_id'],
-			'operator_id'   => get_current_user_id(),
+			'operator_id'   => $operator_id,
 			'sale_date'     => current_time('mysql'),
 		);
 
