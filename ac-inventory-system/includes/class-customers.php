@@ -6,9 +6,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AC_IS_Customers {
 
 	public static function get_customer_by_phone( $phone ) {
+		if ( empty($phone) || $phone === '-' ) return null;
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_customers';
-		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE phone = %s", $phone ) );
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE phone = %s OR phone_secondary = %s", $phone, $phone ) );
 	}
 
 	public static function add_customer( $data ) {
@@ -22,6 +23,12 @@ class AC_IS_Customers {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_customers';
 		return $wpdb->update( $table, $data, array( 'id' => $id ) );
+	}
+
+	public static function delete_customer( $id ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_customers';
+		return $wpdb->delete( $table, array( 'id' => $id ) );
 	}
 
 	public static function get_customer( $id ) {
