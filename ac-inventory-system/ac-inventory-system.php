@@ -43,6 +43,7 @@ class AC_Inventory_System {
 
 	private function includes() {
 		require_once AC_IS_PATH . 'includes/class-database.php';
+		require_once AC_IS_PATH . 'includes/class-customers.php';
 		require_once AC_IS_PATH . 'includes/class-inventory.php';
 		require_once AC_IS_PATH . 'includes/class-sales.php';
 		require_once AC_IS_PATH . 'includes/class-shortcode.php';
@@ -53,6 +54,7 @@ class AC_Inventory_System {
 	private function init_hooks() {
 		register_activation_hook( __FILE__, array( 'AC_IS_Database', 'create_tables' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( 'init', array( 'AC_IS_Database', 'create_tables' ) );
 	}
 
 	public function enqueue_assets() {

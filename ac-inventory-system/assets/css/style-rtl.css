@@ -225,6 +225,14 @@
 
 /* Capsules - Smaller */
 .ac-is-capsule {
+    display: inline-block;
     padding: 2px 8px;
     font-size: 0.75rem;
+    border-radius: 4px;
+    font-weight: 600;
 }
+
+.capsule-primary { background: var(--ac-info); color: var(--ac-info-text); }
+.capsule-success { background: var(--ac-success); color: var(--ac-success-text); }
+.capsule-warning { background: var(--ac-warning); color: var(--ac-warning-text); }
+.capsule-danger { background: var(--ac-danger); color: var(--ac-danger-text); }

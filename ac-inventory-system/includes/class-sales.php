@@ -15,6 +15,7 @@ class AC_IS_Sales {
 
 		// Insert sale record
 		$sale_data = array(
+			'invoice_id'    => $data['invoice_id'],
 			'product_id'    => $data['product_id'],
 			'serial_number' => $data['serial_number'],
 			'quantity'      => $data['quantity'],
@@ -56,6 +57,32 @@ class AC_IS_Sales {
 			JOIN $table_products p ON s.product_id = p.id
 			WHERE s.id = %d",
 			$id
+		) );
+	}
+
+	public static function get_invoice( $id ) {
+		global $wpdb;
+		$table_invoices = $wpdb->prefix . 'ac_is_invoices';
+		$table_customers = $wpdb->prefix . 'ac_is_customers';
+		return $wpdb->get_row( $wpdb->prepare(
+			"SELECT i.*, c.name as customer_name, c.phone as customer_phone, c.address as customer_address, c.email as customer_email
+			FROM $table_invoices i
+			LEFT JOIN $table_customers c ON i.customer_id = c.id
+			WHERE i.id = %d",
+			$id
+		) );
+	}
+
+	public static function get_invoice_items( $invoice_id ) {
+		global $wpdb;
+		$table_sales = $wpdb->prefix . 'ac_is_sales';
+		$table_products = $wpdb->prefix . 'ac_is_products';
+		return $wpdb->get_results( $wpdb->prepare(
+			"SELECT s.*, p.name as product_name, p.barcode as product_barcode
+			FROM $table_sales s
+			JOIN $table_products p ON s.product_id = p.id
+			WHERE s.invoice_id = %d",
+			$invoice_id
 		) );
 	}
 }
