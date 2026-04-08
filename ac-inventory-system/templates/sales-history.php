@@ -2,20 +2,12 @@
 global $wpdb;
 $table_sales = $wpdb->prefix . 'ac_is_sales';
 $table_products = $wpdb->prefix . 'ac_is_products';
-
-// Handle search/filters
-$where = "1=1";
-if(!empty($_GET['sale_search'])) {
-    $search = '%' . $wpdb->esc_like($_GET['sale_search']) . '%';
-    $where .= $wpdb->prepare(" AND (p.name LIKE %s OR s.serial_number LIKE %s)", $search, $search);
-}
+$table_staff = $wpdb->prefix . 'ac_is_staff';
 
 $sales = $wpdb->get_results("
-    SELECT s.*, p.name as product_name, u.display_name as operator_name 
+    SELECT s.*, p.name as product_name
     FROM $table_sales s
     JOIN $table_products p ON s.product_id = p.id
-    JOIN {$wpdb->users} u ON s.operator_id = u.ID
-    WHERE $where
     ORDER BY s.sale_date DESC
 ");
 ?>
@@ -44,16 +36,26 @@ $sales = $wpdb->get_results("
         </tr>
     </thead>
     <tbody>
-        <?php if($sales): foreach($sales as $sale): ?>
+        <?php if($sales): foreach($sales as $sale):
+            $operator_name = __('غير معروف', 'ac-inventory-system');
+            if (strpos($sale->operator_id, 'wp_') === 0) {
+                $wp_id = str_replace('wp_', '', $sale->operator_id);
+                $user = get_userdata($wp_id);
+                if ($user) $operator_name = $user->display_name;
+            } else {
+                $staff = $wpdb->get_row($wpdb->prepare("SELECT name FROM $table_staff WHERE id = %s", $sale->operator_id));
+                if ($staff) $operator_name = $staff->name;
+            }
+        ?>
             <tr>
                 <td><?php echo $sale->sale_date; ?></td>
                 <td><?php echo esc_html($sale->product_name); ?></td>
                 <td><?php echo esc_html($sale->serial_number ?: '-'); ?></td>
                 <td><?php echo $sale->quantity; ?></td>
                 <td><span style="font-weight:bold; color:var(--ac-primary);"><?php echo number_format($sale->total_price, 2); ?></span></td>
-                <td><?php echo esc_html($sale->operator_name); ?></td>
+                <td><?php echo esc_html($operator_name); ?></td>
                 <td>
-                    <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'sale_id' => $sale->id)); ?>" class="ac-is-btn" style="padding: 5px 10px; font-size:0.8rem; background:#6c757d;"><?php _e('فاتورة', 'ac-inventory-system'); ?></a>
+                    <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $sale->invoice_id)); ?>" class="ac-is-btn" style="padding: 5px 10px; font-size:0.8rem; background:#64748b;"><?php _e('فاتورة', 'ac-inventory-system'); ?></a>
                 </td>
             </tr>
         <?php endforeach; else: ?>

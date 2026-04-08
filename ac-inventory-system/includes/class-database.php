@@ -71,7 +71,7 @@ class AC_IS_Database {
 			quantity int NOT NULL,
 			total_price decimal(10,2) NOT NULL,
 			branch_id mediumint(9) NOT NULL,
-			operator_id bigint(20) UNSIGNED NOT NULL,
+			operator_id varchar(100) NOT NULL,
 			sale_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) $charset_collate;

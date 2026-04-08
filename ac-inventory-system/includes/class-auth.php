@@ -35,11 +35,27 @@ class AC_IS_Auth {
 	}
 
 	public static function is_logged_in() {
+		// Auto-grant access to WordPress Administrators
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
 		return isset( $_SESSION['ac_is_user_id'] );
 	}
 
 	public static function current_user() {
-		if ( ! self::is_logged_in() ) return null;
+		// If WP admin, return WP user data mapped to staff format
+		if ( current_user_can( 'manage_options' ) ) {
+			$wp_user = wp_get_current_user();
+			return (object) array(
+				'id'   => 'wp_' . $wp_user->ID,
+				'username' => $wp_user->user_login,
+				'role' => 'admin',
+				'name' => $wp_user->display_name
+			);
+		}
+
+		if ( ! isset( $_SESSION['ac_is_user_id'] ) ) return null;
+
 		return (object) array(
 			'id'   => $_SESSION['ac_is_user_id'],
 			'username' => $_SESSION['ac_is_username'],
@@ -49,6 +65,10 @@ class AC_IS_Auth {
 	}
 
 	public static function is_admin() {
+		// WP Admin always has plugin admin privileges
+		if ( current_user_can( 'manage_options' ) ) {
+			return true;
+		}
 		$user = self::current_user();
 		return $user && $user->role === 'admin';
 	}
