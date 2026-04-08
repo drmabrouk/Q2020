@@ -132,13 +132,21 @@ class AC_IS_Database {
 			) );
 		}
 
-		// Default full screen password
-		$exists = $wpdb->get_var( $wpdb->prepare( "SELECT setting_value FROM $table_settings WHERE setting_key = %s", 'fullscreen_password' ) );
-		if ( ! $exists ) {
-			$wpdb->insert( $table_settings, array(
-				'setting_key'   => 'fullscreen_password',
-				'setting_value' => '123456789'
-			) );
+		// Default settings
+		$defaults = array(
+			'fullscreen_password' => '123456789',
+			'system_name'         => 'نظام البيع',
+			'company_name'        => get_bloginfo('name'),
+		);
+
+		foreach ( $defaults as $key => $value ) {
+			$exists = $wpdb->get_var( $wpdb->prepare( "SELECT setting_key FROM $table_settings WHERE setting_key = %s", $key ) );
+			if ( ! $exists ) {
+				$wpdb->insert( $table_settings, array(
+					'setting_key'   => $key,
+					'setting_value' => $value
+				) );
+			}
 		}
 	}
 }

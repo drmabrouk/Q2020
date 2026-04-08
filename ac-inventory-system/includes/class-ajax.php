@@ -273,7 +273,10 @@ class AC_IS_Ajax {
 		$invoice = AC_IS_Sales::get_invoice( $invoice_id );
 		$items = AC_IS_Sales::get_invoice_items( $invoice_id );
 
-		$subject = sprintf( __( 'فاتورة مبيعات رقم #%d - %s', 'ac-inventory-system' ), $invoice_id, get_bloginfo( 'name' ) );
+		global $wpdb;
+		$company_name = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'company_name'" ) ?: get_bloginfo('name');
+
+		$subject = sprintf( __( 'فاتورة مبيعات رقم #%d - %s', 'ac-inventory-system' ), $invoice_id, $company_name );
 
 		$message = "<h2>" . __( 'شكراً لتعاملكم معنا', 'ac-inventory-system' ) . "</h2>";
 		$message .= "<p>" . __( 'رقم الفاتورة:', 'ac-inventory-system' ) . " #" . $invoice_id . "</p>";

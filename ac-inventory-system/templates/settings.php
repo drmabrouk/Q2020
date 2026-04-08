@@ -1,11 +1,12 @@
 <?php
 global $wpdb;
 $staff = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ac_is_staff ORDER BY id DESC" );
-$fullscreen_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'fullscreen_password'" );
+$settings = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ac_is_settings", OBJECT_K );
+$fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789';
 ?>
 
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-    <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('الإعدادات / إدارة المستخدمين', 'ac-inventory-system'); ?></h2>
+    <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('الإعدادات العامة للنظام', 'ac-inventory-system'); ?></h2>
 </div>
 
 <div class="ac-is-grid">
@@ -87,16 +88,42 @@ $fullscreen_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_
         </table>
     </div>
 
-    <!-- System Settings -->
+    <!-- System Identity -->
     <div class="ac-is-card">
-        <h3><?php _e('إعدادات النظام', 'ac-inventory-system'); ?></h3>
+        <h3><?php _e('هوية النظام والشركة', 'ac-inventory-system'); ?></h3>
         <form id="ac-is-system-settings-form">
+            <div class="ac-is-form-group">
+                <label><?php _e('اسم النظام (يظهر في القائمة)', 'ac-inventory-system'); ?></label>
+                <input type="text" name="system_name" value="<?php echo esc_attr($settings['system_name']->setting_value ?? 'نظام البيع'); ?>" required>
+            </div>
+            <div class="ac-is-form-group">
+                <label><?php _e('اسم الشركة / المؤسسة', 'ac-inventory-system'); ?></label>
+                <input type="text" name="company_name" value="<?php echo esc_attr($settings['company_name']->setting_value ?? get_bloginfo('name')); ?>" required>
+            </div>
+            <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="ac-is-form-group">
+                    <label><?php _e('رقم الهاتف للتواصل', 'ac-inventory-system'); ?></label>
+                    <input type="text" name="company_phone" value="<?php echo esc_attr($settings['company_phone']->setting_value ?? ''); ?>">
+                </div>
+                <div class="ac-is-form-group">
+                    <label><?php _e('البريد الإلكتروني', 'ac-inventory-system'); ?></label>
+                    <input type="email" name="company_email" value="<?php echo esc_attr($settings['company_email']->setting_value ?? ''); ?>">
+                </div>
+            </div>
+            <div class="ac-is-form-group">
+                <label><?php _e('العنوان بالتفصيل', 'ac-inventory-system'); ?></label>
+                <textarea name="company_address" rows="2"><?php echo esc_textarea($settings['company_address']->setting_value ?? ''); ?></textarea>
+            </div>
+            <div class="ac-is-form-group">
+                <label><?php _e('رابط شعار الشركة (Logo URL)', 'ac-inventory-system'); ?></label>
+                <input type="text" name="company_logo" value="<?php echo esc_attr($settings['company_logo']->setting_value ?? ''); ?>">
+            </div>
+            <hr style="margin:20px 0; border:0; border-top:1px solid #eee;">
             <div class="ac-is-form-group">
                 <label><?php _e('كلمة مرور الخروج من ملء الشاشة', 'ac-inventory-system'); ?></label>
                 <input type="text" name="fullscreen_password" value="<?php echo esc_attr($fullscreen_pass); ?>" required>
-                <p style="font-size:0.75rem; color:#64748b; margin-top:5px;"><?php _e('هذه هي كلمة المرور المطلوبة عند محاولة الخروج من وضع ملء الشاشة.', 'ac-inventory-system'); ?></p>
             </div>
-            <button type="submit" class="ac-is-btn" style="background:#1e293b;"><?php _e('حفظ الإعدادات', 'ac-inventory-system'); ?></button>
+            <button type="submit" class="ac-is-btn" style="background:#1e293b; width:100%; height:45px;"><?php _e('حفظ كافة الإعدادات', 'ac-inventory-system'); ?></button>
         </form>
     </div>
 </div>

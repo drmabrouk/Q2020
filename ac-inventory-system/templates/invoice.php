@@ -3,6 +3,14 @@ $invoice_id = isset($_GET['invoice_id']) ? intval($_GET['invoice_id']) : 0;
 $invoice = $invoice_id ? AC_IS_Sales::get_invoice($invoice_id) : null;
 $items = $invoice_id ? AC_IS_Sales::get_invoice_items($invoice_id) : array();
 
+global $wpdb;
+$settings = $wpdb->get_results( "SELECT * FROM {$wpdb->prefix}ac_is_settings", OBJECT_K );
+$company_name = $settings['company_name']->setting_value ?? get_bloginfo('name');
+$company_phone = $settings['company_phone']->setting_value ?? '';
+$company_email = $settings['company_email']->setting_value ?? '';
+$company_address = $settings['company_address']->setting_value ?? '';
+$company_logo = $settings['company_logo']->setting_value ?? '';
+
 $branches = AC_IS_Inventory::get_branches();
 $branch_name = '';
 if($invoice) {
@@ -27,14 +35,21 @@ if($invoice) {
 <div class="invoice-container" style="background:#fff; font-family: 'Segoe UI', Tahoma, sans-serif;">
     <div class="invoice-header" style="border-bottom: 4px solid #0f172a; padding-bottom: 20px; margin-bottom: 30px;">
         <div style="display:flex; justify-content: space-between; align-items: center;">
-            <div>
-                <h1 style="margin:0; font-size:2rem; font-weight:900; color:#0f172a;"><?php echo get_bloginfo('name'); ?></h1>
-                <p style="margin:5px 0; font-weight:700; color:#64748b;"><?php echo $branch_name; ?></p>
+            <div style="display:flex; align-items:center; gap:20px;">
+                <?php if($company_logo): ?>
+                    <img src="<?php echo esc_url($company_logo); ?>" style="max-height:80px; width:auto;">
+                <?php endif; ?>
+                <div>
+                    <h1 style="margin:0; font-size:2rem; font-weight:900; color:#0f172a;"><?php echo esc_html($company_name); ?></h1>
+                    <p style="margin:5px 0; font-weight:700; color:#64748b;"><?php echo $branch_name; ?></p>
+                    <small style="color:#64748b;"><?php echo esc_html($company_address); ?></small>
+                </div>
             </div>
             <div style="text-align: left;">
                 <h2 style="margin:0; color:#2563eb; font-weight:800;"><?php _e('فاتورة ضريبية مبسطة', 'ac-inventory-system'); ?></h2>
                 <p style="margin:5px 0; font-weight:600;">#<?php echo str_pad($invoice->id, 8, '0', STR_PAD_LEFT); ?></p>
                 <p style="margin:0; font-size:0.9rem; color:#64748b;"><?php echo date('H:i | Y/m/d', strtotime($invoice->invoice_date)); ?></p>
+                <?php if($company_phone): ?><p style="margin:5px 0 0 0; font-weight:600;"><?php echo esc_html($company_phone); ?></p><?php endif; ?>
             </div>
         </div>
     </div>
@@ -97,7 +112,10 @@ if($invoice) {
             <p>___________________<br><?php _e('توقيع المستلم', 'ac-inventory-system'); ?></p>
             <p>___________________<br><?php _e('توقيع المحاسب', 'ac-inventory-system'); ?></p>
         </div>
-        <p style="margin-top:50px; font-size:0.8rem; color:#94a3b8;"><?php _e('تم إصدار هذه الفاتورة إلكترونياً - شكراً لتعاملكم معنا', 'ac-inventory-system'); ?></p>
+        <p style="margin-top:50px; font-size:0.8rem; color:#94a3b8;">
+            <?php echo esc_html($company_name); ?> | <?php echo esc_html($company_email); ?> | <?php echo esc_html($company_phone); ?>
+            <br><?php _e('تم إصدار هذه الفاتورة إلكترونياً - شكراً لتعاملكم معنا', 'ac-inventory-system'); ?>
+        </p>
     </div>
 </div>
 <?php else: ?>

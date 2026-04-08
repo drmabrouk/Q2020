@@ -428,3 +428,13 @@
 .capsule-success { background: var(--ac-success); color: var(--ac-success-text); }
 .capsule-warning { background: var(--ac-warning); color: var(--ac-warning-text); }
 .capsule-danger { background: var(--ac-danger); color: var(--ac-danger-text); }
+
+.spin {
+    display: inline-block;
+    animation: rotate 1.5s linear infinite;
+}
+
+@keyframes rotate {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
