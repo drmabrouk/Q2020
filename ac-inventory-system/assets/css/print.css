@@ -1,5 +1,5 @@
 @media print {
-    .ac-is-nav, .ac-is-export-actions, .ac-is-header-flex, .ac-is-btn, .ac-is-dashboard > h2 {
+    .ac-is-sidebar, .ac-is-header-flex.no-print, .ac-is-btn, .ac-is-nav, .ac-is-export-actions, .ac-is-sidebar-nav {
         display: none !important;
     }
 
@@ -7,7 +7,7 @@
         background: #fff !important;
         margin: 0;
         padding: 0;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        font-family: inherit;
         color: #000;
         direction: rtl;
     }
@@ -18,50 +18,49 @@
         margin: 0 !important;
         padding: 0 !important;
         max-width: 100% !important;
-    }
-
-    /* Invoice Specifics */
-    #ac-is-receipt {
         display: block !important;
-        border: none !important;
-        padding: 20px !important;
     }
 
+    .ac-is-main-content {
+        padding: 0 !important;
+    }
+
+    /* Invoice Specifics for Receipt Printers */
     .invoice-container {
         width: 100%;
         max-width: 800px;
         margin: 0 auto;
-        padding: 40px;
+        padding: 20px;
         border: 1px solid #eee;
     }
 
     .invoice-header {
         display: flex;
         justify-content: space-between;
-        margin-bottom: 40px;
+        margin-bottom: 30px;
         border-bottom: 2px solid #333;
-        padding-bottom: 20px;
+        padding-bottom: 15px;
     }
 
     .invoice-header h1 {
         margin: 0;
-        font-size: 24px;
+        font-size: 1.5rem;
     }
 
     .invoice-details {
-        margin-bottom: 30px;
+        margin-bottom: 20px;
         font-size: 14px;
     }
 
     .invoice-table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 30px;
+        margin-bottom: 20px;
     }
 
     .invoice-table th, .invoice-table td {
         border-bottom: 1px solid #ddd;
-        padding: 12px;
+        padding: 10px;
         text-align: right;
     }
 
@@ -72,7 +71,7 @@
 
     .invoice-total {
         text-align: left;
-        font-size: 18px;
+        font-size: 1.1rem;
         font-weight: bold;
     }
 
@@ -98,7 +97,7 @@
         margin-bottom: 5px;
     }
 
-    .barcode-sticker canvas {
+    .barcode-sticker canvas, .barcode-sticker svg {
         max-width: 100%;
         height: auto;
     }

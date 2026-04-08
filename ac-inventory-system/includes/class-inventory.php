@@ -35,12 +35,27 @@ class AC_IS_Inventory {
 	public static function add_product( $data ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_products';
+
+		// Auto-generate serial and barcode if not provided
+		if ( empty( $data['barcode'] ) ) {
+			$data['barcode'] = 'AC-' . strtoupper( wp_generate_password( 8, false ) );
+		}
+		if ( empty( $data['serial_number'] ) ) {
+			$data['serial_number'] = $data['barcode'];
+		}
+
 		return $wpdb->insert( $table, $data );
 	}
 
 	public static function update_product( $id, $data ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_products';
+
+		// Auto-generate serial if empty
+		if ( empty( $data['serial_number'] ) && ! empty( $data['barcode'] ) ) {
+			$data['serial_number'] = $data['barcode'];
+		}
+
 		return $wpdb->update( $table, $data, array( 'id' => $id ) );
 	}
 
