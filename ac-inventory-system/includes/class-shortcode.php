@@ -40,6 +40,9 @@ class AC_IS_Shortcode {
 			case 'sales-history':
 				include AC_IS_PATH . 'templates/sales-history.php';
 				break;
+			case 'invoice':
+				include AC_IS_PATH . 'templates/invoice.php';
+				break;
 			case 'reports':
 				if ( ! $is_admin ) {
 					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';

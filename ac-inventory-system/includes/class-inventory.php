@@ -13,6 +13,15 @@ class AC_IS_Inventory {
 		if ( ! empty( $args['branch_id'] ) ) {
 			$where .= $wpdb->prepare( " AND branch_id = %d", $args['branch_id'] );
 		}
+
+		if ( ! empty( $args['search'] ) ) {
+			$search = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where .= $wpdb->prepare( " AND (name LIKE %s OR barcode LIKE %s OR serial_number LIKE %s)", $search, $search, $search );
+		}
+
+		if ( ! empty( $args['category'] ) ) {
+			$where .= $wpdb->prepare( " AND category = %s", $args['category'] );
+		}
 		
 		return $wpdb->get_results( "SELECT * FROM $table WHERE $where ORDER BY created_at DESC" );
 	}

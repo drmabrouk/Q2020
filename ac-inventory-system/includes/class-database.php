@@ -25,6 +25,7 @@ class AC_IS_Database {
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
 			category varchar(100),
+			subcategory varchar(100),
 			description text,
 			original_price decimal(10,2) DEFAULT '0.00',
 			discount decimal(10,2) DEFAULT '0.00',
@@ -32,6 +33,8 @@ class AC_IS_Database {
 			stock_quantity int DEFAULT 0,
 			branch_id mediumint(9),
 			image_url text,
+			serial_number varchar(255),
+			barcode varchar(255),
 			created_at datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) $charset_collate;
@@ -39,6 +42,7 @@ class AC_IS_Database {
 		CREATE TABLE $table_sales (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			product_id mediumint(9) NOT NULL,
+			serial_number varchar(255),
 			quantity int NOT NULL,
 			total_price decimal(10,2) NOT NULL,
 			branch_id mediumint(9) NOT NULL,

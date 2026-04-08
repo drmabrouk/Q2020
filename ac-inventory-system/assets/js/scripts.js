@@ -1,4 +1,36 @@
 jQuery(document).ready(function($) {
+    // Utility: Generate Barcode
+    function generateBarcode(id, value) {
+        if (!value) return;
+        JsBarcode(id, value, {
+            format: "CODE128",
+            width: 2,
+            height: 40,
+            displayValue: true
+        });
+    }
+
+    // Barcode Preview in Product Form
+    $('#ac-is-barcode-input').on('input', function() {
+        generateBarcode("#barcode-svg", $(this).val());
+    });
+
+    if ($('#ac-is-barcode-input').val()) {
+        generateBarcode("#barcode-svg", $('#ac-is-barcode-input').val());
+    }
+
+    $('#generate-barcode').on('click', function() {
+        var randomBarcode = Math.floor(Math.random() * 1000000000);
+        $('#ac-is-barcode-input').val(randomBarcode).trigger('input');
+    });
+
+    // Auto calculate final price
+    $('#original-price, #discount').on('input', function() {
+        var original = parseFloat($('#original-price').val()) || 0;
+        var discount = parseFloat($('#discount').val()) || 0;
+        $('#final-price').val((original - discount).toFixed(2));
+    });
+
     // Save branch
     $('#ac-is-branch-form').on('submit', function(e) {
         e.preventDefault();
@@ -26,7 +58,7 @@ jQuery(document).ready(function($) {
     });
 
     // Delete product
-    $('.ac-is-delete-product').on('click', function(e) {
+    $(document).on('click', '.ac-is-delete-product', function(e) {
         e.preventDefault();
         if (!confirm('هل أنت متأكد من الحذف؟')) return;
         var id = $(this).data('id');
@@ -37,6 +69,82 @@ jQuery(document).ready(function($) {
         }, function(response) {
             if (response.success) {
                 location.reload();
+            }
+        });
+    });
+
+    // Print Barcode Button
+    $(document).on('click', '.ac-is-print-barcode', function(e) {
+        e.preventDefault();
+        var barcode = $(this).data('barcode');
+        var name = $(this).data('name');
+        if (!barcode) { alert('لا يوجد باركود لهذا المنتج'); return; }
+
+        $('#print-product-name').text(name);
+        generateBarcode("#print-barcode-svg", barcode);
+        window.print();
+    });
+
+    // Inventory Real-time Search & Filter
+    var searchTimeout;
+    $('#ac-is-inventory-search, #ac-is-inventory-category').on('input change', function() {
+        clearTimeout(searchTimeout);
+        searchTimeout = setTimeout(function() {
+            var search = $('#ac-is-inventory-search').val();
+            var category = $('#ac-is-inventory-category').val();
+
+            $.post(ac_is_ajax.ajax_url, {
+                action: 'ac_is_search_products',
+                search: search,
+                category: category,
+                nonce: ac_is_ajax.nonce
+            }, function(response) {
+                if (response.success) {
+                    renderInventory(response.data);
+                }
+            });
+        }, 500);
+    });
+
+    function renderInventory(products) {
+        var html = '';
+        if (products.length === 0) {
+            html = '<tr><td colspan="7" style="text-align:center;">لا توجد منتجات.</td></tr>';
+        } else {
+            $.each(products, function(i, p) {
+                var stockClass = (p.stock_quantity < 5) ? 'capsule-danger' : ((p.stock_quantity < 15) ? 'capsule-warning' : 'capsule-success');
+                var categoryName = (p.category == 'ac') ? 'مكيفات' : ((p.category == 'cooling') ? 'تبريد' : 'فلاتر');
+                html += '<tr>' +
+                    '<td>' + (p.image_url ? '<img src="' + p.image_url + '" class="ac-is-product-img" style="border-radius:4px; max-width:60px;">' : '') + '</td>' +
+                    '<td><strong>' + p.name + '</strong><br><span class="ac-is-capsule capsule-primary">' + categoryName + '</span> ' + (p.subcategory ? '<small style="color:#666;"> (' + p.subcategory + ')</small>' : '') + '</td>' +
+                    '<td><small>B: ' + (p.barcode || 'N/A') + '</small><br><small>S/N: ' + (p.serial_number || 'N/A') + '</small></td>' +
+                    '<td><span style="font-weight:bold; color:var(--ac-primary);">' + parseFloat(p.final_price).toFixed(2) + '</span>' + (p.discount > 0 ? '<br><del style="font-size:0.8rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : '') + '</td>' +
+                    '<td><span class="ac-is-capsule ' + stockClass + '">' + p.stock_quantity + '</span></td>' +
+                    '<td>' + p.branch_id + '</td>' + // Simplified as we'd need more logic to match branch name in JS
+                    '<td><div style="display:flex; gap:5px;">' +
+                        '<a href="?ac_view=edit-product&id=' + p.id + '" class="ac-is-btn" style="padding: 5px 10px; font-size:0.8rem; background:#4a90e2;">تعديل</a>' +
+                        '<button class="ac-is-btn ac-is-print-barcode" data-barcode="' + p.barcode + '" data-name="' + p.name + '" style="padding: 5px 10px; font-size:0.8rem; background:#6c757d;">باركود</button>' +
+                        '<button class="ac-is-delete-product ac-is-btn" data-id="' + p.id + '" style="padding: 5px 10px; font-size:0.8rem; background:#e53e3e;">حذف</button>' +
+                    '</div></td>' +
+                '</tr>';
+            });
+        }
+        $('#ac-is-inventory-table-body').html(html);
+    }
+
+    // Sale search product by barcode/serial
+    $('#ac-is-sale-product-search').on('input', function() {
+        var query = $(this).val();
+        if (query.length < 3) return;
+
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_search_products',
+            search: query,
+            nonce: ac_is_ajax.nonce
+        }, function(response) {
+            if (response.success && response.data.length > 0) {
+                var p = response.data[0]; // Take first match
+                $('#ac-is-sale-product').val(p.id).trigger('change');
             }
         });
     });
@@ -65,14 +173,7 @@ jQuery(document).ready(function($) {
         $.post(ac_is_ajax.ajax_url, data, function(response) {
             if (response.success) {
                 alert('تم تسجيل البيع بنجاح');
-                $('#receipt-content').html(
-                    '<p>رقم الفاتورة: ' + response.data.sale_id + '</p>' +
-                    '<p>المنتج: ' + product.text() + '</p>' +
-                    '<p>الكمية: ' + qty + '</p>' +
-                    '<p>الإجمالي: ' + $('#ac-is-sale-total').val() + '</p>'
-                );
-                $('#ac-is-receipt').show();
-                $('#ac-is-sales-form')[0].reset();
+                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&sale_id=' + response.data.sale_id;
             } else {
                 alert('فشل تسجيل البيع: ' + response.data);
             }

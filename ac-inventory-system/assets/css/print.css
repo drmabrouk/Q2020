@@ -1,16 +1,105 @@
 @media print {
-    .ac-is-nav, .ac-is-export-actions, .ac-is-quick-actions, .ac-is-upload-btn, .ac-is-btn {
+    .ac-is-nav, .ac-is-export-actions, .ac-is-header-flex, .ac-is-btn, .ac-is-dashboard > h2 {
         display: none !important;
     }
-    .ac-is-dashboard {
-        border: none;
-        background: none;
+
+    body {
+        background: #fff !important;
+        margin: 0;
         padding: 0;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        color: #000;
+        direction: rtl;
     }
-    .ac-is-content {
-        box-shadow: none;
+
+    .ac-is-dashboard {
+        box-shadow: none !important;
+        border: none !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        max-width: 100% !important;
     }
-    .ac-is-table th, .ac-is-table td {
-        border: 1px solid #000;
+
+    /* Invoice Specifics */
+    #ac-is-receipt {
+        display: block !important;
+        border: none !important;
+        padding: 20px !important;
+    }
+
+    .invoice-container {
+        width: 100%;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 40px;
+        border: 1px solid #eee;
+    }
+
+    .invoice-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 40px;
+        border-bottom: 2px solid #333;
+        padding-bottom: 20px;
+    }
+
+    .invoice-header h1 {
+        margin: 0;
+        font-size: 24px;
+    }
+
+    .invoice-details {
+        margin-bottom: 30px;
+        font-size: 14px;
+    }
+
+    .invoice-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 30px;
+    }
+
+    .invoice-table th, .invoice-table td {
+        border-bottom: 1px solid #ddd;
+        padding: 12px;
+        text-align: right;
+    }
+
+    .invoice-table th {
+        background: #f8f8f8 !important;
+        -webkit-print-color-adjust: exact;
+    }
+
+    .invoice-total {
+        text-align: left;
+        font-size: 18px;
+        font-weight: bold;
+    }
+
+    /* Barcode Stickers */
+    #barcode-print-section {
+        display: block !important;
+    }
+
+    .barcode-sticker {
+        width: 50mm;
+        height: 30mm;
+        padding: 5mm;
+        text-align: center;
+        border: 1px dashed #ccc;
+        page-break-inside: avoid;
+        margin: 10px;
+        display: inline-block;
+    }
+
+    .barcode-sticker .product-name {
+        font-size: 10px;
+        font-weight: bold;
+        margin-bottom: 5px;
+    }
+
+    .barcode-sticker canvas {
+        max-width: 100%;
+        height: auto;
     }
 }
