@@ -1,7 +1,7 @@
-<div class="ac-is-dashboard">
+<div class="ac-is-dashboard" id="ac-is-system-root">
     <aside class="ac-is-sidebar">
         <div class="ac-is-sidebar-logo">
-            <h2>AC System</h2>
+            <h2>نظام البيع</h2>
         </div>
         <nav class="ac-is-sidebar-nav">
             <a href="<?php echo add_query_arg('ac_view', 'dashboard'); ?>" class="<?php echo (!isset($_GET['ac_view']) || $_GET['ac_view'] == 'dashboard') ? 'active' : ''; ?>">
@@ -22,6 +22,22 @@
                 </a>
             <?php endif; ?>
         </nav>
+
+        <div class="ac-is-sidebar-footer" style="padding: 15px; border-top: 1px solid var(--ac-sidebar-hover);">
+            <button id="ac-is-fullscreen-btn" class="ac-is-btn" style="width:100%; background:#475569; padding: 10px; font-size: 0.85rem;">
+                <span class="dashicons dashicons-fullscreen-alt" style="margin-left:8px;"></span>
+                <span class="btn-text"><?php _e('ملء الشاشة', 'ac-inventory-system'); ?></span>
+            </button>
+        </div>
     </aside>
     <main class="ac-is-main-content">
         <div class="ac-is-content-inner">
+
+<div id="ac-is-unlock-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.95); z-index:9999; align-items:center; justify-content:center; flex-direction:column; color:#fff;">
+    <h2 style="margin-bottom:20px;"><?php _e('النظام مغلق - يرجى إدخال كلمة المرور للخروج', 'ac-inventory-system'); ?></h2>
+    <div style="display:flex; gap:10px;">
+        <input type="password" id="ac-is-unlock-pass" placeholder="********" style="padding:15px; border-radius:8px; border:none; font-size:1.2rem; text-align:center;">
+        <button id="ac-is-unlock-submit" class="ac-is-btn" style="background:var(--ac-primary); font-size:1.1rem;"><?php _e('فك القفل', 'ac-inventory-system'); ?></button>
+    </div>
+    <p id="ac-is-unlock-error" style="color:var(--ac-danger-text); margin-top:15px; display:none;"><?php _e('كلمة المرور غير صحيحة', 'ac-inventory-system'); ?></p>
+</div>

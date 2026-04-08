@@ -1,10 +1,21 @@
 @media print {
+    /* Default Page Settings for Invoices */
     @page {
+        size: auto;
+        margin: 10mm;
+    }
+
+    /* Sticker Specific Page Settings (Only when printing sticker) */
+    body.ac-is-printing-sticker {
+        margin: 0;
+    }
+
+    body.ac-is-printing-sticker @page {
         size: 50mm 30mm;
         margin: 0;
     }
 
-    .ac-is-sidebar, .ac-is-header-flex.no-print, .ac-is-btn, .ac-is-nav, .ac-is-export-actions, .ac-is-sidebar-nav, .ac-is-search-filters {
+    .ac-is-sidebar, .ac-is-header-flex.no-print, .ac-is-btn, .ac-is-nav, .ac-is-export-actions, .ac-is-sidebar-nav, .ac-is-search-filters, #ac-is-unlock-overlay {
         display: none !important;
     }
 
@@ -30,18 +41,22 @@
         padding: 0 !important;
     }
 
-    /* Invoice Specifics (Override for invoice page) */
+    /* Invoice Layout (Default Print) */
     .invoice-container {
         width: 100%;
         max-width: 100% !important;
         margin: 0 !important;
-        padding: 20px !important;
+        padding: 10mm !important;
         border: none !important;
         page-break-after: always;
     }
 
     /* Sticker Specifics */
     #barcode-print-section {
+        display: none; /* Hidden by default in standard print */
+    }
+
+    body.ac-is-printing-sticker #barcode-print-section {
         display: block !important;
         width: 50mm;
         height: 30mm;
@@ -68,7 +83,7 @@
     .barcode-sticker .product-name {
         font-size: 8pt;
         font-weight: 700;
-        margin-bottom: 2mm;
+        margin-bottom: 1mm;
         white-space: nowrap;
         overflow: hidden;
         width: 100%;
@@ -80,9 +95,13 @@
     }
 }
 
-/* Hide everything else when printing sticker */
+/* Hide everything else when printing */
 @media print {
-    .ac-is-main-content > *:not(#barcode-print-section):not(.invoice-container) {
+    .ac-is-content-inner > *:not(#barcode-print-section):not(.invoice-container) {
+        display: none !important;
+    }
+
+    body.ac-is-printing-sticker .invoice-container {
         display: none !important;
     }
 }

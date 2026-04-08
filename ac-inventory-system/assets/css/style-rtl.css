@@ -26,11 +26,20 @@
     margin: 0;
     padding: 0;
     border-radius: 0;
+    font-size: 0.9rem; /* Global scaling down ~10% */
 }
 
-/* Vertical Sidebar */
+/* Fullscreen Specific Styles */
+#ac-is-system-root:-webkit-full-screen { width: 100%; height: 100%; overflow-y: auto; background: #f1f5f9; }
+#ac-is-system-root:-ms-fullscreen { width: 100%; height: 100%; overflow-y: auto; background: #f1f5f9; }
+#ac-is-system-root:fullscreen { width: 100%; height: 100%; overflow-y: auto; background: #f1f5f9; }
+
+#ac-is-system-root:fullscreen .ac-is-sidebar { height: 100vh; position: fixed; top: 0; right: 0; }
+#ac-is-system-root:fullscreen .ac-is-main-content { margin-right: 250px; width: calc(100% - 250px); }
+
+/* Vertical Sidebar - Reduced Width ~10% */
 .ac-is-sidebar {
-    width: 280px;
+    width: 250px;
     background: var(--ac-sidebar-bg);
     color: var(--ac-sidebar-text);
     flex-shrink: 0;
@@ -44,7 +53,7 @@
 }
 
 .ac-is-sidebar-logo {
-    padding: 30px 20px;
+    padding: 25px 15px;
     background: #1e293b;
     text-align: center;
 }
@@ -52,27 +61,27 @@
 .ac-is-sidebar-logo h2 {
     color: #fff;
     margin: 0;
-    font-size: 1.4rem;
+    font-size: 1.25rem;
     font-weight: 800;
-    letter-spacing: 0.5px;
 }
 
 .ac-is-sidebar-nav {
-    margin-top: 10px;
+    margin-top: 8px;
     flex-grow: 1;
 }
 
 .ac-is-sidebar-nav a {
     display: flex;
     align-items: center;
-    gap: 15px;
-    padding: 15px 25px;
+    gap: 12px;
+    padding: 12px 20px;
     color: #94a3b8;
     text-decoration: none !important;
     transition: all 0.3s;
     font-weight: 500;
     border-radius: 0;
     border-right: 4px solid transparent;
+    font-size: 0.85rem;
 }
 
 .ac-is-sidebar-nav a:hover {
@@ -86,49 +95,35 @@
     border-right-color: var(--ac-primary);
 }
 
-.ac-is-sidebar-nav .dashicons {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
-}
-
 /* Main Content Area */
 .ac-is-main-content {
     flex-grow: 1;
-    padding: 40px;
+    padding: 30px;
     background: #f1f5f9;
+    transition: margin 0.3s ease;
 }
 
 .ac-is-content-inner {
-    max-width: 1400px;
+    max-width: 1500px;
     margin: 0 auto;
 }
 
-/* Professional Flat Buttons */
+/* Professional Flat Buttons - Scaled Down */
 .ac-is-btn {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 24px;
+    padding: 10px 18px;
     background: var(--ac-primary);
     color: #fff !important;
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 0.95rem;
+    font-size: 0.85rem;
     font-weight: 600;
     transition: all 0.2s;
     text-decoration: none !important;
-    box-shadow: none;
-}
-
-.ac-is-btn:hover {
-    background: #1d4ed8;
-    filter: brightness(1.1);
-}
-
-.ac-is-btn:active {
-    transform: translateY(1px);
+    line-height: 1.4;
 }
 
 /* Responsive Sidebar */
@@ -140,15 +135,13 @@
         width: 100%;
         height: auto;
         position: relative;
-        top: 0;
     }
     .ac-is-sidebar-nav {
         display: flex;
         overflow-x: auto;
-        margin-top: 0;
     }
     .ac-is-sidebar-nav a {
-        padding: 15px 20px;
+        padding: 12px 15px;
         white-space: nowrap;
         border-right: none;
         border-bottom: 4px solid transparent;
@@ -156,108 +149,82 @@
     .ac-is-sidebar-nav a.active {
         border-bottom-color: var(--ac-primary);
     }
+    #ac-is-system-root:fullscreen .ac-is-main-content { margin-right: 0; width: 100%; }
 }
 
-/* Capsules & Statuses */
-.ac-is-capsule {
-    display: inline-block;
-    padding: 4px 12px;
-    border-radius: 4px;
-    font-size: 0.85rem;
-    font-weight: 600;
-    text-transform: uppercase;
-}
-
-.capsule-primary { background: var(--ac-info); color: var(--ac-info-text); }
-.capsule-success { background: var(--ac-success); color: var(--ac-success-text); }
-.capsule-warning { background: var(--ac-warning); color: var(--ac-warning-text); }
-.capsule-danger { background: var(--ac-danger); color: var(--ac-danger-text); }
-
-/* Table Enhancements */
+/* Table Optimization - Reduced Row Height & Padding */
 .ac-is-table {
     width: 100%;
     border-collapse: collapse;
     background: #fff;
-    border-radius: 0;
     border: 1px solid var(--ac-border);
 }
 
 .ac-is-table th {
     background: #f8fafc;
-    padding: 18px 20px;
+    padding: 12px 15px;
     text-align: right;
     font-weight: 700;
     color: #334155;
     border-bottom: 2px solid var(--ac-border);
+    font-size: 0.85rem;
 }
 
 .ac-is-table td {
-    padding: 18px 20px;
+    padding: 10px 15px;
     border-bottom: 1px solid var(--ac-border);
     color: #475569;
+    font-size: 0.85rem;
 }
 
-/* Form Styles */
+/* Card Styles - Scaled Down */
+.ac-is-card {
+    background: #fff;
+    padding: 22px;
+    border-radius: 0;
+    border: 1px solid var(--ac-border);
+}
+
+.ac-is-card h3 {
+    margin: 0 0 12px 0;
+    font-size: 1rem;
+    color: #64748b;
+}
+
+.ac-is-card .value {
+    font-size: 1.8rem;
+    font-weight: 800;
+}
+
+/* Form Styles - Reduced Gaps & Padding */
 .ac-is-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 30px;
-}
-
-@media (max-width: 768px) {
-    .ac-is-grid {
-        grid-template-columns: 1fr;
-    }
+    gap: 20px;
 }
 
 .ac-is-form-group {
-    margin-bottom: 25px;
+    margin-bottom: 18px;
 }
 
 .ac-is-form-group label {
     display: block;
-    margin-bottom: 10px;
+    margin-bottom: 6px;
     font-weight: 600;
-    color: #334155;
+    font-size: 0.85rem;
 }
 
 .ac-is-form-group input,
 .ac-is-form-group select,
 .ac-is-form-group textarea {
-    width: 100%;
-    padding: 12px 16px;
+    padding: 8px 12px;
     border: 1px solid #cbd5e1;
-    border-radius: 6px;
-    font-size: 1rem;
-    background: #fff;
-    color: #1e293b;
-    transition: border-color 0.2s;
+    border-radius: 4px;
+    font-size: 0.9rem;
 }
 
-.ac-is-form-group input:focus {
-    border-color: var(--ac-primary);
-    outline: none;
-    box-shadow: 0 0 0 1px var(--ac-primary);
-}
-
-/* Card Styles */
-.ac-is-card {
-    background: #fff;
-    padding: 30px;
-    border-radius: 0;
-    border: 1px solid var(--ac-border);
-    transition: all 0.3s;
-}
-
-.ac-is-card h3 {
-    margin: 0 0 15px 0;
-    font-size: 1.1rem;
-    color: #64748b;
-    font-weight: 600;
-}
-
-.ac-is-card .value {
-    font-size: 2.2rem;
-    font-weight: 800;
-    color: var(--ac-text);
+/* Capsules - Smaller */
+.ac-is-capsule {
+    padding: 2px 8px;
+    font-size: 0.75rem;
 }
