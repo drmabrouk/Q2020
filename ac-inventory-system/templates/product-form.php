@@ -47,6 +47,11 @@ $branches = AC_IS_Inventory::get_branches();
         </div>
 
         <div class="ac-is-form-group">
+            <label><?php _e('تكلفة الشراء (Purchase Cost)', 'ac-inventory-system'); ?></label>
+            <input type="number" step="0.01" name="purchase_cost" placeholder="0.00" value="<?php echo $product ? $product->purchase_cost : '0.00'; ?>" required>
+        </div>
+
+        <div class="ac-is-form-group">
             <label><?php _e('الخصم', 'ac-inventory-system'); ?></label>
             <input type="number" step="0.01" name="discount" id="discount" placeholder="0.00" value="<?php echo $product ? $product->discount : '0.00'; ?>">
         </div>

@@ -178,17 +178,31 @@ jQuery(document).ready(function($) {
         if (e.which == 13) $('#ac-is-unlock-submit').click();
     });
 
+    // Strict Fullscreen Security
+    $(document).on('keydown', function(e) {
+        if (document.fullscreenElement) {
+            if (e.key === "Escape" || e.keyCode === 27) {
+                e.preventDefault();
+                showUnlockOverlay();
+                return false;
+            }
+        }
+    });
+
     document.addEventListener('fullscreenchange', function() {
         if (!document.fullscreenElement) {
-            if (unlockOverlay.is(':hidden')) {
+            if (unlockOverlay.is(':hidden') && fullscreenBtn.data('active') === 'true') {
                 enterFullscreen();
                 showUnlockOverlay();
+            } else if (unlockOverlay.is(':hidden')) {
+                fullscreenBtn.find('.btn-text').text('ملء الشاشة');
+                fullscreenBtn.find('.dashicons').removeClass('dashicons-screenoptions').addClass('dashicons-fullscreen-alt');
+                fullscreenBtn.data('active', 'false');
             }
-            fullscreenBtn.find('.btn-text').text('ملء الشاشة');
-            fullscreenBtn.find('.dashicons').removeClass('dashicons-screenoptions').addClass('dashicons-fullscreen-alt');
         } else {
             fullscreenBtn.find('.btn-text').text('إنهاء وضع ملء الشاشة');
             fullscreenBtn.find('.dashicons').removeClass('dashicons-fullscreen-alt').addClass('dashicons-screenoptions');
+            fullscreenBtn.data('active', 'true');
         }
     });
 
@@ -321,7 +335,7 @@ jQuery(document).ready(function($) {
                     <td>${p.image_url ? '<img src="' + p.image_url + '" class="ac-is-product-img" style="border-radius:4px; max-width:50px;">' : ''}</td>
                     <td><strong>${p.name}</strong><br><span class="ac-is-capsule capsule-primary">${categoryName}</span> ${p.subcategory ? '<small style="color:#666;"> (' + p.subcategory + ')</small>' : ''}</td>
                     <td><small>B: ${p.barcode || 'N/A'}</small><br><small>S/N: ${p.serial_number || 'N/A'}</small></td>
-                    <td><span style="font-weight:bold; color:var(--ac-primary);">${parseFloat(p.final_price).toFixed(2)} EGP</span>${p.discount > 0 ? '<br><del style="font-size:0.7rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : ''}</td>
+                    <td><span style="font-weight:bold; color:var(--ac-primary);">${parseFloat(p.final_price).toFixed(2)} EGP</span>${p.discount > 0 ? '<br><del style="font-size:0.8rem; color:#999;">' + parseFloat(p.original_price).toFixed(2) + '</del> <span class="ac-is-capsule capsule-danger" style="font-size:0.7rem; padding: 1px 5px;">' + parseFloat(p.discount).toFixed(2) + '-</span>' : ''}</td>
                     <td><span class="ac-is-capsule ${stockClass}">${p.stock_quantity}</span></td>
                     <td>${p.branch_id}</td>
                     <td><div style="display:flex; gap:5px;">
