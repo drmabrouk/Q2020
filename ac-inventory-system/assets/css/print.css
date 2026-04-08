@@ -1,5 +1,10 @@
 @media print {
-    .ac-is-sidebar, .ac-is-header-flex.no-print, .ac-is-btn, .ac-is-nav, .ac-is-export-actions, .ac-is-sidebar-nav {
+    @page {
+        size: 50mm 30mm;
+        margin: 0;
+    }
+
+    .ac-is-sidebar, .ac-is-header-flex.no-print, .ac-is-btn, .ac-is-nav, .ac-is-export-actions, .ac-is-sidebar-nav, .ac-is-search-filters {
         display: none !important;
     }
 
@@ -7,7 +12,7 @@
         background: #fff !important;
         margin: 0;
         padding: 0;
-        font-family: inherit;
+        font-family: 'Segoe UI', sans-serif;
         color: #000;
         direction: rtl;
     }
@@ -25,80 +30,59 @@
         padding: 0 !important;
     }
 
-    /* Invoice Specifics for Receipt Printers */
+    /* Invoice Specifics (Override for invoice page) */
     .invoice-container {
         width: 100%;
-        max-width: 800px;
-        margin: 0 auto;
-        padding: 20px;
-        border: 1px solid #eee;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 20px !important;
+        border: none !important;
+        page-break-after: always;
     }
 
-    .invoice-header {
-        display: flex;
-        justify-content: space-between;
-        margin-bottom: 30px;
-        border-bottom: 2px solid #333;
-        padding-bottom: 15px;
-    }
-
-    .invoice-header h1 {
-        margin: 0;
-        font-size: 1.5rem;
-    }
-
-    .invoice-details {
-        margin-bottom: 20px;
-        font-size: 14px;
-    }
-
-    .invoice-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-bottom: 20px;
-    }
-
-    .invoice-table th, .invoice-table td {
-        border-bottom: 1px solid #ddd;
-        padding: 10px;
-        text-align: right;
-    }
-
-    .invoice-table th {
-        background: #f8f8f8 !important;
-        -webkit-print-color-adjust: exact;
-    }
-
-    .invoice-total {
-        text-align: left;
-        font-size: 1.1rem;
-        font-weight: bold;
-    }
-
-    /* Barcode Stickers */
+    /* Sticker Specifics */
     #barcode-print-section {
         display: block !important;
+        width: 50mm;
+        height: 30mm;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
     }
 
     .barcode-sticker {
         width: 50mm;
         height: 30mm;
-        padding: 5mm;
+        padding: 2mm;
         text-align: center;
-        border: 1px dashed #ccc;
+        border: none !important;
         page-break-inside: avoid;
-        margin: 10px;
-        display: inline-block;
+        margin: 0;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
     }
 
     .barcode-sticker .product-name {
-        font-size: 10px;
-        font-weight: bold;
-        margin-bottom: 5px;
+        font-size: 8pt;
+        font-weight: 700;
+        margin-bottom: 2mm;
+        white-space: nowrap;
+        overflow: hidden;
+        width: 100%;
     }
 
-    .barcode-sticker canvas, .barcode-sticker svg {
-        max-width: 100%;
-        height: auto;
+    .barcode-sticker svg {
+        width: 45mm !important;
+        height: 18mm !important;
+    }
+}
+
+/* Hide everything else when printing sticker */
+@media print {
+    .ac-is-main-content > *:not(#barcode-print-section):not(.invoice-container) {
+        display: none !important;
     }
 }
