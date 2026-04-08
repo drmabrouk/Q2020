@@ -34,7 +34,7 @@ class AC_IS_Reports {
 			return;
 		}
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		if ( ! AC_IS_Auth::is_admin() ) {
 			return;
 		}
 

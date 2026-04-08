@@ -35,7 +35,6 @@ class AC_IS_Auth {
 	}
 
 	public static function is_logged_in() {
-		// Auto-grant access to WordPress Administrators
 		if ( current_user_can( 'manage_options' ) ) {
 			return true;
 		}
@@ -43,7 +42,6 @@ class AC_IS_Auth {
 	}
 
 	public static function current_user() {
-		// If WP admin, return WP user data mapped to staff format
 		if ( current_user_can( 'manage_options' ) ) {
 			$wp_user = wp_get_current_user();
 			return (object) array(
@@ -65,11 +63,20 @@ class AC_IS_Auth {
 	}
 
 	public static function is_admin() {
-		// WP Admin always has plugin admin privileges
 		if ( current_user_can( 'manage_options' ) ) {
 			return true;
 		}
 		$user = self::current_user();
 		return $user && $user->role === 'admin';
+	}
+
+	public static function is_manager() {
+		if ( self::is_admin() ) return true;
+		$user = self::current_user();
+		return $user && $user->role === 'manager';
+	}
+
+	public static function can_delete_records() {
+		return self::is_manager();
 	}
 }

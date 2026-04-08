@@ -88,4 +88,33 @@ class AC_IS_Sales {
 			$invoice_id
 		) );
 	}
+
+	public static function delete_invoice( $invoice_id ) {
+		global $wpdb;
+		$table_invoices = $wpdb->prefix . 'ac_is_invoices';
+		$table_sales    = $wpdb->prefix . 'ac_is_sales';
+		$table_products = $wpdb->prefix . 'ac_is_products';
+
+		// Get items to restore stock
+		$items = self::get_invoice_items( $invoice_id );
+
+		$wpdb->query('START TRANSACTION');
+
+		foreach ( $items as $item ) {
+			// Restore stock
+			$wpdb->query( $wpdb->prepare(
+				"UPDATE $table_products SET stock_quantity = stock_quantity + %d WHERE id = %d",
+				$item->quantity, $item->product_id
+			) );
+		}
+
+		// Delete sales records
+		$wpdb->delete( $table_sales, array( 'invoice_id' => $invoice_id ) );
+
+		// Delete invoice
+		$wpdb->delete( $table_invoices, array( 'id' => $invoice_id ) );
+
+		$wpdb->query('COMMIT');
+		return true;
+	}
 }

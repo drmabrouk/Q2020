@@ -55,7 +55,12 @@ $sales = $wpdb->get_results("
                 <td><span style="font-weight:bold; color:var(--ac-primary);"><?php echo number_format($sale->total_price, 2); ?></span></td>
                 <td><?php echo esc_html($operator_name); ?></td>
                 <td>
-                    <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $sale->invoice_id)); ?>" class="ac-is-btn" style="padding: 5px 10px; font-size:0.8rem; background:#64748b;"><?php _e('فاتورة', 'ac-inventory-system'); ?></a>
+                    <div style="display:flex; gap:5px;">
+                        <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $sale->invoice_id)); ?>" class="ac-is-btn" style="padding: 4px 8px; font-size:0.75rem; background:#64748b;"><?php _e('فاتورة', 'ac-inventory-system'); ?></a>
+                        <?php if ( AC_IS_Auth::can_delete_records() ) : ?>
+                            <button class="ac-is-btn ac-is-delete-invoice" data-id="<?php echo $sale->invoice_id; ?>" style="padding: 4px 8px; font-size:0.75rem; background:#ef4444;"><?php _e('حذف', 'ac-inventory-system'); ?></button>
+                        <?php endif; ?>
+                    </div>
                 </td>
             </tr>
         <?php endforeach; else: ?>
@@ -63,3 +68,21 @@ $sales = $wpdb->get_results("
         <?php endif; ?>
     </tbody>
 </table>
+
+<script>
+jQuery(document).ready(function($) {
+    $('.ac-is-delete-invoice').on('click', function() {
+        if (!confirm('<?php _e('هل أنت متأكد من حذف هذه الفاتورة؟ سيتم استرجاع المنتجات للمخزون وحذف السجل نهائياً.', 'ac-inventory-system'); ?>')) return;
+        const id = $(this).data('id');
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_delete_invoice',
+            invoice_id: id,
+            nonce: ac_is_ajax.nonce
+        }, function(response) {
+            if (response.success) {
+                location.reload();
+            }
+        });
+    });
+});
+</script>

@@ -6,27 +6,24 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AC_IS_Ajax {
 
 	public function __construct() {
-		add_action( 'wp_ajax_ac_is_save_product', array( $this, 'save_product' ) );
-		add_action( 'wp_ajax_ac_is_delete_product', array( $this, 'delete_product' ) );
-		add_action( 'wp_ajax_ac_is_record_sale', array( $this, 'record_sale' ) );
-		add_action( 'wp_ajax_ac_is_multi_sale', array( $this, 'multi_sale' ) );
-		add_action( 'wp_ajax_ac_is_save_branch', array( $this, 'save_branch' ) );
-		add_action( 'wp_ajax_ac_is_search_products', array( $this, 'search_products' ) );
-		add_action( 'wp_ajax_ac_is_get_customer', array( $this, 'get_customer' ) );
+		$actions = array(
+			'save_product', 'delete_product', 'record_sale', 'multi_sale',
+			'save_branch', 'search_products', 'get_customer', 'delete_invoice',
+			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings'
+		);
+
+		foreach ( $actions as $action ) {
+			add_action( 'wp_ajax_ac_is_' . $action, array( $this, $action ) );
+			add_action( 'wp_ajax_nopriv_ac_is_' . $action, array( $this, $action ) );
+		}
+
 		add_action( 'wp_ajax_nopriv_ac_is_login', array( $this, 'login' ) );
 		add_action( 'wp_ajax_ac_is_login', array( $this, 'login' ) );
-		add_action( 'wp_ajax_ac_is_logout', array( $this, 'logout' ) );
-		add_action( 'wp_ajax_ac_is_add_staff', array( $this, 'add_staff' ) );
-		add_action( 'wp_ajax_ac_is_delete_staff', array( $this, 'delete_staff' ) );
-		add_action( 'wp_ajax_ac_is_save_settings', array( $this, 'save_settings' ) );
 	}
 
 	public function save_product() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized' );
-		}
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
 		$data = array(
@@ -55,10 +52,7 @@ class AC_IS_Ajax {
 
 	public function delete_product() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
-
-		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( 'Unauthorized' );
-		}
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = intval( $_POST['id'] );
 		AC_IS_Inventory::delete_product( $id );
@@ -67,10 +61,7 @@ class AC_IS_Ajax {
 
 	public function record_sale() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
-
-		if ( ! is_user_logged_in() ) {
-			wp_send_json_error( 'Unauthorized' );
-		}
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
 
 		$data = array(
 			'product_id'    => intval( $_POST['product_id'] ),
@@ -117,6 +108,22 @@ class AC_IS_Ajax {
 		}
 	}
 
+	public function record_attendance() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error( 'Unauthorized' );
+
+		$data = array(
+			'staff_id'  => intval( $_POST['staff_id'] ),
+			'work_date' => sanitize_text_field( $_POST['work_date'] ),
+			'check_in'  => sanitize_text_field( $_POST['check_in'] ),
+			'check_out' => sanitize_text_field( $_POST['check_out'] ),
+			'status'    => sanitize_text_field( $_POST['status'] ),
+		);
+
+		AC_IS_Payroll::record_attendance( $data );
+		wp_send_json_success();
+	}
+
 	public function logout() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
 		AC_IS_Auth::logout();
@@ -131,10 +138,13 @@ class AC_IS_Ajax {
 		$table = $wpdb->prefix . 'ac_is_staff';
 
 		$data = array(
-			'username' => sanitize_text_field( $_POST['staff_username'] ),
-			'password' => password_hash( $_POST['staff_password'], PASSWORD_DEFAULT ),
-			'name'     => sanitize_text_field( $_POST['staff_name'] ),
-			'role'     => sanitize_text_field( $_POST['staff_role'] ),
+			'username'      => sanitize_text_field( $_POST['staff_username'] ),
+			'password'      => password_hash( $_POST['staff_password'], PASSWORD_DEFAULT ),
+			'name'          => sanitize_text_field( $_POST['staff_name'] ),
+			'role'          => sanitize_text_field( $_POST['staff_role'] ),
+			'base_salary'   => floatval( $_POST['base_salary'] ),
+			'working_days'  => intval( $_POST['working_days'] ),
+			'working_hours' => intval( $_POST['working_hours'] ),
 		);
 
 		$wpdb->insert( $table, $data );
@@ -170,6 +180,15 @@ class AC_IS_Ajax {
 		wp_send_json_success();
 	}
 
+	public function delete_invoice() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::can_delete_records() ) wp_send_json_error( 'Unauthorized' );
+
+		$invoice_id = intval( $_POST['invoice_id'] );
+		AC_IS_Sales::delete_invoice( $invoice_id );
+		wp_send_json_success();
+	}
+
 	public function search_products() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
 
@@ -195,6 +214,9 @@ class AC_IS_Ajax {
 
 	public function multi_sale() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
 
 		global $wpdb;
 		$items = $_POST['items'];
