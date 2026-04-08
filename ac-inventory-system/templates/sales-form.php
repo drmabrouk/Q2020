@@ -7,23 +7,32 @@ $branches = AC_IS_Inventory::get_branches();
 </div>
 
 <div class="ac-is-grid">
-    <!-- Left Column: Product Selection -->
+    <!-- Left Column: Product Selection / Scanner -->
     <div class="ac-is-selection-area">
         <div class="ac-is-sales-modes" style="display:flex; gap:10px; margin-bottom:20px;">
             <button type="button" class="ac-is-mode-btn ac-is-btn active" data-mode="manual" style="flex:1; background:#fff; color:var(--ac-sidebar-bg) !important; border: 2px solid var(--ac-sidebar-bg); padding:8px;">
-                <span class="dashicons dashicons-edit"></span> <?php _e('يدوي', 'ac-inventory-system'); ?>
+                <span class="dashicons dashicons-edit"></span> <?php _e('إدخال يدوي', 'ac-inventory-system'); ?>
             </button>
             <button type="button" class="ac-is-mode-btn ac-is-btn" data-mode="scan" id="ac-is-toggle-scanner" style="flex:1; background:#fff; color:var(--ac-primary) !important; border: 2px solid var(--ac-primary); padding:8px;">
-                <span class="dashicons dashicons-camera"></span> <?php _e('ماسح', 'ac-inventory-system'); ?>
+                <span class="dashicons dashicons-camera"></span> <?php _e('مسح بالباركود', 'ac-inventory-system'); ?>
             </button>
         </div>
 
         <div id="ac-is-reader-container" style="display:none; margin-bottom:20px;">
-            <div id="ac-is-reader" style="width:100%; border: 2px solid var(--ac-primary);"></div>
+            <div id="ac-is-reader"></div>
+            <div class="ac-is-scan-overlay">
+                <div class="ac-is-scan-frame">
+                    <div class="ac-is-scan-frame-corner-tr"></div>
+                    <div class="ac-is-scan-frame-corner-bl"></div>
+                    <div class="ac-is-scan-frame-corner-br"></div>
+                    <div class="ac-is-scan-corners"></div>
+                </div>
+            </div>
+            <div class="ac-is-scan-status"><?php _e('جاهز للمسح الضوئي', 'ac-inventory-system'); ?></div>
         </div>
 
         <div id="ac-is-manual-search" class="ac-is-card" style="margin-bottom:20px; padding:15px;">
-            <input type="text" id="ac-is-sale-product-search" placeholder="<?php _e('بحث عن منتج...', 'ac-inventory-system'); ?>" style="width:100%;">
+            <input type="text" id="ac-is-sale-product-search" placeholder="<?php _e('بحث سريع...', 'ac-inventory-system'); ?>" style="width:100%;">
         </div>
 
         <div class="ac-is-card" style="padding:20px;">
