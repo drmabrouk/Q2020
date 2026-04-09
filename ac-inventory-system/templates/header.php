@@ -28,7 +28,7 @@
             <a href="<?php echo add_query_arg('ac_view', 'payroll'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'payroll') ? 'active' : ''; ?>">
                 <span class="dashicons dashicons-money-alt"></span> <?php _e('المرتبات', 'ac-inventory-system'); ?>
             </a>
-            <?php if ( AC_IS_Auth::is_admin() ) : ?>
+            <?php if ( AC_IS_Auth::is_system_admin() ) : ?>
                 <a href="<?php echo add_query_arg('ac_view', 'settings'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'settings') ? 'active' : ''; ?>">
                     <span class="dashicons dashicons-admin-generic"></span> <?php _e('الإعدادات', 'ac-inventory-system'); ?>
                 </a>
@@ -54,9 +54,9 @@
                     <span class="dashicons dashicons-update" style="font-size:18px; width:18px; height:18px;"></span>
                     <small style="font-size:0.6rem; margin-top:2px;"><?php _e('تحديث', 'ac-inventory-system'); ?></small>
                 </button>
-                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
-                    <span class="dashicons dashicons-logout" style="font-size:18px; width:18px; height:18px;"></span>
-                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('خروج', 'ac-inventory-system'); ?></small>
+                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" title="<?php _e('Logout / خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444 !important; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
+                    <span class="dashicons dashicons-exit" style="font-size:18px; width:18px; height:18px;"></span>
+                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('Logout / خروج', 'ac-inventory-system'); ?></small>
                 </button>
             </div>
         </div>

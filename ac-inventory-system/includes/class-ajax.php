@@ -31,19 +31,21 @@ class AC_IS_Ajax {
 
 		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
 		$data = array(
-			'name'           => sanitize_text_field( $_POST['name'] ),
-			'category'       => sanitize_text_field( $_POST['category'] ),
-			'subcategory'    => sanitize_text_field( $_POST['subcategory'] ),
-			'original_price' => floatval( $_POST['original_price'] ),
-			'purchase_cost'  => floatval( $_POST['purchase_cost'] ),
-			'discount'       => floatval( $_POST['discount'] ),
-			'final_price'    => floatval( $_POST['final_price'] ),
-			'stock_quantity' => intval( $_POST['stock_quantity'] ),
-			'brand_id'       => intval( $_POST['brand_id'] ),
-			'model_number'   => sanitize_text_field( $_POST['model_number'] ),
-			'filter_stages'  => intval( $_POST['filter_stages'] ),
-			'serial_number'  => sanitize_text_field( $_POST['serial_number'] ),
-			'barcode'        => sanitize_text_field( $_POST['barcode'] ),
+			'name'             => sanitize_text_field( $_POST['name'] ),
+			'category'         => sanitize_text_field( $_POST['category'] ),
+			'subcategory'      => sanitize_text_field( $_POST['subcategory'] ),
+			'original_price'   => floatval( $_POST['original_price'] ),
+			'purchase_cost'    => floatval( $_POST['purchase_cost'] ),
+			'discount'         => floatval( $_POST['discount'] ),
+			'final_price'      => floatval( $_POST['final_price'] ),
+			'stock_quantity'   => intval( $_POST['stock_quantity'] ),
+			'brand_id'         => intval( $_POST['brand_id'] ),
+			'model_number'     => sanitize_text_field( $_POST['model_number'] ),
+			'filter_stages'    => intval( $_POST['filter_stages'] ),
+			'serial_number'    => sanitize_text_field( $_POST['serial_number'] ),
+			'barcode'          => sanitize_text_field( $_POST['barcode'] ),
+			'factory_barcode'  => sanitize_text_field( $_POST['factory_barcode'] ),
+			'default_warranty' => sanitize_text_field( $_POST['default_warranty'] ),
 		);
 
 		if ( $id ) {
@@ -106,8 +108,10 @@ class AC_IS_Ajax {
 		$password = $_POST['password'];
 
 		if ( AC_IS_Auth::login( $username, $password ) ) {
+			AC_IS_Reports_Audit::log('login', "User $username logged in");
 			wp_send_json_success();
 		} else {
+			AC_IS_Reports_Audit::log('failed_login', "Failed login attempt for $username");
 			wp_send_json_error();
 		}
 	}
@@ -189,6 +193,8 @@ class AC_IS_Ajax {
 		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
+		$name = sanitize_text_field( $_POST['name'] );
+		AC_IS_Reports_Audit::log( $id ? 'edit_product' : 'add_product', "Product: $name" );
 		$data = array(
 			'name'            => sanitize_text_field( $_POST['name'] ),
 			'phone'           => sanitize_text_field( $_POST['phone'] ),
@@ -476,6 +482,7 @@ class AC_IS_Ajax {
 		$operator_id  = $current_user ? $current_user->id : 0;
 
 		// Create Invoice
+		AC_IS_Reports_Audit::log('sale', "Customer: {$customer_data['name']}, Amount: {$_POST['total_amount']}");
 		$wpdb->insert( $wpdb->prefix . 'ac_is_invoices', array(
 			'customer_id' => $customer_id,
 			'total_amount' => floatval( $_POST['total_amount'] ),

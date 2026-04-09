@@ -40,13 +40,22 @@ $chart_data = $wpdb->get_results("
     ORDER BY month ASC
 ");
 
-// Recent Activity
+// Recent Activity (Fixed to 5)
 $recent_sales = $wpdb->get_results("
     SELECT i.*, c.name as customer_name
     FROM $table_invoices i
     LEFT JOIN {$wpdb->prefix}ac_is_customers c ON i.customer_id = c.id
     ORDER BY i.invoice_date DESC
-    LIMIT 8
+    LIMIT 5
+");
+
+// Daily Sales for Current Month
+$current_month_days = $wpdb->get_results("
+    SELECT DATE(invoice_date) as sale_date, SUM(total_amount) as daily_total
+    FROM $table_invoices
+    WHERE MONTH(invoice_date) = MONTH(CURDATE()) AND YEAR(invoice_date) = YEAR(CURDATE())
+    GROUP BY DATE(invoice_date)
+    ORDER BY sale_date ASC
 ");
 ?>
 
@@ -129,12 +138,30 @@ $recent_sales = $wpdb->get_results("
     </div>
 </div>
 
-<div class="ac-is-grid" style="grid-template-columns: 1.5fr 1fr; gap:20px; align-items: stretch;">
-    <!-- Monthly Sales Chart -->
+<div class="ac-is-grid" style="grid-template-columns: 1.8fr 1fr; gap:20px; align-items: stretch;">
+    <!-- Monthly Sales Detailed Table/Graph -->
     <div class="ac-is-card" style="display:flex; flex-direction:column;">
-        <h3><?php _e('تحليل المبيعات الشهري', 'ac-inventory-system'); ?></h3>
-        <div style="flex-grow:1; display:flex; align-items:center;">
-            <canvas id="ac-is-sales-chart" height="150"></canvas>
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:15px;">
+            <h3 style="margin:0;"><?php _e('تحليل مبيعات الشهر الحالي', 'ac-inventory-system'); ?></h3>
+            <span class="ac-is-capsule capsule-success" style="font-size:0.9rem; padding:5px 12px;"><?php _e('الإجمالي:', 'ac-inventory-system'); ?> <?php echo number_format($total_sales_value, 2); ?></span>
+        </div>
+        <div style="flex-grow:1; overflow-y:auto; max-height:400px;">
+            <table class="ac-is-table" style="font-size:0.8rem;">
+                <thead>
+                    <tr>
+                        <th><?php _e('التاريخ', 'ac-inventory-system'); ?></th>
+                        <th><?php _e('قيمة المبيعات', 'ac-inventory-system'); ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach($current_month_days as $day): ?>
+                        <tr>
+                            <td><?php echo date('d / m / Y', strtotime($day->sale_date)); ?></td>
+                            <td><strong><?php echo number_format($day->daily_total, 2); ?> EGP</strong></td>
+                        </tr>
+                    <?php endforeach; ?>
+                </tbody>
+            </table>
         </div>
     </div>
 

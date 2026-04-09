@@ -81,6 +81,12 @@ class AC_IS_Auth {
 		return $user && ( $user->role === 'admin' || $user->role === 'manager' || $user->role === 'technician' );
 	}
 
+	public static function is_system_admin() {
+		if ( current_user_can( 'manage_options' ) ) return true;
+		$user = self::current_user();
+		return $user && $user->role === 'admin';
+	}
+
 	public static function can_delete_records() {
 		return self::is_manager();
 	}

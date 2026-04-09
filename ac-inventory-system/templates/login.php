@@ -34,7 +34,7 @@ jQuery(document).ready(function($) {
             if (response.success) {
                 location.reload();
             } else {
-                $('#ac-is-login-error').show().shake();
+                $('#ac-is-login-error').fadeIn(200);
             }
         });
     });

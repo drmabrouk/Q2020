@@ -16,6 +16,7 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
         <button class="ac-is-tab-btn" data-tab="tab-identity"><?php _e('هوية النظام', 'ac-inventory-system'); ?></button>
         <button class="ac-is-tab-btn" data-tab="tab-pwa"><?php _e('تطبيق الجوال', 'ac-inventory-system'); ?></button>
         <button class="ac-is-tab-btn" data-tab="tab-brands"><?php _e('البراندات', 'ac-inventory-system'); ?></button>
+        <button class="ac-is-tab-btn" data-tab="tab-audit"><?php _e('سجل النشاطات', 'ac-inventory-system'); ?></button>
     </div>
 
     <!-- Section 1: Staff Management -->
@@ -117,6 +118,13 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                         <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b; padding:0 10px;"><span class="dashicons dashicons-upload"></span></button>
                     </div>
                 </div>
+                <div class="ac-is-form-group">
+                    <label style="font-size:0.75rem;"><?php _e('أيقونة التطبيق (PWA Icon)', 'ac-inventory-system'); ?></label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" name="pwa_icon_url" id="pwa-icon-url" value="<?php echo esc_attr($settings['pwa_icon_url']->setting_value ?? ''); ?>" placeholder="URL">
+                        <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b; padding:0 10px;"><span class="dashicons dashicons-upload"></span></button>
+                    </div>
+                </div>
                 <div class="ac-is-form-group" style="background:#fef2f2; padding:15px; border-radius:6px; border:1px solid #fee2e2;">
                     <label style="color:#991b1b; font-weight:700;"><?php _e('أمن ملء الشاشة', 'ac-inventory-system'); ?></label>
                     <input type="text" name="fullscreen_password" value="<?php echo esc_attr($fullscreen_pass); ?>" placeholder="<?php _e('كلمة مرور الخروج', 'ac-inventory-system'); ?>">
@@ -153,13 +161,6 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                     <div class="ac-is-form-group">
                         <label style="font-size:0.75rem;"><?php _e('لون الخلفية', 'ac-inventory-system'); ?></label>
                         <input type="color" name="pwa_bg_color" value="<?php echo esc_attr($settings['pwa_bg_color']->setting_value ?? '#f1f5f9'); ?>" style="height:35px; padding:2px;">
-                    </div>
-                </div>
-                <div class="ac-is-form-group">
-                    <label style="font-size:0.75rem;"><?php _e('أيقونة التطبيق (512x512)', 'ac-inventory-system'); ?></label>
-                    <div style="display:flex; gap:5px;">
-                        <input type="text" name="pwa_icon_url" value="<?php echo esc_attr($settings['pwa_icon_url']->setting_value ?? ''); ?>" placeholder="URL">
-                        <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b; padding:0 10px;"><span class="dashicons dashicons-upload"></span></button>
                     </div>
                 </div>
                 <button type="submit" class="ac-is-btn" style="width:100%; height:40px; background:#805ad5;"><?php _e('تحديث إعدادات التطبيق', 'ac-inventory-system'); ?></button>
@@ -206,6 +207,40 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
             </div>
         </div>
         </div>
+
+        <!-- Section 5: Activity Audit Log -->
+        <div id="tab-audit" class="ac-is-tab-content" style="display:none;">
+            <div class="ac-is-card" style="border-top: 4px solid #f59e0b;">
+                <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:20px;">
+                    <h3><?php _e('سجل مراقبة النشاطات (آخر 200 إجراء)', 'ac-inventory-system'); ?></h3>
+                    <button id="ac-is-export-audit-pdf" class="ac-is-btn" style="background:#dc2626;"><span class="dashicons dashicons-pdf" style="margin-left:5px;"></span><?php _e('تصدير التقرير', 'ac-inventory-system'); ?></button>
+                </div>
+                <div style="max-height:600px; overflow-y:auto;">
+                    <table class="ac-is-table" id="ac-is-audit-table">
+                        <thead>
+                            <tr>
+                                <th><?php _e('المستخدم', 'ac-inventory-system'); ?></th>
+                                <th><?php _e('الإجراء', 'ac-inventory-system'); ?></th>
+                                <th><?php _e('الوصف', 'ac-inventory-system'); ?></th>
+                                <th><?php _e('الجهاز', 'ac-inventory-system'); ?></th>
+                                <th><?php _e('التاريخ', 'ac-inventory-system'); ?></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <?php $audit_logs = AC_IS_Reports_Audit::get_logs(); foreach($audit_logs as $log): ?>
+                                <tr>
+                                    <td><strong><?php echo esc_html($log->user_id); ?></strong></td>
+                                    <td><span class="ac-is-capsule capsule-info"><?php echo esc_html($log->action_type); ?></span></td>
+                                    <td><small><?php echo esc_html($log->description); ?></small></td>
+                                    <td><small><?php echo esc_html($log->device_type); ?></small></td>
+                                    <td><?php echo date('Y-m-d H:i', strtotime($log->action_date)); ?></td>
+                                </tr>
+                            <?php endforeach; ?>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -235,6 +270,18 @@ jQuery(document).ready(function($) {
         $(this).addClass('active');
         $('.ac-is-tab-content').hide();
         $('#' + tab).fadeIn(200);
+    });
+
+    $('#ac-is-export-audit-pdf').on('click', function() {
+        const element = document.getElementById('ac-is-audit-table');
+        const opt = {
+            margin: 10,
+            filename: 'audit-log-' + new Date().toISOString().slice(0,10) + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
     });
 
     // Shared Staff/Settings submit logic

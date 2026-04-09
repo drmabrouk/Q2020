@@ -12,8 +12,15 @@ $can_manage = AC_IS_Auth::is_manager();
     <?php endif; ?>
 </div>
 
-<div class="ac-is-search-filters" style="margin-bottom:25px; padding:20px; background:#fff; border:1px solid var(--ac-border);">
-    <input type="text" id="ac-is-customer-search" placeholder="<?php _e('البحث الذكي بالاسم، الهاتف (أساسي/ثانوي)، أو البريد الإلكتروني...', 'ac-inventory-system'); ?>" style="width:100%; height:45px; font-size:1.1rem; border-radius:6px; padding:0 20px;">
+<div class="ac-is-search-filters" style="margin-bottom:25px; padding:20px; background:#fff; border:1px solid var(--ac-border); display:flex; gap:15px; flex-wrap: wrap; align-items: center;">
+    <input type="text" id="ac-is-customer-search" placeholder="<?php _e('بحث شامل بالاسم، الهاتف، أو البريد...', 'ac-inventory-system'); ?>" style="flex: 2; height:45px; font-size:1.1rem; border-radius:6px; padding:0 20px;">
+
+    <select id="ac-is-customer-sort" style="flex: 1; height:45px; border-radius:6px;">
+        <option value="name"><?php _e('ترتيب حسب: الاسم', 'ac-inventory-system'); ?></option>
+        <option value="revenue"><?php _e('ترتيب حسب: إجمالي المشتريات', 'ac-inventory-system'); ?></option>
+        <option value="profit"><?php _e('ترتيب حسب: صافي الربح', 'ac-inventory-system'); ?></option>
+        <option value="frequency"><?php _e('ترتيب حسب: عدد العمليات', 'ac-inventory-system'); ?></option>
+    </select>
 </div>
 
 <!-- Customer Modal (Styled) -->
@@ -135,17 +142,38 @@ jQuery(document).ready(function($) {
         $.post(ac_is_ajax.ajax_url, { action: 'ac_is_delete_customer', id: $(this).closest('tr').data('customer').id, nonce: ac_is_ajax.nonce }, () => location.reload());
     });
 
-    $('#ac-is-customer-search').on('input', function() {
-        const query = $(this).val().toLowerCase();
-        $('#ac-is-customer-table tbody tr').each(function() {
-            const data = $(this).data('customer');
+    function filterAndSortCustomers() {
+        const query = $('#ac-is-customer-search').val().toLowerCase();
+        const sortBy = $('#ac-is-customer-sort').val();
+        const rows = $('#ac-is-customer-table tbody tr').get();
+
+        rows.forEach(row => {
+            const data = $(row).data('customer');
             if(!data) return;
             const match = data.name.toLowerCase().includes(query) ||
                           data.phone.includes(query) ||
                           (data.phone_secondary && data.phone_secondary.includes(query)) ||
                           (data.email && data.email.toLowerCase().includes(query));
-            $(this).toggle(match);
+            $(row).toggle(match);
         });
-    });
+
+        rows.sort((a, b) => {
+            const valA = $(a).data('customer');
+            const valB = $(b).data('customer');
+            if (!valA || !valB) return 0;
+
+            switch(sortBy) {
+                case 'revenue': return parseFloat(valB.total_revenue || 0) - parseFloat(valA.total_revenue || 0);
+                case 'profit': return parseFloat(valB.net_profit || 0) - parseFloat(valA.net_profit || 0);
+                case 'frequency': return parseInt(valB.total_invoices || 0) - parseInt(valA.total_invoices || 0);
+                default: return valA.name.localeCompare(valB.name, 'ar');
+            }
+        });
+
+        $.each(rows, (index, row) => $('#ac-is-customer-table tbody').append(row));
+    }
+
+    $('#ac-is-customer-search').on('input', filterAndSortCustomers);
+    $('#ac-is-customer-sort').on('change', filterAndSortCustomers);
 });
 </script>

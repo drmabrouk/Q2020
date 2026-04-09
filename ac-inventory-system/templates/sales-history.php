@@ -118,9 +118,10 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
                     <td><span class="ac-is-capsule capsule-info"><?php echo esc_html($operator_name); ?></span></td>
                     <td>
                         <div style="display:flex; gap:5px;">
-                            <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $s->invoice_id)); ?>" class="ac-is-btn" style="padding:4px 8px; font-size:0.75rem; background:#64748b;"><span class="dashicons dashicons-visibility"></span></a>
+                            <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $s->invoice_id)); ?>" class="ac-is-btn" style="padding:4px 8px; font-size:0.75rem; background:#64748b;" title="<?php _e('عرض', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-visibility"></span></a>
+                            <button class="ac-is-btn ac-is-download-invoice-pdf" data-id="<?php echo $s->invoice_id; ?>" style="padding:4px 8px; font-size:0.75rem; background:#059669;" title="<?php _e('تحميل PDF', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-pdf"></span></button>
                             <?php if ( AC_IS_Auth::can_delete_records() ) : ?>
-                                <button class="ac-is-btn ac-is-delete-invoice" data-id="<?php echo $s->invoice_id; ?>" style="padding:4px 8px; font-size:0.75rem; background:#ef4444;"><span class="dashicons dashicons-trash"></span></button>
+                                <button class="ac-is-btn ac-is-delete-invoice" data-id="<?php echo $s->invoice_id; ?>" style="padding:4px 8px; font-size:0.75rem; background:#ef4444;" title="<?php _e('حذف', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-trash"></span></button>
                             <?php endif; ?>
                         </div>
                     </td>
@@ -134,6 +135,26 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
 
 <script>
 jQuery(document).ready(function($) {
+    $('.ac-is-download-invoice-pdf').on('click', function() {
+        const id = $(this).data('id');
+        const url = '?ac_view=invoice&invoice_id=' + id + '&print_mode=1';
+
+        // Use an iframe to load and then export
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        iframe.onload = function() {
+            const element = iframe.contentWindow.document.querySelector('.invoice-container');
+            if (element) {
+                html2pdf().from(element).save('invoice-' + id + '.pdf').then(() => {
+                    document.body.removeChild(iframe);
+                });
+            }
+        };
+    });
+
     $('.ac-is-delete-invoice').on('click', function() {
         if (!confirm('<?php _e('هل أنت متأكد من حذف هذه الفاتورة؟ سيتم استرجاع المنتجات للمخزون وحذف السجل نهائياً.', 'ac-inventory-system'); ?>')) return;
         const id = $(this).data('id');
