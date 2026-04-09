@@ -30,19 +30,20 @@
                     <span class="dashicons dashicons-admin-generic"></span> <?php _e('الإعدادات', 'ac-inventory-system'); ?>
                 </a>
             <?php endif; ?>
-            <a href="#" id="ac-is-logout-btn">
-                <span class="dashicons dashicons-logout"></span> <?php _e('تسجيل الخروج', 'ac-inventory-system'); ?>
-            </a>
         </nav>
 
-        <div class="ac-is-sidebar-footer" style="padding: 15px; border-top: 1px solid var(--ac-sidebar-hover);">
-            <button id="ac-is-refresh-btn" class="ac-is-btn" style="width:100%; background:rgba(255,255,255,0.1); margin-bottom:10px; padding:8px; font-size:0.8rem;">
-                <span class="dashicons dashicons-update" style="margin-left:5px;"></span> <?php _e('تحديث البيانات', 'ac-inventory-system'); ?>
-            </button>
-            <button id="ac-is-fullscreen-btn" class="ac-is-btn" style="width:100%; background:#475569; padding: 10px; font-size: 0.85rem;">
-                <span class="dashicons dashicons-fullscreen-alt" style="margin-left:8px;"></span>
-                <span class="btn-text"><?php _e('ملء الشاشة', 'ac-inventory-system'); ?></span>
-            </button>
+        <div class="ac-is-sidebar-footer">
+            <div class="ac-is-top-controls">
+                <button id="ac-is-fullscreen-btn" class="control-btn" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>">
+                    <span class="dashicons dashicons-fullscreen-alt"></span>
+                </button>
+                <button id="ac-is-refresh-btn" class="control-btn" title="<?php _e('تحديث البيانات', 'ac-inventory-system'); ?>">
+                    <span class="dashicons dashicons-update"></span>
+                </button>
+                <button id="ac-is-logout-btn" class="control-btn logout" title="<?php _e('تسجيل الخروج', 'ac-inventory-system'); ?>">
+                    <span class="dashicons dashicons-logout"></span>
+                </button>
+            </div>
         </div>
     </aside>
 
