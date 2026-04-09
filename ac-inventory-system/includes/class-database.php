@@ -139,6 +139,8 @@ class AC_IS_Database {
 			description text,
 			device_type varchar(50),
 			device_info text,
+			ip_address varchar(50),
+			meta_data longtext,
 			action_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) $charset_collate;";

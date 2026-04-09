@@ -4,9 +4,11 @@ $brands = AC_IS_Brands::get_brands();
 $brand_map = array();
 foreach($brands as $b) { $brand_map[$b->id] = $b; }
 ?>
-<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
     <h2><?php _e('إدارة المخزون', 'ac-inventory-system'); ?></h2>
-    <div style="display:flex; gap:10px;">
+    <div style="display:flex; gap:10px; flex-wrap: wrap;">
+        <button id="ac-is-inventory-add-scan-btn" class="ac-is-btn" style="background:#059669;"><span class="dashicons dashicons-camera" style="margin-left:5px;"></span><?php _e('إضافة منتج بباركود', 'ac-inventory-system'); ?></button>
+        <button id="ac-is-inventory-bulk-scan-btn" class="ac-is-btn" style="background:#1e293b;"><span class="dashicons dashicons-forms" style="margin-left:5px;"></span><?php _e('إدخال سريع', 'ac-inventory-system'); ?></button>
         <button id="ac-is-bulk-barcode-pdf" class="ac-is-btn" style="background:#64748b;"><span class="dashicons dashicons-pdf" style="margin-left:5px;"></span><?php _e('تصدير الباركود (PDF)', 'ac-inventory-system'); ?></button>
         <a href="<?php echo add_query_arg('ac_view', 'add-product'); ?>" class="ac-is-btn"><span class="dashicons dashicons-plus" style="margin-left:5px;"></span><?php _e('إضافة منتج جديد', 'ac-inventory-system'); ?></a>
     </div>

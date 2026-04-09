@@ -5,7 +5,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class AC_IS_Reports_Audit {
 
-	public static function log( $action, $description = '' ) {
+	public static function log( $action, $description = '', $data = null ) {
 		global $wpdb;
 		$user = AC_IS_Auth::current_user();
 		$user_id = $user ? $user->id : 'guest';
@@ -22,6 +22,8 @@ class AC_IS_Reports_Audit {
 			'description' => $description,
 			'device_type' => $device,
 			'device_info' => $agent,
+			'ip_address'  => $_SERVER['REMOTE_ADDR'] ?? '',
+			'meta_data'   => $data ? json_encode($data) : null
 		) );
 	}
 

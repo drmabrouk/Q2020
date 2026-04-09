@@ -54,9 +54,9 @@
                     <span class="dashicons dashicons-update" style="font-size:18px; width:18px; height:18px;"></span>
                     <small style="font-size:0.6rem; margin-top:2px;"><?php _e('تحديث', 'ac-inventory-system'); ?></small>
                 </button>
-                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" title="<?php _e('Logout / خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444 !important; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
+                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" title="<?php _e('خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444 !important; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
                     <span class="dashicons dashicons-exit" style="font-size:18px; width:18px; height:18px;"></span>
-                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('Logout / خروج', 'ac-inventory-system'); ?></small>
+                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('خروج', 'ac-inventory-system'); ?></small>
                 </button>
             </div>
         </div>

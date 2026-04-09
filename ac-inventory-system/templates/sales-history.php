@@ -40,9 +40,19 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('سجل المبيعات والتفاصيل', 'ac-inventory-system'); ?></h2>
 
-    <div class="ac-is-compact-search" style="flex-grow: 1; max-width: 400px; position: relative;">
-        <span class="dashicons dashicons-search" style="position: absolute; right: 10px; top: 10px; color: #94a3b8;"></span>
-        <input type="text" id="ac-is-live-sales-search" placeholder="<?php _e('بحث سريع: فاتورة، عميل، منتج...', 'ac-inventory-system'); ?>" style="width: 100%; padding: 8px 35px 8px 12px; border-radius: 20px; border: 1px solid var(--ac-border); font-size: 0.85rem;">
+    <div class="ac-is-compact-search" style="flex-grow: 1; max-width: 500px; display:flex; gap:10px;">
+        <div style="position: relative; flex:1;">
+            <span class="dashicons dashicons-search" style="position: absolute; right: 10px; top: 10px; color: #94a3b8;"></span>
+            <input type="text" id="ac-is-live-sales-search" placeholder="<?php _e('بحث سريع: فاتورة، عميل، منتج...', 'ac-inventory-system'); ?>" style="width: 100%; padding: 8px 35px 8px 12px; border-radius: 20px; border: 1px solid var(--ac-border); font-size: 0.85rem;">
+        </div>
+        <div class="ac-is-dropdown" style="position:relative;">
+            <button class="ac-is-btn" style="background:#64748b; height:38px;" onclick="jQuery('#export-dropdown').toggle()"><?php _e('تصدير التقارير', 'ac-inventory-system'); ?> <span class="dashicons dashicons-arrow-down-alt2"></span></button>
+            <div id="export-dropdown" style="display:none; position:absolute; left:0; top:45px; background:#fff; border:1px solid #ddd; border-radius:8px; width:200px; z-index:1000; box-shadow:0 10px 15px rgba(0,0,0,0.1);">
+                <a href="#" class="export-link" data-type="sales-pdf" style="display:block; padding:10px 15px; text-decoration:none; color:#333; border-bottom:1px solid #eee;"><?php _e('تصدير المبيعات (PDF)', 'ac-inventory-system'); ?></a>
+                <a href="#" class="export-link" data-type="details-pdf" style="display:block; padding:10px 15px; text-decoration:none; color:#333; border-bottom:1px solid #eee;"><?php _e('تصدير التفاصيل (PDF)', 'ac-inventory-system'); ?></a>
+                <a href="<?php echo add_query_arg(array('ac_export' => 'sales', 'ac_nonce' => wp_create_nonce('ac_is_export'))); ?>" style="display:block; padding:10px 15px; text-decoration:none; color:#333;"><?php _e('تصدير CSV', 'ac-inventory-system'); ?></a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -153,6 +163,22 @@ jQuery(document).ready(function($) {
                 });
             }
         };
+    });
+
+    $('.export-link').on('click', function(e) {
+        e.preventDefault();
+        const type = $(this).data('type');
+        const element = document.getElementById('ac-is-sales-table').cloneNode(true);
+        $(element).find('th:last-child, td:last-child').remove();
+
+        const opt = {
+            margin: 10,
+            filename: 'sales-report-' + new Date().toISOString().slice(0,10) + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save().then(() => $('#export-dropdown').hide());
     });
 
     $('.ac-is-delete-invoice').on('click', function() {

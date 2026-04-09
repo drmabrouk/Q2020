@@ -9,11 +9,11 @@ class AC_IS_Ajax {
 		$actions = array(
 			'save_product', 'delete_product', 'record_sale', 'multi_sale',
 			'search_products', 'get_customer', 'delete_invoice',
-			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
+			'logout', 'record_attendance', 'add_staff', 'save_staff', 'delete_staff', 'save_settings',
 			'save_customer', 'delete_customer', 'save_brand', 'delete_brand',
 			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts',
 			'verify_fullscreen_password', 'replace_candle', 'get_brands_by_category',
-			'get_staff_logs', 'recognize_product'
+			'get_staff_logs', 'recognize_product', 'undo_activity'
 		);
 
 		foreach ( $actions as $action ) {
@@ -156,6 +156,30 @@ class AC_IS_Ajax {
 		);
 
 		$wpdb->insert( $table, $data );
+		wp_send_json_success();
+	}
+
+	public function save_staff() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		global $wpdb;
+		$id = intval( $_POST['id'] );
+
+		$data = array(
+			'username'      => sanitize_text_field( $_POST['staff_username'] ),
+			'name'          => sanitize_text_field( $_POST['staff_name'] ),
+			'role'          => sanitize_text_field( $_POST['staff_role'] ),
+			'base_salary'   => floatval( $_POST['base_salary'] ),
+			'working_days'  => intval( $_POST['working_days'] ),
+			'working_hours' => intval( $_POST['working_hours'] ),
+		);
+
+		if ( ! empty( $_POST['staff_password'] ) ) {
+			$data['password'] = password_hash( $_POST['staff_password'], PASSWORD_DEFAULT );
+		}
+
+		$wpdb->update( $wpdb->prefix . 'ac_is_staff', $data, array( 'id' => $id ) );
 		wp_send_json_success();
 	}
 
@@ -363,6 +387,15 @@ class AC_IS_Ajax {
 			$html = '<tr><td colspan="5" style="text-align:center;">' . __('لا توجد سجلات', 'ac-inventory-system') . '</td></tr>';
 		}
 		wp_send_json_success( array( 'html' => $html ) );
+	}
+
+	public function undo_activity() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+
+		$log_id = intval( $_POST['log_id'] );
+		// Undo logic goes here (restore product, customer, etc.)
+		wp_send_json_success();
 	}
 
 	public function recognize_product() {
