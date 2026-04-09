@@ -76,7 +76,11 @@ class AC_Inventory_System {
 
 	public function enqueue_assets() {
 		wp_enqueue_media();
-		wp_enqueue_style( 'ac-is-rtl-style', AC_IS_URL . 'assets/css/style-rtl.css', array(), AC_IS_VERSION );
+
+		// Enqueue Cairo font as fallback
+		wp_enqueue_style( 'ac-is-font-cairo', 'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap', array(), AC_IS_VERSION );
+
+		wp_enqueue_style( 'ac-is-rtl-style', AC_IS_URL . 'assets/css/style-rtl.css', array( 'ac-is-font-cairo' ), AC_IS_VERSION );
 		wp_enqueue_style( 'ac-is-print-style', AC_IS_URL . 'assets/css/print.css', array(), AC_IS_VERSION, 'print' );
 
 		// Enqueue JsBarcode from CDN
