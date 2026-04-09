@@ -335,7 +335,23 @@ jQuery(document).ready(function($) {
     // PWA Install Prompt Logic
     let deferredPrompt;
     const installBanner = $('#ac-is-install-banner');
+    const iosInstallBanner = $('#ac-is-ios-install-banner');
     const installBtn = $('#ac-is-install-btn');
+
+    // Detect iOS
+    const isIos = () => {
+        const userAgent = window.navigator.userAgent.toLowerCase();
+        return /iphone|ipad|ipod/.test(userAgent);
+    };
+
+    // Detect if already installed (standalone mode)
+    const isInStandaloneMode = () => ('standalone' in window.navigator) && (window.navigator.standalone);
+
+    if (isIos() && !isInStandaloneMode()) {
+        iosInstallBanner.fadeIn(300);
+        // Auto hide after 15 seconds to avoid permanent clutter
+        setTimeout(() => iosInstallBanner.fadeOut(500), 15000);
+    }
 
     window.addEventListener('beforeinstallprompt', (e) => {
         // Prevent Chrome 67 and earlier from automatically showing the prompt
