@@ -138,6 +138,10 @@ class AC_IS_Database {
 			'fullscreen_password' => '123456789',
 			'system_name'         => 'نظام البيع',
 			'company_name'        => get_bloginfo('name'),
+			'pwa_app_name'        => 'نظام المبيعات',
+			'pwa_short_name'      => 'المبيعات',
+			'pwa_theme_color'     => '#2563eb',
+			'pwa_bg_color'        => '#f1f5f9',
 		);
 
 		foreach ( $defaults as $key => $value ) {

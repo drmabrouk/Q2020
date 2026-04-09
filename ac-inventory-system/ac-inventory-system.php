@@ -51,6 +51,7 @@ class AC_Inventory_System {
 		require_once AC_IS_PATH . 'includes/class-inventory.php';
 		require_once AC_IS_PATH . 'includes/class-sales.php';
 		require_once AC_IS_PATH . 'includes/class-reports.php';
+		require_once AC_IS_PATH . 'includes/class-pwa.php';
 
 		// Infrastructure
 		require_once AC_IS_PATH . 'includes/class-shortcode.php';
@@ -60,6 +61,7 @@ class AC_Inventory_System {
 	private function init_hooks() {
 		register_activation_hook( __FILE__, array( 'AC_IS_Database', 'create_tables' ) );
 		add_action( 'init', array( 'AC_IS_Auth', 'init' ) );
+		add_action( 'init', array( 'AC_IS_PWA', 'init' ) );
 		add_action( 'init', array( 'AC_IS_Reports', 'export_sales_csv' ) );
 		add_action( 'init', array( $this, 'send_nocache_headers' ) );
 		add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_assets' ) );
