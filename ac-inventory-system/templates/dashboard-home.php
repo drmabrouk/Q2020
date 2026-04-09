@@ -31,7 +31,7 @@ $recent_sales = $wpdb->get_results("
 ?>
 
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
-    <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('لوحة المعلومات / التقارير', 'ac-inventory-system'); ?></h2>
+    <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('لوحة المعلومات', 'ac-inventory-system'); ?></h2>
     <div style="display:flex; gap:10px;">
         <a href="<?php echo add_query_arg('ac_view', 'add-product'); ?>" class="ac-is-btn"><?php _e('إضافة منتج', 'ac-inventory-system'); ?></a>
         <a href="<?php echo add_query_arg('ac_view', 'sales'); ?>" class="ac-is-btn" style="background:#059669;"><?php _e('بيع جديد', 'ac-inventory-system'); ?></a>

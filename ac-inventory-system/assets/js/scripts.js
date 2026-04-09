@@ -4,6 +4,9 @@ jQuery(document).ready(function($) {
     let salesMode = 'manual';
     let customerData = { is_quick: true };
     let html5QrCode;
+    let lastScannedCode = '';
+    let lastScanTime = 0;
+    const SCAN_COOLDOWN = 5000; // 5 seconds
 
     // --- Core Operations ---
 
@@ -100,11 +103,21 @@ jQuery(document).ready(function($) {
     }
 
     function processScannedBarcode(query) {
+        const now = Date.now();
+        if (query === lastScannedCode && (now - lastScanTime) < SCAN_COOLDOWN) {
+            console.log('Barcode cooldown active for:', query);
+            return false;
+        }
+
         let found = false;
         $('#ac-is-sale-product option').each(function() {
             if ($(this).data('barcode') == query || $(this).data('serial') == query) {
-                addProductToCart($(this).val(), $(this).data('serial'), 1);
-                found = true; return false;
+                if (addProductToCart($(this).val(), $(this).data('serial'), 1)) {
+                    lastScannedCode = query;
+                    lastScanTime = now;
+                    found = true;
+                }
+                return false;
             }
         });
         return found;
