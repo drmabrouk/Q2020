@@ -4,6 +4,7 @@ jQuery(document).ready(function($) {
     let salesMode = 'manual';
     let customerData = { is_quick: true };
     let html5QrCode;
+    let formQrCode;
     let lastScannedCode = '';
     let lastScanTime = 0;
     const SCAN_COOLDOWN = 5000; // 5 seconds
@@ -370,6 +371,50 @@ jQuery(document).ready(function($) {
             if (res.success) window.location.href = '?ac_view=inventory';
         });
     });
+
+    $('#scan-factory-barcode').on('click', function() {
+        $('#ac-is-form-scanner-overlay').fadeIn(300);
+        if (!formQrCode) formQrCode = new Html5Qrcode("ac-is-form-reader");
+        formQrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: { width: 250, height: 150 } }, (text) => {
+            $('#ac-is-factory-barcode-input').val(text);
+            recognizeProductByBarcode(text);
+            stopFormScanner();
+        }).catch(err => console.error(err));
+    });
+
+    function stopFormScanner() {
+        if (formQrCode) formQrCode.stop().then(() => {
+            $('#ac-is-form-scanner-overlay').fadeOut(200);
+        });
+    }
+
+    $('#close-form-scanner').on('click', stopFormScanner);
+
+    function recognizeProductByBarcode(code) {
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_recognize_product',
+            barcode: code,
+            nonce: ac_is_ajax.nonce
+        }, function(res) {
+            if (res.success) {
+                const p = res.data;
+                // Fill form
+                $('input[name="name"]').val(p.name);
+                $('#ac-is-category-select').val(p.category).trigger('change');
+                $('#ac-is-brand-select').val(p.brand_id);
+                $('input[name="model_number"]').val(p.model_number);
+                $('input[name="purchase_cost"]').val(p.purchase_cost);
+                $('input[name="original_price"]').val(p.original_price);
+                $('input[name="discount"]').val(p.discount);
+                $('input[name="final_price"]').val(p.final_price);
+                $('#ac-is-barcode-input').val(p.barcode);
+                $('#ac-is-factory-barcode-input').val(p.factory_barcode);
+                $('input[name="id"]').val(p.id);
+
+                showScanConfirmation();
+            }
+        });
+    }
 
     $(document).on('click', '.ac-is-delete-product', function(e) {
         if (!confirm('حذف؟')) return;

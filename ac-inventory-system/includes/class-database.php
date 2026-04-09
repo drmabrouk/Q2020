@@ -42,6 +42,7 @@ class AC_IS_Database {
 			filter_stages int,
 			serial_number varchar(255),
 			barcode varchar(255),
+			factory_barcode varchar(255),
 			created_at datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) $charset_collate;

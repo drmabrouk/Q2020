@@ -29,6 +29,12 @@ class AC_IS_Inventory {
 		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE id = %d", $id ) );
 	}
 
+	public static function get_product_by_barcode( $barcode ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_products';
+		return $wpdb->get_row( $wpdb->prepare( "SELECT * FROM $table WHERE barcode = %s OR factory_barcode = %s", $barcode, $barcode ) );
+	}
+
 	public static function add_product( $data ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_products';
