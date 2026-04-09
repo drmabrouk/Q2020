@@ -28,10 +28,10 @@ $tracking_items = AC_IS_Filters::get_all_tracking( array('status' => $filter_sta
     <table class="ac-is-table">
         <thead>
             <tr>
-                <th><?php _e('العملية / الفلتر', 'ac-inventory-system'); ?></th>
-                <th><?php _e('العميل', 'ac-inventory-system'); ?></th>
-                <th><?php _e('حالة الشمعات', 'ac-inventory-system'); ?></th>
-                <th><?php _e('إجراءات', 'ac-inventory-system'); ?></th>
+                <th class="col-filter"><?php _e('العملية / الفلتر', 'ac-inventory-system'); ?></th>
+                <th class="col-customer"><?php _e('العميل', 'ac-inventory-system'); ?></th>
+                <th class="col-status"><?php _e('حالة الشمعات', 'ac-inventory-system'); ?></th>
+                <th class="col-actions"><?php _e('إجراءات', 'ac-inventory-system'); ?></th>
             </tr>
         </thead>
         <tbody>
@@ -42,11 +42,11 @@ $tracking_items = AC_IS_Filters::get_all_tracking( array('status' => $filter_sta
                 }
             ?>
                 <tr>
-                    <td>
+                    <td class="col-filter">
                         <strong><?php echo esc_html($op->product_name); ?></strong><br>
                         <small style="color:#64748b;">#INV-<?php echo str_pad($op->invoice_id, 8, '0', STR_PAD_LEFT); ?></small>
                     </td>
-                    <td>
+                    <td class="col-customer">
                         <strong><?php echo esc_html($op->customer_name); ?></strong><br>
                         <button class="ac-is-btn view-customer-details"
                                 data-name="<?php echo esc_attr($op->customer_name); ?>"
@@ -57,7 +57,7 @@ $tracking_items = AC_IS_Filters::get_all_tracking( array('status' => $filter_sta
                             <?php _e('تفاصيل العميل', 'ac-inventory-system'); ?>
                         </button>
                     </td>
-                    <td>
+                    <td class="col-status">
                         <div style="display:flex; gap:5px; flex-wrap: wrap;">
                             <?php foreach($op->stages as $s):
                                 $days_left = (strtotime($s->expiry_date) - time()) / 86400;
@@ -69,7 +69,7 @@ $tracking_items = AC_IS_Filters::get_all_tracking( array('status' => $filter_sta
                             <?php endforeach; ?>
                         </div>
                     </td>
-                    <td>
+                    <td class="col-actions">
                         <button class="ac-is-btn view-candle-details" data-stages='<?php echo json_encode($op->stages); ?>' style="padding:6px 12px; font-size:0.8rem;">
                             <span class="dashicons dashicons-list-view" style="margin-left:5px;"></span><?php _e('إدارة الشمعات', 'ac-inventory-system'); ?>
                         </button>

@@ -64,9 +64,9 @@
 
     <!-- Mobile Bottom Bar (Fixed) -->
     <div class="ac-is-mobile-bottom-bar" style="display:none;">
-        <button id="ac-is-mobile-fullscreen-btn" class="sidebar-ctrl-icon" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>">
-            <span class="dashicons dashicons-fullscreen-alt"></span>
-            <small><?php _e('كاملة', 'ac-inventory-system'); ?></small>
+        <button id="ac-is-mobile-quick-scan-btn" class="sidebar-ctrl-icon" style="color:var(--ac-primary) !important;" title="<?php _e('بيع سريع', 'ac-inventory-system'); ?>">
+            <span class="dashicons dashicons-camera"></span>
+            <small><?php _e('مسح', 'ac-inventory-system'); ?></small>
         </button>
         <button id="ac-is-mobile-refresh-btn" class="sidebar-ctrl-icon" title="<?php _e('تحديث', 'ac-inventory-system'); ?>">
             <span class="dashicons dashicons-update"></span>

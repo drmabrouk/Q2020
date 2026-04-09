@@ -8,8 +8,28 @@ $table_invoices = $wpdb->prefix . 'ac_is_invoices';
 $total_products = $wpdb->get_var("SELECT COUNT(*) FROM $table_products");
 $today_sales_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_invoices WHERE DATE(invoice_date) = CURDATE()");
 $today_sales_total = $wpdb->get_var("SELECT SUM(total_amount) FROM $table_invoices WHERE DATE(invoice_date) = CURDATE()") ?: 0;
+
+// Daily Profit Margin
+$today_cost = $wpdb->get_var("
+    SELECT SUM(p.purchase_cost * s.quantity)
+    FROM $table_sales s
+    JOIN $table_products p ON s.product_id = p.id
+    WHERE DATE(s.sale_date) = CURDATE()
+") ?: 0;
+$today_profit = $today_sales_total - $today_cost;
+
 $low_stock_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_products WHERE stock_quantity < 10");
 $total_stock_qty = $wpdb->get_var("SELECT SUM(stock_quantity) FROM $table_products") ?: 0;
+
+// Financial Metrics (Second Row)
+$total_inventory_value = $wpdb->get_var("SELECT SUM(purchase_cost * stock_quantity) FROM $table_products") ?: 0;
+$total_sales_value = $wpdb->get_var("SELECT SUM(total_amount) FROM $table_invoices") ?: 0;
+$total_cost_sold = $wpdb->get_var("
+    SELECT SUM(p.purchase_cost * s.quantity)
+    FROM $table_sales s
+    JOIN $table_products p ON s.product_id = p.id
+") ?: 0;
+$total_profit_margin = $total_sales_value - $total_cost_sold;
 
 // Monthly Sales data for chart (Last 6 months)
 $chart_data = $wpdb->get_results("
@@ -46,19 +66,19 @@ $recent_sales = $wpdb->get_results("
         </div>
         <div class="ac-is-metric-content">
             <div class="ac-is-metric-title"><?php _e('مبيعات اليوم', 'ac-inventory-system'); ?></div>
-            <div class="ac-is-metric-value"><?php echo number_format($today_sales_total, 2); ?> <small style="font-size:0.8rem;">EGP</small></div>
+            <div class="ac-is-metric-value"><?php echo number_format($today_sales_total, 2); ?></div>
             <div style="font-size: 0.75rem; color: #059669; font-weight: 600;"><?php echo $today_sales_count; ?> <?php _e('عملية', 'ac-inventory-system'); ?></div>
         </div>
     </div>
 
-    <div class="ac-is-metric-card" style="border-right-color: #dc2626;">
-        <div class="ac-is-metric-icon" style="background: #fef2f2; color: #dc2626;">
-            <span class="dashicons dashicons-warning"></span>
+    <div class="ac-is-metric-card" style="border-right-color: #805ad5;">
+        <div class="ac-is-metric-icon" style="background: #f3e8ff; color: #805ad5;">
+            <span class="dashicons dashicons-money-alt"></span>
         </div>
         <div class="ac-is-metric-content">
-            <div class="ac-is-metric-title"><?php _e('تنبيهات المخزون', 'ac-inventory-system'); ?></div>
-            <div class="ac-is-metric-value" style="color: #dc2626;"><?php echo $low_stock_count; ?></div>
-            <div style="font-size: 0.75rem; color: #64748b;"><?php _e('منتجات منخفضة', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-title"><?php _e('ربح اليوم', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value"><?php echo number_format($today_profit, 2); ?></div>
+            <div style="font-size: 0.75rem; color: #805ad5;"><?php _e('هامش الربح', 'ac-inventory-system'); ?></div>
         </div>
     </div>
 
@@ -70,6 +90,41 @@ $recent_sales = $wpdb->get_results("
             <div class="ac-is-metric-title"><?php _e('إجمالي المخزون', 'ac-inventory-system'); ?></div>
             <div class="ac-is-metric-value"><?php echo number_format($total_stock_qty); ?></div>
             <div style="font-size: 0.75rem; color: #64748b; font-weight: 600;"><?php echo $total_products; ?> <?php _e('صنف مسجل', 'ac-inventory-system'); ?></div>
+        </div>
+    </div>
+</div>
+
+<div class="ac-is-metrics-row">
+    <div class="ac-is-metric-card" style="border-right-color: #4b5563;">
+        <div class="ac-is-metric-icon" style="background: #f3f4f6; color: #4b5563;">
+            <span class="dashicons dashicons-products"></span>
+        </div>
+        <div class="ac-is-metric-content">
+            <div class="ac-is-metric-title"><?php _e('قيمة المخزون (شراء)', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value"><?php echo number_format($total_inventory_value, 2); ?></div>
+            <div style="font-size: 0.75rem; color: #64748b;"><?php _e('رأس المال بالمخزن', 'ac-inventory-system'); ?></div>
+        </div>
+    </div>
+
+    <div class="ac-is-metric-card" style="border-right-color: #1e293b;">
+        <div class="ac-is-metric-icon" style="background: #f1f5f9; color: #1e293b;">
+            <span class="dashicons dashicons-chart-bar"></span>
+        </div>
+        <div class="ac-is-metric-content">
+            <div class="ac-is-metric-title"><?php _e('إجمالي المبيعات', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value"><?php echo number_format($total_sales_value, 2); ?></div>
+            <div style="font-size: 0.75rem; color: #64748b;"><?php _e('قيمة المبيعات الكلية', 'ac-inventory-system'); ?></div>
+        </div>
+    </div>
+
+    <div class="ac-is-metric-card" style="border-right-color: #059669;">
+        <div class="ac-is-metric-icon" style="background: #ecfdf5; color: #059669;">
+            <span class="dashicons dashicons-plus-alt"></span>
+        </div>
+        <div class="ac-is-metric-content">
+            <div class="ac-is-metric-title"><?php _e('صافي الربح الكلي', 'ac-inventory-system'); ?></div>
+            <div class="ac-is-metric-value"><?php echo number_format($total_profit_margin, 2); ?></div>
+            <div style="font-size: 0.75rem; color: #059669; font-weight: 600;"><?php _e('إجمالي الأرباح', 'ac-inventory-system'); ?></div>
         </div>
     </div>
 </div>
