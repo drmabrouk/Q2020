@@ -6,7 +6,10 @@ foreach($brands as $b) { $brand_map[$b->id] = $b; }
 ?>
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <h2><?php _e('إدارة المخزون', 'ac-inventory-system'); ?></h2>
-    <a href="<?php echo add_query_arg('ac_view', 'add-product'); ?>" class="ac-is-btn"><?php _e('إضافة منتج جديد', 'ac-inventory-system'); ?></a>
+    <div style="display:flex; gap:10px;">
+        <button id="ac-is-bulk-barcode-pdf" class="ac-is-btn" style="background:#64748b;"><span class="dashicons dashicons-pdf" style="margin-left:5px;"></span><?php _e('تصدير الباركود (PDF)', 'ac-inventory-system'); ?></button>
+        <a href="<?php echo add_query_arg('ac_view', 'add-product'); ?>" class="ac-is-btn"><span class="dashicons dashicons-plus" style="margin-left:5px;"></span><?php _e('إضافة منتج جديد', 'ac-inventory-system'); ?></a>
+    </div>
 </div>
 
 <div class="ac-is-search-filters" style="margin-bottom:25px; display:flex; gap:15px; flex-wrap: wrap; background:#fff; padding:20px; border:1px solid var(--ac-border);">
@@ -70,9 +73,14 @@ foreach($brands as $b) { $brand_map[$b->id] = $b; }
                     </td>
                     <td>
                         <div style="display:flex; gap:5px;">
-                            <a href="<?php echo add_query_arg( array('ac_view' => 'edit-product', 'id' => $product->id) ); ?>" class="ac-is-btn" style="padding: 6px 10px; font-size:0.8rem; background:#3b82f6;"><span class="dashicons dashicons-edit"></span></a>
-                            <button class="ac-is-btn ac-is-print-barcode" data-barcode="<?php echo esc_attr($product->barcode); ?>" data-name="<?php echo esc_attr($product->name); ?>" data-serial="<?php echo esc_attr($product->serial_number); ?>" style="padding: 6px 10px; font-size:0.8rem; background:#64748b;"><span class="dashicons dashicons-id"></span></button>
-                            <button class="ac-is-delete-product ac-is-btn" data-id="<?php echo $product->id; ?>" style="padding: 6px 10px; font-size:0.8rem; background:#ef4444;"><span class="dashicons dashicons-trash"></span></button>
+                            <?php if ( AC_IS_Auth::can_edit_products() ) : ?>
+                                <a href="<?php echo add_query_arg( array('ac_view' => 'edit-product', 'id' => $product->id) ); ?>" class="ac-is-btn" style="padding: 6px 10px; font-size:0.8rem; background:#3b82f6;" title="<?php _e('تعديل', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-edit"></span></a>
+                            <?php endif; ?>
+                            <button class="ac-is-btn ac-is-print-barcode" data-barcode="<?php echo esc_attr($product->barcode); ?>" data-name="<?php echo esc_attr($product->name); ?>" data-serial="<?php echo esc_attr($product->serial_number); ?>" style="padding: 6px 10px; font-size:0.8rem; background:#64748b;" title="<?php _e('طباعة ملصق', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-printer"></span></button>
+                            <button class="ac-is-btn ac-is-download-barcode" data-barcode="<?php echo esc_attr($product->barcode); ?>" data-name="<?php echo esc_attr($product->name); ?>" style="padding: 6px 10px; font-size:0.8rem; background:#059669;" title="<?php _e('تحميل PNG', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-download"></span></button>
+                            <?php if ( AC_IS_Auth::can_delete_products() ) : ?>
+                                <button class="ac-is-delete-product ac-is-btn" data-id="<?php echo $product->id; ?>" style="padding: 6px 10px; font-size:0.8rem; background:#ef4444;" title="<?php _e('حذف', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-trash"></span></button>
+                            <?php endif; ?>
                         </div>
                     </td>
                 </tr>

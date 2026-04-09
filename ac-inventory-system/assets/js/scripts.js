@@ -208,7 +208,7 @@ jQuery(document).ready(function($) {
     $(document).ajaxStart(function() { showSync(); });
     $(document).ajaxStop(function() { hideSync(); });
 
-    $('#ac-is-refresh-btn').on('click', function() {
+    $('#ac-is-refresh-btn, #ac-is-mobile-refresh-btn').on('click', function() {
         showSync('جاري مسح التخزين المؤقت وتحديث البيانات...');
         if (window.sessionStorage) window.sessionStorage.clear();
         setTimeout(() => { window.location.reload(true); }, 500);
@@ -216,7 +216,7 @@ jQuery(document).ready(function($) {
 
     const systemRoot = document.getElementById('ac-is-system-root');
 
-    $('#ac-is-fullscreen-btn').on('click', function() {
+    $('#ac-is-fullscreen-btn, #ac-is-mobile-fullscreen-btn').on('click', function() {
         if (!document.fullscreenElement) {
             if (systemRoot.requestFullscreen) systemRoot.requestFullscreen();
             else if (systemRoot.webkitRequestFullscreen) systemRoot.webkitRequestFullscreen();
@@ -259,11 +259,76 @@ jQuery(document).ready(function($) {
         if (!barcode) { alert('لا يوجد باركود لهذا المنتج'); return; }
 
         $('#print-product-name').text(name + (serial ? ' (' + serial + ')' : ''));
-        generateBarcode("#print-barcode-svg", barcode);
+        JsBarcode("#print-barcode-svg", barcode, {
+            format: "CODE128",
+            width: 2,
+            height: 60,
+            displayValue: true,
+            fontSize: 14
+        });
 
         $('body').addClass('ac-is-printing-sticker');
         window.print();
         setTimeout(() => $('body').removeClass('ac-is-printing-sticker'), 1000);
+    });
+
+    // Barcode Download (High Resolution PNG)
+    $(document).on('click', '.ac-is-download-barcode', function(e) {
+        e.preventDefault();
+        const barcode = $(this).data('barcode');
+        const name = $(this).data('name');
+        if (!barcode) return;
+
+        const canvas = document.createElement('canvas');
+        JsBarcode(canvas, barcode, {
+            format: "CODE128",
+            width: 4,
+            height: 120,
+            displayValue: true,
+            fontSize: 20
+        });
+
+        const link = document.createElement('a');
+        link.download = `barcode-${name}-${barcode}.png`;
+        link.href = canvas.toDataURL("image/png");
+        link.click();
+    });
+
+    // Bulk Barcode PDF Export
+    $('#ac-is-bulk-barcode-pdf').on('click', function() {
+        const container = $('<div style="display:grid; grid-template-columns: repeat(3, 1fr); gap: 10mm; padding: 10mm;"></div>');
+
+        $('#ac-is-inventory-table-body tr').each(function() {
+            const barcode = $(this).find('.ac-is-print-barcode').data('barcode');
+            const name = $(this).find('.ac-is-print-barcode').data('name');
+            if (!barcode) return;
+
+            const sticker = $(`
+                <div style="border:1px dashed #ccc; padding:5mm; text-align:center; break-inside:avoid; width:50mm; height:30mm; display:flex; flex-direction:column; align-items:center; justify-content:center;">
+                    <div style="font-size:8pt; font-weight:bold; margin-bottom:1mm; overflow:hidden; white-space:nowrap; width:100%;">${name}</div>
+                    <svg class="bulk-barcode-svg" data-code="${barcode}"></svg>
+                </div>
+            `);
+            container.append(sticker);
+        });
+
+        // We need to append to body temporarily to render SVGs via JsBarcode
+        $('body').append(container);
+        container.find('.bulk-barcode-svg').each(function() {
+            JsBarcode(this, $(this).data('code'), { format: "CODE128", width: 1.2, height: 35, displayValue: true, fontSize: 10 });
+        });
+
+        const opt = {
+            margin: 0,
+            filename: 'all-barcodes.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+
+        html2pdf().set(opt).from(container[0]).save().then(() => {
+            container.remove();
+        });
     });
 
     // Product Barcode Generation (Enhanced)
@@ -326,7 +391,7 @@ jQuery(document).ready(function($) {
     });
 
     // Logout
-    $('#ac-is-logout-btn').on('click', function() {
+    $('#ac-is-logout-btn, #ac-is-mobile-logout-btn').on('click', function() {
         $.post(ac_is_ajax.ajax_url, { action: 'ac_is_logout', nonce: ac_is_ajax.nonce }, () => location.reload());
     });
 

@@ -49,12 +49,28 @@
                 <button id="ac-is-refresh-btn" class="sidebar-ctrl-icon" title="<?php _e('تحديث', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px;">
                     <span class="dashicons dashicons-update" style="font-size:18px;"></span>
                 </button>
-                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon" title="<?php _e('خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px;">
+                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" title="<?php _e('خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px;">
                     <span class="dashicons dashicons-logout" style="font-size:18px;"></span>
                 </button>
             </div>
         </div>
     </aside>
+
+    <!-- Mobile Bottom Bar (Fixed) -->
+    <div class="ac-is-mobile-bottom-bar" style="display:none;">
+        <button id="ac-is-mobile-fullscreen-btn" class="sidebar-ctrl-icon" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>">
+            <span class="dashicons dashicons-fullscreen-alt"></span>
+            <small><?php _e('كاملة', 'ac-inventory-system'); ?></small>
+        </button>
+        <button id="ac-is-mobile-refresh-btn" class="sidebar-ctrl-icon" title="<?php _e('تحديث', 'ac-inventory-system'); ?>">
+            <span class="dashicons dashicons-update"></span>
+            <small><?php _e('تحديث', 'ac-inventory-system'); ?></small>
+        </button>
+        <button id="ac-is-mobile-logout-btn" class="sidebar-ctrl-icon logout" title="<?php _e('خروج', 'ac-inventory-system'); ?>">
+            <span class="dashicons dashicons-logout"></span>
+            <small><?php _e('خروج', 'ac-inventory-system'); ?></small>
+        </button>
+    </div>
 
     <div id="ac-is-sync-loader" style="display:none; position:fixed; top:20px; left:50%; transform:translateX(-50%); background:var(--ac-primary); color:#fff; padding:10px 20px; border-radius:30px; z-index:10000; box-shadow:0 4px 12px rgba(0,0,0,0.2); font-weight:600;">
         <span class="dashicons dashicons-update spin" style="margin-left:8px; vertical-align:middle;"></span>

@@ -70,7 +70,7 @@
         height: 30mm;
         padding: 2mm;
         text-align: center;
-        border: none !important;
+        border: 1px dashed #ccc !important;
         page-break-inside: avoid;
         margin: 0;
         display: flex;
