@@ -79,7 +79,7 @@ $company_logo = $settings['company_logo']->setting_value ?? '';
         </table>
     </div>
 
-    <div class="invoice-summary" style="display:flex; justify-content: space-between; align-items: flex-end; padding:20px; background:#f8fafc;">
+    <div class="invoice-summary" style="display:flex; justify-content: space-between; align-items: flex-end; padding:20px; background:var(--ac-secondary); border-radius: 8px;">
         <div class="invoice-qr">
             <svg id="invoice-barcode-svg"></svg>
             <script>
@@ -96,8 +96,17 @@ $company_logo = $settings['company_logo']->setting_value ?? '';
         </div>
     </div>
 
+    <?php if($invoice->warranty_years > 0): ?>
+        <div class="warranty-section" style="margin-top:30px; padding:15px; border: 1px solid var(--ac-border); border-right: 5px solid var(--ac-primary); border-radius: 8px;">
+            <h4 style="margin:0 0 8px 0; color:var(--ac-primary);"><?php _e('بيان الضمان المحدود', 'ac-inventory-system'); ?></h4>
+            <p style="font-size:0.85rem; line-height:1.6; margin:0;">
+                <?php printf(__('هذا المنتج مشمول بضمان محدود لمدة (%d) سنوات من تاريخ الشراء، يغطي عيوب الصناعة فقط. لا يشمل الضمان سوء الاستخدام، التلف الناتج عن الكسر، أو الصيانة خارج مراكزنا المعتمدة. يلزم إبراز أصل الفاتورة عند المطالبة بالضمان.', 'ac-inventory-system'), $invoice->warranty_years); ?>
+            </p>
+        </div>
+    <?php endif; ?>
+
     <div class="invoice-footer" style="margin-top:50px; text-align: center; border-top: 2px dashed var(--ac-border); padding-top: 30px;">
-        <p style="margin-top:30px; font-size:0.8rem; color:#94a3b8;">
+        <p style="margin-top:15px; font-size:0.8rem; color:#94a3b8;">
             <?php echo esc_html($company_name); ?> | <?php echo esc_html($company_email); ?> | <?php echo esc_html($company_phone); ?>
             <br><?php _e('تم إصدار هذه الفاتورة إلكترونياً - شكراً لتعاملكم معنا', 'ac-inventory-system'); ?>
         </p>

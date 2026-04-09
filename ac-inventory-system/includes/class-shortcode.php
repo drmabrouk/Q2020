@@ -44,7 +44,11 @@ class AC_IS_Shortcode {
 				include AC_IS_PATH . 'templates/customers.php';
 				break;
 			case 'filter-tracking':
-				include AC_IS_PATH . 'templates/filter-tracking.php';
+				if ( ! AC_IS_Auth::can_access_filters() ) {
+					echo '<p>' . __( 'ليس لديك صلاحية للوصول لهذه الصفحة.', 'ac-inventory-system' ) . '</p>';
+				} else {
+					include AC_IS_PATH . 'templates/filter-tracking.php';
+				}
 				break;
 			case 'payroll':
 				include AC_IS_PATH . 'templates/payroll.php';

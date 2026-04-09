@@ -76,6 +76,11 @@ class AC_IS_Auth {
 		return $user && $user->role === 'manager';
 	}
 
+	public static function is_technician() {
+		$user = self::current_user();
+		return $user && ( $user->role === 'admin' || $user->role === 'manager' || $user->role === 'technician' );
+	}
+
 	public static function can_delete_records() {
 		return self::is_manager();
 	}
@@ -86,5 +91,9 @@ class AC_IS_Auth {
 
 	public static function can_delete_products() {
 		return self::is_admin();
+	}
+
+	public static function can_access_filters() {
+		return self::is_technician();
 	}
 }

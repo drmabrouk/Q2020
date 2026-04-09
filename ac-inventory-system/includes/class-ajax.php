@@ -414,6 +414,7 @@ class AC_IS_Ajax {
 			'customer_id' => $customer_id,
 			'total_amount' => floatval( $_POST['total_amount'] ),
 			'operator_id' => $operator_id,
+			'warranty_years' => intval( $_POST['warranty_years'] ),
 		) );
 		$invoice_id = $wpdb->insert_id;
 
