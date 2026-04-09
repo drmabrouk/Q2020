@@ -156,6 +156,13 @@
     .ac-is-cart-area {
         position: static !important;
     }
+
+    /* Hide non-critical sections on mobile */
+    .ac-is-sidebar-nav a[href*="ac_view=payroll"],
+    .ac-is-sidebar-nav a[href*="ac_view=sales-history"],
+    .ac-is-sidebar-nav a[href*="ac_view=inventory"] {
+        display: none !important;
+    }
 }
 
 @media (max-width: 768px) {
