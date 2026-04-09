@@ -218,7 +218,7 @@ jQuery(document).ready(function($) {
 
     const systemRoot = document.getElementById('ac-is-system-root');
 
-    $('#ac-is-fullscreen-btn, #ac-is-mobile-fullscreen-btn').on('click', function() {
+    $('#ac-is-fullscreen-btn').on('click', function() {
         if (!document.fullscreenElement) {
             if (systemRoot.requestFullscreen) systemRoot.requestFullscreen();
             else if (systemRoot.webkitRequestFullscreen) systemRoot.webkitRequestFullscreen();
@@ -226,6 +226,10 @@ jQuery(document).ready(function($) {
             $('#ac-is-unlock-overlay').css('display', 'flex').hide().fadeIn(300);
             $('#ac-is-unlock-pass').focus();
         }
+    });
+
+    $('#ac-is-mobile-quick-scan-btn').on('click', function() {
+        window.location.href = window.location.href.split('&')[0] + '&ac_view=sales&mode=scan';
     });
 
     $('#ac-is-unlock-submit').on('click', function() {
@@ -454,6 +458,12 @@ jQuery(document).ready(function($) {
             }
         });
     });
+
+    // Handle mode from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('ac_view') === 'sales' && urlParams.get('mode') === 'scan') {
+        $('.ac-is-mode-box[data-mode="scan"]').trigger('click');
+    }
 
     if (window.location.search.indexOf('autoprint=1') > -1) {
         // Prevent double printing via a session flag

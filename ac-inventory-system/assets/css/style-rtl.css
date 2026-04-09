@@ -20,7 +20,7 @@
     display: flex;
     direction: rtl;
     text-align: right;
-    font-family: inherit, 'Cairo', sans-serif;
+    font-family: 'Cairo', sans-serif;
     min-height: 100vh;
     background: #f1f5f9;
     margin: 0;
@@ -243,10 +243,34 @@
     .ac-is-metrics-row::-webkit-scrollbar { display: none; }
 
     .ac-is-metric-card {
-        min-width: 200px;
-        padding: 15px;
+        flex: 1 1 0;
+        min-width: 100px; /* Force 3 on same row */
+        padding: 10px 5px;
         margin-bottom: 0;
+        gap: 8px;
+        border-right-width: 3px;
     }
+
+    .ac-is-metric-icon {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+
+    .ac-is-metric-title {
+        font-size: 0.65rem;
+    }
+
+    .ac-is-metric-value {
+        font-size: 0.9rem;
+    }
+
+    .ac-is-metric-content div:last-child {
+        font-size: 0.6rem !important;
+    }
+
+    /* Water Filter Tracking Mobile Optimization */
+    .col-filter { display: none !important; }
 }
 
 @media (max-width: 768px) {

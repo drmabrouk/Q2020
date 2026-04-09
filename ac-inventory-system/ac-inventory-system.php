@@ -69,7 +69,7 @@ class AC_Inventory_System {
 	}
 
 	public function send_nocache_headers() {
-		if ( isset( $_GET['page'] ) && strpos( $_GET['page'], 'ac-inventory' ) !== false ) {
+		if ( (isset( $_GET['page'] ) && strpos( $_GET['page'], 'ac-inventory' ) !== false) || isset( $_GET['ac_view'] ) ) {
 			nocache_headers();
 		}
 		if ( defined( 'DOING_AJAX' ) && DOING_AJAX && isset( $_REQUEST['action'] ) && strpos( $_REQUEST['action'], 'ac_is_' ) === 0 ) {
