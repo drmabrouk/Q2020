@@ -332,6 +332,41 @@ jQuery(document).ready(function($) {
         setTimeout(function() { window.print(); }, 1000);
     }
 
+    // PWA Install Prompt Logic
+    let deferredPrompt;
+    const installBanner = $('#ac-is-install-banner');
+    const installBtn = $('#ac-is-install-btn');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent Chrome 67 and earlier from automatically showing the prompt
+        e.preventDefault();
+        // Stash the event so it can be triggered later.
+        deferredPrompt = e;
+        // Update UI notify the user they can add to home screen
+        installBanner.fadeIn(300);
+    });
+
+    installBtn.on('click', (e) => {
+        // hide our install banner
+        installBanner.fadeOut(200);
+        // Show the prompt
+        deferredPrompt.prompt();
+        // Wait for the user to respond to the prompt
+        deferredPrompt.userChoice.then((choiceResult) => {
+            if (choiceResult.outcome === 'accepted') {
+                console.log('User accepted the A2HS prompt');
+            } else {
+                console.log('User dismissed the A2HS prompt');
+            }
+            deferredPrompt = null;
+        });
+    });
+
+    window.addEventListener('appinstalled', (evt) => {
+        console.log('AC IS was installed.');
+        installBanner.fadeOut(200);
+    });
+
     // Live Sales Search
     let salesSearchTimeout;
     $('#ac-is-live-sales-search').on('input', function() {

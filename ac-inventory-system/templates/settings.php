@@ -105,7 +105,44 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
             </form>
         </div>
 
-        <!-- Section 3: Brand Management -->
+        <!-- Section 3: PWA & Mobile App Settings -->
+        <div class="ac-is-card" style="border-top: 4px solid #805ad5; margin-bottom: 25px;">
+            <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
+                <span class="dashicons dashicons-smartphone"></span> <?php _e('إعدادات تطبيق الجوال (PWA)', 'ac-inventory-system'); ?>
+            </h3>
+            <form class="ac-is-system-settings-form">
+                <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div class="ac-is-form-group">
+                        <label style="font-size:0.75rem;"><?php _e('اسم التطبيق', 'ac-inventory-system'); ?></label>
+                        <input type="text" name="pwa_app_name" value="<?php echo esc_attr($settings['pwa_app_name']->setting_value ?? 'نظام المبيعات'); ?>">
+                    </div>
+                    <div class="ac-is-form-group">
+                        <label style="font-size:0.75rem;"><?php _e('الاسم المختصر', 'ac-inventory-system'); ?></label>
+                        <input type="text" name="pwa_short_name" value="<?php echo esc_attr($settings['pwa_short_name']->setting_value ?? 'المبيعات'); ?>">
+                    </div>
+                </div>
+                <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                    <div class="ac-is-form-group">
+                        <label style="font-size:0.75rem;"><?php _e('لون السمة (Theme)', 'ac-inventory-system'); ?></label>
+                        <input type="color" name="pwa_theme_color" value="<?php echo esc_attr($settings['pwa_theme_color']->setting_value ?? '#2563eb'); ?>" style="height:35px; padding:2px;">
+                    </div>
+                    <div class="ac-is-form-group">
+                        <label style="font-size:0.75rem;"><?php _e('لون الخلفية', 'ac-inventory-system'); ?></label>
+                        <input type="color" name="pwa_bg_color" value="<?php echo esc_attr($settings['pwa_bg_color']->setting_value ?? '#f1f5f9'); ?>" style="height:35px; padding:2px;">
+                    </div>
+                </div>
+                <div class="ac-is-form-group">
+                    <label style="font-size:0.75rem;"><?php _e('أيقونة التطبيق (512x512)', 'ac-inventory-system'); ?></label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" name="pwa_icon_url" value="<?php echo esc_attr($settings['pwa_icon_url']->setting_value ?? ''); ?>" placeholder="URL">
+                        <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b; padding:0 10px;"><span class="dashicons dashicons-upload"></span></button>
+                    </div>
+                </div>
+                <button type="submit" class="ac-is-btn" style="width:100%; height:40px; background:#805ad5;"><?php _e('تحديث إعدادات التطبيق', 'ac-inventory-system'); ?></button>
+            </form>
+        </div>
+
+        <!-- Section 4: Brand Management -->
         <div class="ac-is-card" style="border-top: 4px solid #059669;">
             <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
                 <span class="dashicons dashicons-tag"></span> <?php _e('إدارة العلامات التجارية', 'ac-inventory-system'); ?>
