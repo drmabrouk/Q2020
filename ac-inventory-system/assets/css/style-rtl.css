@@ -20,7 +20,7 @@
     display: flex;
     direction: rtl;
     text-align: right;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: inherit, 'Cairo', sans-serif;
     min-height: 100vh;
     background: #f1f5f9;
     margin: 0;
@@ -78,10 +78,11 @@
     color: #94a3b8;
     text-decoration: none !important;
     transition: all 0.3s;
-    font-weight: 500;
+    font-weight: 600;
     border-radius: 0;
     border-right: 4px solid transparent;
     font-size: 0.85rem;
+    font-family: inherit;
 }
 
 .ac-is-sidebar-nav a:hover {
@@ -120,10 +121,11 @@
     border-radius: 6px;
     cursor: pointer;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     transition: all 0.2s;
     text-decoration: none !important;
     line-height: 1.4;
+    font-family: inherit;
 }
 
 /* Responsive Sidebar */
@@ -489,6 +491,7 @@
     border: 1px solid #cbd5e1;
     border-radius: 4px;
     font-size: 0.9rem;
+    font-family: inherit;
 }
 
 /* Capsules - Smaller */
