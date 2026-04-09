@@ -94,6 +94,9 @@ class AC_Inventory_System {
 		// Enqueue Chart.js for dashboard metrics
 		wp_enqueue_script( 'chartjs', 'https://cdn.jsdelivr.net/npm/chart.js', array(), '4.4.1', true );
 
+		// Enqueue html2pdf for bulk export
+		wp_enqueue_script( 'html2pdf', 'https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js', array(), '0.10.1', true );
+
 		wp_enqueue_script( 'ac-is-scripts', AC_IS_URL . 'assets/js/scripts.js', array( 'jquery', 'jsbarcode', 'html5-qrcode', 'chartjs' ), AC_IS_VERSION, true );
 
 		global $wpdb;

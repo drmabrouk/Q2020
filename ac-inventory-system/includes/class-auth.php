@@ -79,4 +79,12 @@ class AC_IS_Auth {
 	public static function can_delete_records() {
 		return self::is_manager();
 	}
+
+	public static function can_edit_products() {
+		return self::is_manager();
+	}
+
+	public static function can_delete_products() {
+		return self::is_admin();
+	}
 }

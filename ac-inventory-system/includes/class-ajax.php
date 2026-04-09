@@ -26,7 +26,7 @@ class AC_IS_Ajax {
 
 	public function save_product() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
-		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+		if ( ! AC_IS_Auth::can_edit_products() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = isset( $_POST['id'] ) ? intval( $_POST['id'] ) : 0;
 		$data = array(
@@ -56,7 +56,7 @@ class AC_IS_Ajax {
 
 	public function delete_product() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
-		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
+		if ( ! AC_IS_Auth::can_delete_products() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = intval( $_POST['id'] );
 		AC_IS_Inventory::delete_product( $id );
