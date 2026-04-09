@@ -109,6 +109,15 @@ jQuery(document).ready(function($) {
             return false;
         }
 
+        // Check if it's an invoice barcode (INV-XXXXXXXX)
+        if (query.startsWith('INV-')) {
+            const invoiceId = parseInt(query.replace('INV-', ''));
+            if (invoiceId) {
+                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&invoice_id=' + invoiceId;
+                return true;
+            }
+        }
+
         let found = false;
         $('#ac-is-sale-product option').each(function() {
             if ($(this).data('barcode') == query || $(this).data('serial') == query) {
@@ -206,7 +215,6 @@ jQuery(document).ready(function($) {
     });
 
     const systemRoot = document.getElementById('ac-is-system-root');
-    const EXIT_PASSWORD = ac_is_ajax.fullscreen_password;
 
     $('#ac-is-fullscreen-btn').on('click', function() {
         if (!document.fullscreenElement) {
@@ -219,12 +227,20 @@ jQuery(document).ready(function($) {
     });
 
     $('#ac-is-unlock-submit').on('click', function() {
-        if ($('#ac-is-unlock-pass').val() === EXIT_PASSWORD) {
-            $('#ac-is-unlock-overlay').fadeOut(300, function() {
-                if (document.exitFullscreen) document.exitFullscreen();
-                $('#ac-is-unlock-pass').val('');
-            });
-        }
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_verify_fullscreen_password',
+            password: $('#ac-is-unlock-pass').val(),
+            nonce: ac_is_ajax.nonce
+        }, function(res) {
+            if (res.success) {
+                $('#ac-is-unlock-overlay').fadeOut(300, function() {
+                    if (document.exitFullscreen) document.exitFullscreen();
+                    $('#ac-is-unlock-pass').val('');
+                });
+            } else {
+                alert('كلمة المرور غير صحيحة');
+            }
+        });
     });
 
     // Product calculations (Enhanced)

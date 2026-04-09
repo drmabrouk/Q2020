@@ -38,6 +38,10 @@ class AC_IS_Reports {
 			return;
 		}
 
+		if ( ! isset( $_GET['ac_nonce'] ) || ! wp_verify_nonce( $_GET['ac_nonce'], 'ac_is_export' ) ) {
+			return;
+		}
+
 		global $wpdb;
 		$table_sales = $wpdb->prefix . 'ac_is_sales';
 		$table_products = $wpdb->prefix . 'ac_is_products';

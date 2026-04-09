@@ -11,17 +11,13 @@ class AC_IS_Ajax {
 			'search_products', 'get_customer', 'delete_invoice',
 			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
 			'save_customer', 'delete_customer', 'save_brand', 'delete_brand',
-			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts'
+			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts',
+			'verify_fullscreen_password'
 		);
 
 		foreach ( $actions as $action ) {
 			add_action( 'wp_ajax_ac_is_' . $action, array( $this, $action ) );
-			// Security: Most actions should require login
-			if ( in_array( $action, array( 'search_products', 'get_customer', 'search_sales' ) ) ) {
-				// These specifically were called out as sensitive
-			} else {
-				// add_action( 'wp_ajax_nopriv_ac_is_' . $action, array( $this, $action ) );
-			}
+			add_action( 'wp_ajax_nopriv_ac_is_' . $action, array( $this, $action ) );
 		}
 
 		add_action( 'wp_ajax_nopriv_ac_is_login', array( $this, 'login' ) );
@@ -286,6 +282,19 @@ class AC_IS_Ajax {
 			array( 'staff_id' => intval( $_POST['staff_id'] ), 'status' => 'shift_request' )
 		);
 		wp_send_json_success();
+	}
+
+	public function verify_fullscreen_password() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		global $wpdb;
+		$stored_pass = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'fullscreen_password'" ) ?: '123456789';
+		$provided_pass = $_POST['password'];
+
+		if ( $provided_pass === $stored_pass ) {
+			wp_send_json_success();
+		} else {
+			wp_send_json_error();
+		}
 	}
 
 	public function search_sales() {

@@ -102,7 +102,6 @@ class AC_Inventory_System {
 		wp_localize_script( 'ac-is-scripts', 'ac_is_ajax', array(
 			'ajax_url' => admin_url( 'admin-ajax.php' ),
 			'nonce'    => wp_create_nonce( 'ac_is_nonce' ),
-			'fullscreen_password' => $fullscreen_pass,
 		) );
 	}
 }

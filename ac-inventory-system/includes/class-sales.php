@@ -77,12 +77,15 @@ class AC_IS_Sales {
 
 	public static function get_invoice_items( $invoice_id ) {
 		global $wpdb;
-		$table_sales = $wpdb->prefix . 'ac_is_sales';
+		$table_sales    = $wpdb->prefix . 'ac_is_sales';
 		$table_products = $wpdb->prefix . 'ac_is_products';
+		$table_brands   = $wpdb->prefix . 'ac_is_brands';
+
 		return $wpdb->get_results( $wpdb->prepare(
-			"SELECT s.*, p.name as product_name, p.barcode as product_barcode
+			"SELECT s.*, p.name as product_name, p.barcode as product_barcode, b.logo_url as brand_logo
 			FROM $table_sales s
 			JOIN $table_products p ON s.product_id = p.id
+			LEFT JOIN $table_brands b ON p.brand_id = b.id
 			WHERE s.invoice_id = %d",
 			$invoice_id
 		) );

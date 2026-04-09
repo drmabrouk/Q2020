@@ -95,7 +95,11 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                     <textarea name="company_address" rows="2" placeholder="<?php _e('العنوان بالتفصيل ليظهر في الفواتير', 'ac-inventory-system'); ?>"><?php echo esc_textarea($settings['company_address']->setting_value ?? ''); ?></textarea>
                 </div>
                 <div class="ac-is-form-group">
-                    <input type="text" name="company_logo" value="<?php echo esc_attr($settings['company_logo']->setting_value ?? ''); ?>" placeholder="<?php _e('رابط الشعار (URL)', 'ac-inventory-system'); ?>">
+                    <label style="font-size:0.75rem;"><?php _e('شعار الشركة', 'ac-inventory-system'); ?></label>
+                    <div style="display:flex; gap:5px;">
+                        <input type="text" name="company_logo" id="company-logo-url" value="<?php echo esc_attr($settings['company_logo']->setting_value ?? ''); ?>" placeholder="<?php _e('رابط الشعار', 'ac-inventory-system'); ?>">
+                        <button type="button" class="ac-is-upload-btn ac-is-btn" style="background:#64748b; padding:0 10px;"><span class="dashicons dashicons-upload"></span></button>
+                    </div>
                 </div>
                 <div class="ac-is-form-group" style="background:#fef2f2; padding:15px; border-radius:6px; border:1px solid #fee2e2;">
                     <label style="color:#991b1b; font-weight:700;"><?php _e('أمن ملء الشاشة', 'ac-inventory-system'); ?></label>

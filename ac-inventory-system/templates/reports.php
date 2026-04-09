@@ -100,7 +100,7 @@ $company_name = $settings['company_name']->setting_value ?? get_bloginfo('name')
 
 <div class="ac-is-export-actions" style="margin-top:40px; display:flex; gap:15px; justify-content:center;">
         <?php if(AC_IS_Auth::is_admin()): ?>
-            <a href="<?php echo add_query_arg('ac_export', 'sales'); ?>" class="ac-is-btn" style="background:#28a745;"><?php _e('تصدير التقرير (CSV)', 'ac-inventory-system'); ?></a>
+            <a href="<?php echo add_query_arg(array('ac_export' => 'sales', 'ac_nonce' => wp_create_nonce('ac_is_export'))); ?>" class="ac-is-btn" style="background:#28a745;"><?php _e('تصدير التقرير (CSV)', 'ac-inventory-system'); ?></a>
         <?php endif; ?>
     <button onclick="window.print();" class="ac-is-btn" style="background:#6c757d;"><?php _e('طباعة التقرير', 'ac-inventory-system'); ?></button>
 </div>
