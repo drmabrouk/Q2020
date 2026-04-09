@@ -16,6 +16,11 @@ class AC_IS_Filters {
 			$where .= " AND t.expiry_date <= DATE_ADD(CURDATE(), INTERVAL 7 DAY)";
 		}
 
+		if ( ! empty($args['search']) ) {
+			$s = '%' . $wpdb->esc_like( $args['search'] ) . '%';
+			$where .= $wpdb->prepare( " AND (c.name LIKE %s OR c.phone LIKE %s OR p.name LIKE %s)", $s, $s, $s );
+		}
+
 		// Group by invoice/customer operation
 		$results = $wpdb->get_results( "
 			SELECT t.*, c.name as customer_name, c.phone as customer_phone, c.address as customer_address, c.email as customer_email, p.name as product_name

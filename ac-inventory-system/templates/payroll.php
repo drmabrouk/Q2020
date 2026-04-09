@@ -200,5 +200,57 @@ jQuery(document).ready(function($) {
             location.reload();
         });
     });
+
+    $('.ac-is-view-staff-logs').on('click', function() {
+        const d = $(this).data();
+        $('#logs-modal-title').text('<?php _e('سجل حضور:', 'ac-inventory-system'); ?> ' + d.name + ' (' + d.month + ')');
+        $.post(ac_is_ajax.ajax_url, {
+            action: 'ac_is_get_staff_logs',
+            staff_id: d.id,
+            month: d.month,
+            nonce: ac_is_ajax.nonce
+        }, function(res) {
+            if (res.success) {
+                $('#ac-is-logs-table tbody').html(res.data.html);
+                $('#ac-is-logs-modal').css('display', 'flex').hide().fadeIn(200);
+            }
+        });
+    });
+
+    $('#ac-is-export-payroll-pdf').on('click', function() {
+        const element = document.getElementById('ac-is-logs-table');
+        const title = $('#logs-modal-title').text();
+        const opt = {
+            margin: 10,
+            filename: title + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        html2pdf().set(opt).from(element).save();
+    });
 });
 </script>
+
+<!-- Staff Attendance Logs Modal -->
+<div id="ac-is-logs-modal" class="ac-is-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10010; align-items:center; justify-content:center;">
+    <div class="ac-is-card" style="width:700px; background:#fff; padding:25px; max-height:85vh; overflow-y:auto;">
+        <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:20px;">
+            <h3 id="logs-modal-title" style="margin:0;"></h3>
+            <button id="ac-is-export-payroll-pdf" class="ac-is-btn" style="background:#dc2626; font-size:0.8rem;"><span class="dashicons dashicons-pdf" style="margin-left:5px;"></span><?php _e('تصدير PDF', 'ac-inventory-system'); ?></button>
+        </div>
+        <table class="ac-is-table" id="ac-is-logs-table">
+            <thead>
+                <tr>
+                    <th><?php _e('التاريخ', 'ac-inventory-system'); ?></th>
+                    <th><?php _e('الحضور', 'ac-inventory-system'); ?></th>
+                    <th><?php _e('الانصراف', 'ac-inventory-system'); ?></th>
+                    <th><?php _e('المدة', 'ac-inventory-system'); ?></th>
+                    <th><?php _e('الحالة', 'ac-inventory-system'); ?></th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <button class="ac-is-btn" style="width:100%; margin-top:20px; background:#64748b;" onclick="jQuery('#ac-is-logs-modal').fadeOut(200)"><?php _e('إغلاق', 'ac-inventory-system'); ?></button>
+    </div>
+</div>

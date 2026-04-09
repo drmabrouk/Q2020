@@ -5,9 +5,12 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 class AC_IS_Brands {
 
-	public static function get_brands() {
+	public static function get_brands( $category = null ) {
 		global $wpdb;
 		$table = $wpdb->prefix . 'ac_is_brands';
+		if ( $category ) {
+			return $wpdb->get_results( $wpdb->prepare( "SELECT * FROM $table WHERE category = %s OR category = 'all' ORDER BY name ASC", $category ) );
+		}
 		return $wpdb->get_results( "SELECT * FROM $table ORDER BY name ASC" );
 	}
 

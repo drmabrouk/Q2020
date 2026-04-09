@@ -11,7 +11,15 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
 
 <div class="ac-is-settings-wrapper">
 
+    <div class="ac-is-tabs" style="display:flex; gap:10px; margin-bottom:25px; border-bottom:1px solid var(--ac-border); padding-bottom:10px;">
+        <button class="ac-is-tab-btn active" data-tab="tab-staff"><?php _e('طاقم العمل', 'ac-inventory-system'); ?></button>
+        <button class="ac-is-tab-btn" data-tab="tab-identity"><?php _e('هوية النظام', 'ac-inventory-system'); ?></button>
+        <button class="ac-is-tab-btn" data-tab="tab-pwa"><?php _e('تطبيق الجوال', 'ac-inventory-system'); ?></button>
+        <button class="ac-is-tab-btn" data-tab="tab-brands"><?php _e('البراندات', 'ac-inventory-system'); ?></button>
+    </div>
+
     <!-- Section 1: Staff Management -->
+    <div id="tab-staff" class="ac-is-tab-content active">
     <div class="ac-is-card" style="margin-bottom:30px; border-top: 4px solid #4a5568;">
         <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:25px;">
             <span class="dashicons dashicons-admin-users"></span> <?php _e('إدارة طاقم العمل والمستخدمين', 'ac-inventory-system'); ?>
@@ -78,8 +86,12 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
         </table>
     </div>
 
-    <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:25px;">
+    </div>
+    </div>
+
+    <div class="ac-is-tab-content-container">
         <!-- Section 2: System Identity -->
+        <div id="tab-identity" class="ac-is-tab-content" style="display:none;">
         <div class="ac-is-card" style="border-top: 4px solid var(--ac-primary);">
             <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
                 <span class="dashicons dashicons-id"></span> <?php _e('هوية النظام والشركة', 'ac-inventory-system'); ?>
@@ -113,7 +125,11 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
             </form>
         </div>
 
+        </div>
+        </div>
+
         <!-- Section 3: PWA & Mobile App Settings -->
+        <div id="tab-pwa" class="ac-is-tab-content" style="display:none;">
         <div class="ac-is-card" style="border-top: 4px solid #805ad5; margin-bottom: 25px;">
             <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
                 <span class="dashicons dashicons-smartphone"></span> <?php _e('إعدادات تطبيق الجوال (PWA)', 'ac-inventory-system'); ?>
@@ -150,7 +166,11 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
             </form>
         </div>
 
+        </div>
+        </div>
+
         <!-- Section 4: Brand Management -->
+        <div id="tab-brands" class="ac-is-tab-content" style="display:none;">
         <div class="ac-is-card" style="border-top: 4px solid #059669;">
             <h3 style="display:flex; align-items:center; gap:10px; margin-bottom:20px;">
                 <span class="dashicons dashicons-tag"></span> <?php _e('إدارة العلامات التجارية', 'ac-inventory-system'); ?>
@@ -185,11 +205,38 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                 </table>
             </div>
         </div>
+        </div>
     </div>
 </div>
 
+<style>
+.ac-is-tab-btn {
+    padding: 10px 20px;
+    border: none;
+    background: #e2e8f0;
+    color: #475569;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.85rem;
+    transition: all 0.2s;
+}
+.ac-is-tab-btn.active {
+    background: var(--ac-primary);
+    color: #fff;
+}
+</style>
+
 <script>
 jQuery(document).ready(function($) {
+    $('.ac-is-tab-btn').on('click', function() {
+        const tab = $(this).data('tab');
+        $('.ac-is-tab-btn').removeClass('active');
+        $(this).addClass('active');
+        $('.ac-is-tab-content').hide();
+        $('#' + tab).fadeIn(200);
+    });
+
     // Shared Staff/Settings submit logic
     $('#ac-is-staff-form').on('submit', function(e) {
         e.preventDefault();

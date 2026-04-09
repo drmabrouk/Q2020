@@ -29,10 +29,10 @@ $brands = AC_IS_Brands::get_brands();
 
         <div class="ac-is-form-group">
             <label><?php _e('العلامة التجارية (البراند)', 'ac-inventory-system'); ?></label>
-            <select name="brand_id">
+            <select name="brand_id" id="ac-is-brand-select">
                 <option value=""><?php _e('--- اختر البراند ---', 'ac-inventory-system'); ?></option>
                 <?php foreach($brands as $brand): ?>
-                    <option value="<?php echo $brand->id; ?>" <?php selected($product ? $product->brand_id : '', $brand->id); ?>><?php echo esc_html($brand->name); ?></option>
+                    <option value="<?php echo $brand->id; ?>" <?php selected($product ? $product->brand_id : '', $brand->id); ?> data-category="<?php echo esc_attr($brand->category); ?>"><?php echo esc_html($brand->name); ?></option>
                 <?php endforeach; ?>
             </select>
         </div>
@@ -56,7 +56,11 @@ $brands = AC_IS_Brands::get_brands();
 
         <div class="ac-is-form-group">
             <label><?php _e('التصنيف الفرعي', 'ac-inventory-system'); ?></label>
-            <input type="text" name="subcategory" placeholder="<?php _e('مثال: سبليت، مركزي، 5 مراحل', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->subcategory) : ''; ?>">
+            <select name="subcategory" id="ac-is-subcategory-select">
+                <option value=""><?php _e('اختر التصنيف الفرعي', 'ac-inventory-system'); ?></option>
+                <!-- Dynamically populated -->
+            </select>
+            <input type="hidden" id="ac-is-selected-subcategory" value="<?php echo $product ? esc_attr($product->subcategory) : ''; ?>">
         </div>
 
         <hr style="grid-column: span 2; margin:10px 0; border:0; border-top:1px solid #eee;">
@@ -113,13 +117,43 @@ $brands = AC_IS_Brands::get_brands();
 
 <script>
 jQuery(document).ready(function($) {
-    function toggleFields() {
+    const subcategories = {
+        'ac': ['Split (سبليت)', 'Window (شباك)', 'Central (مركزي)', 'Portable (متنقل)', 'Tower (دولابي)'],
+        'filter': ['3 Stages (3 مراحل)', '5 Stages (5 مراحل)', '7 Stages (7 مراحل)', 'RO System', 'UF System'],
+        'cooling': ['Chiller', 'Cold Room', 'Ice Machine', 'Refrigeration Unit', 'Heat Pump']
+    };
+
+    function updateDynamicFields() {
         const cat = $('#ac-is-category-select').val();
+
+        // 1. Toggle dynamic sections
         $('.category-field').hide();
         if(cat === 'ac') $('.ac-only').show();
         if(cat === 'filter') $('.filter-only').show();
+
+        // 2. Filter brands
+        $('#ac-is-brand-select option').each(function() {
+            const brandCat = $(this).data('category');
+            if (!brandCat || brandCat === 'all' || brandCat === cat) {
+                $(this).show();
+            } else {
+                $(this).hide();
+            }
+        });
+
+        // 3. Update subcategories
+        const subSelect = $('#ac-is-subcategory-select');
+        const currentVal = $('#ac-is-selected-subcategory').val();
+        subSelect.empty().append('<option value="">--- اختر ---</option>');
+
+        if (subcategories[cat]) {
+            subcategories[cat].forEach(sub => {
+                subSelect.append(`<option value="${sub}" ${currentVal === sub ? 'selected' : ''}>${sub}</option>`);
+            });
+        }
     }
-    $('#ac-is-category-select').on('change', toggleFields);
-    toggleFields();
+
+    $('#ac-is-category-select').on('change', updateDynamicFields);
+    updateDynamicFields();
 });
 </script>

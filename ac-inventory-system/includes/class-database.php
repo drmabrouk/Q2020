@@ -21,6 +21,7 @@ class AC_IS_Database {
 		$sql = "CREATE TABLE $table_brands (
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			name varchar(255) NOT NULL,
+			category varchar(100) DEFAULT 'all',
 			logo_url text,
 			PRIMARY KEY  (id)
 		) $charset_collate;
@@ -177,10 +178,20 @@ class AC_IS_Database {
 			}
 		}
 
-		// Default brand
-		$exists = $wpdb->get_var( "SELECT id FROM $table_brands LIMIT 1" );
-		if ( ! $exists ) {
-			$wpdb->insert( $table_brands, array( 'name' => 'General' ) );
+		// Seed 15 Brands per category
+		$categories = array(
+			'ac'      => array('Carrier', 'LG', 'Samsung', 'Sharp', 'Gree', 'Media', 'Unionaire', 'Tornado', 'Fresh', 'York', 'Daikin', 'Mitsubishi', 'Haier', 'Zamil', 'Trane'),
+			'filter'  => array('Tank', 'Fresh', 'Panasonic', 'Aqua', 'Pure', 'Blue Sky', 'Water World', 'Crystal', 'Bio', 'Nano', 'Filter King', 'Eco', 'Safe', 'Magic', 'Gold'),
+			'cooling' => array('Coldaire', 'Iceberg', 'Arctic', 'Polar', 'Frosty', 'Glacier', 'Zero', 'Frigo', 'CoolTech', 'MegaCool', 'SuperIce', 'Chill', 'Nova', 'Ultra', 'Extreme')
+		);
+
+		foreach($categories as $cat => $brands) {
+			foreach($brands as $brand_name) {
+				$exists = $wpdb->get_var( $wpdb->prepare( "SELECT id FROM $table_brands WHERE name = %s AND category = %s", $brand_name, $cat ) );
+				if ( ! $exists ) {
+					$wpdb->insert( $table_brands, array( 'name' => $brand_name, 'category' => $cat ) );
+				}
+			}
 		}
 	}
 }

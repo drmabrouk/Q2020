@@ -3,12 +3,24 @@ $filter_status = isset($_GET['filter_status']) ? sanitize_text_field($_GET['filt
 $tracking_items = AC_IS_Filters::get_all_tracking( array('status' => $filter_status) );
 ?>
 
-<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<?php
+$filter_search = isset($_GET['filter_search']) ? sanitize_text_field($_GET['filter_search']) : '';
+$tracking_items = AC_IS_Filters::get_all_tracking( array('status' => $filter_status, 'search' => $filter_search) );
+?>
+<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('متابعة صيانة فلاتر المياه', 'ac-inventory-system'); ?></h2>
-    <div style="display:flex; gap:10px;">
+
+    <div style="display:flex; gap:10px; align-items:center;">
+        <form method="get" style="display:flex; gap:5px;">
+            <input type="hidden" name="ac_view" value="filter-tracking">
+            <input type="hidden" name="filter_status" value="<?php echo $filter_status; ?>">
+            <input type="text" name="filter_search" value="<?php echo esc_attr($filter_search); ?>" placeholder="<?php _e('بحث عميل، هاتف، فلتر...', 'ac-inventory-system'); ?>" style="padding:8px 15px; border-radius:20px; border:1px solid var(--ac-border); font-size:0.85rem; width:250px;">
+            <button type="submit" class="ac-is-btn" style="padding:8px 12px;"><span class="dashicons dashicons-search"></span></button>
+        </form>
+
         <button id="ac-is-filter-settings-btn" class="ac-is-btn" style="background:#64748b; padding:8px;"><span class="dashicons dashicons-admin-generic"></span></button>
         <a href="<?php echo add_query_arg('filter_status', 'all'); ?>" class="ac-is-btn" style="<?php echo ($filter_status == 'all' ? '' : 'background:#64748b;'); ?>"><?php _e('الكل', 'ac-inventory-system'); ?></a>
-        <a href="<?php echo add_query_arg('filter_status', 'alert'); ?>" class="ac-is-btn" style="<?php echo ($filter_status == 'alert' ? 'background:#ef4444;' : 'background:#64748b;'); ?>"><?php _e('تنبيهات التغيير', 'ac-inventory-system'); ?></a>
+        <a href="<?php echo add_query_arg('filter_status', 'alert'); ?>" class="ac-is-btn" style="<?php echo ($filter_status == 'alert' ? 'background:#ef4444;' : 'background:#64748b;'); ?>"><?php _e('تنبيهات', 'ac-inventory-system'); ?></a>
     </div>
 </div>
 

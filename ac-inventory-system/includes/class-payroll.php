@@ -102,4 +102,13 @@ class AC_IS_Payroll {
 			return $wpdb->insert( $table, $data );
 		}
 	}
+
+	public static function get_staff_attendance_logs( $staff_id, $month ) {
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_attendance';
+		return $wpdb->get_results( $wpdb->prepare(
+			"SELECT * FROM $table WHERE staff_id = %d AND work_date LIKE %s ORDER BY work_date ASC",
+			$staff_id, $month . '%'
+		) );
+	}
 }

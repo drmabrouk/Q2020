@@ -203,12 +203,13 @@
         display: flex;
         flex-direction: column;
         align-items: center;
-        gap: 4px;
-        font-size: 0.65rem;
+        gap: 2px;
+        font-size: 0.6rem;
         padding: 10px;
         background: none;
         border: none;
         cursor: pointer;
+        flex: 1;
     }
 
     .ac-is-mobile-bottom-bar .sidebar-ctrl-icon span.dashicons {
