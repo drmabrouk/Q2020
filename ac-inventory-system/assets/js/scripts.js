@@ -189,7 +189,8 @@ jQuery(document).ready(function($) {
             customer_phone: $('#ac-is-customer-phone').val() || '-',
             customer_address: $('#ac-is-customer-address').val() || '',
             customer_email: $('#ac-is-customer-email').val() || '',
-            send_email: $('#ac-is-send-email').is(':checked') ? 1 : 0
+            send_email: $('#ac-is-send-email').is(':checked') ? 1 : 0,
+            warranty_years: $('#ac-is-sale-warranty').val() || 0
         };
 
         $.post(ac_is_ajax.ajax_url, data, function(res) {
@@ -410,7 +411,11 @@ jQuery(document).ready(function($) {
     });
 
     if (window.location.search.indexOf('autoprint=1') > -1) {
-        setTimeout(function() { window.print(); }, 1000);
+        // Prevent double printing via a session flag
+        if (!sessionStorage.getItem('is_printed_' + window.location.search)) {
+            sessionStorage.setItem('is_printed_' + window.location.search, '1');
+            setTimeout(function() { window.print(); }, 1000);
+        }
     }
 
     // PWA Install Prompt Logic

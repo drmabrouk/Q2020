@@ -31,6 +31,7 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                 <div class="ac-is-form-group">
                     <select name="staff_role">
                         <option value="employee"><?php _e('موظف مبيعات', 'ac-inventory-system'); ?></option>
+                        <option value="technician"><?php _e('فني صيانة', 'ac-inventory-system'); ?></option>
                         <option value="manager"><?php _e('مدير مبيعات (صلاحية الحذف)', 'ac-inventory-system'); ?></option>
                         <option value="admin"><?php _e('مدير نظام كامل', 'ac-inventory-system'); ?></option>
                     </select>
@@ -61,7 +62,10 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                     <tr>
                         <td><strong><?php echo esc_html($s->username); ?></strong></td>
                         <td><?php echo esc_html($s->name); ?></td>
-                        <td><span class="ac-is-capsule capsule-info"><?php echo ($s->role == 'admin' ? 'مدير نظام' : ($s->role == 'manager' ? 'مدير مبيعات' : 'موظف')); ?></span></td>
+                        <td><span class="ac-is-capsule capsule-info"><?php
+                            $roles = array('admin' => 'مدير نظام', 'manager' => 'مدير مبيعات', 'technician' => 'فني صيانة', 'employee' => 'موظف');
+                            echo $roles[$s->role] ?? $s->role;
+                        ?></span></td>
                         <td><?php echo number_format($s->base_salary, 2); ?></td>
                         <td style="text-align:left;">
                             <?php if($s->username != 'admin'): ?>

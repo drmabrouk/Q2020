@@ -117,6 +117,17 @@ $products = AC_IS_Inventory::get_products();
                 </div>
 
                 <div style="margin-bottom:20px;">
+                    <div class="ac-is-form-group">
+                        <label style="color:rgba(255,255,255,0.7); font-size:0.8rem; margin-bottom:5px;"><?php _e('مدة الضمان', 'ac-inventory-system'); ?></label>
+                        <select id="ac-is-sale-warranty" style="background:#1e293b; color:#fff; border-color:#334155; height:40px;">
+                            <option value="0"><?php _e('بدون ضمان', 'ac-inventory-system'); ?></option>
+                            <option value="1">1 <?php _e('سنة', 'ac-inventory-system'); ?></option>
+                            <option value="2">2 <?php _e('سنة', 'ac-inventory-system'); ?></option>
+                            <option value="3">3 <?php _e('سنوات', 'ac-inventory-system'); ?></option>
+                            <option value="4">4 <?php _e('سنوات', 'ac-inventory-system'); ?></option>
+                            <option value="5">5 <?php _e('سنوات', 'ac-inventory-system'); ?></option>
+                        </select>
+                    </div>
                     <label style="display:flex; align-items:center; gap:10px; cursor:pointer; font-size:0.9rem;">
                         <input type="checkbox" id="ac-is-send-email" checked> <?php _e('إرسال نسخة للبريد الإلكتروني', 'ac-inventory-system'); ?>
                     </label>

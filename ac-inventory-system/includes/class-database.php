@@ -61,6 +61,7 @@ class AC_IS_Database {
 			customer_id mediumint(9),
 			total_amount decimal(10,2) NOT NULL,
 			operator_id varchar(100) NOT NULL,
+			warranty_years int DEFAULT 0,
 			invoice_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) $charset_collate;

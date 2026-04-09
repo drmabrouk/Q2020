@@ -46,9 +46,10 @@
         width: 100%;
         max-width: 100% !important;
         margin: 0 !important;
-        padding: 10mm !important;
+        padding: 5mm !important;
         border: none !important;
-        page-break-after: always;
+        page-break-after: avoid;
+        page-break-inside: avoid;
     }
 
     /* Sticker Specifics */
