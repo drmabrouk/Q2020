@@ -12,7 +12,8 @@ class AC_IS_Ajax {
 			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
 			'save_customer', 'delete_customer', 'save_brand', 'delete_brand',
 			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts',
-			'verify_fullscreen_password', 'replace_candle'
+			'verify_fullscreen_password', 'replace_candle', 'get_brands_by_category',
+			'get_staff_logs'
 		);
 
 		foreach ( $actions as $action ) {
@@ -305,6 +306,57 @@ class AC_IS_Ajax {
 		$res = AC_IS_Filters::replace_candle( $id );
 		if ( $res ) wp_send_json_success();
 		else wp_send_json_error();
+	}
+
+	public function get_brands_by_category() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		$category = sanitize_text_field( $_POST['category'] );
+		$brands = AC_IS_Brands::get_brands( $category );
+		wp_send_json_success( $brands );
+	}
+
+	public function get_staff_logs() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error( 'Unauthorized' );
+
+		global $wpdb;
+		$staff_id = intval( $_POST['staff_id'] );
+		$month = sanitize_text_field( $_POST['month'] );
+		$logs = AC_IS_Payroll::get_staff_attendance_logs( $staff_id, $month );
+		$staff = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ac_is_staff WHERE id = %d", $staff_id));
+
+		$html = '';
+		$total_minutes = 0;
+		if ( $logs ) {
+			foreach ( $logs as $log ) {
+				$duration = '-';
+				if ( $log->check_in && $log->check_out ) {
+					$diff = strtotime($log->check_out) - strtotime($log->check_in);
+					$mins = floor($diff / 60);
+					$total_minutes += $mins;
+					$duration = floor($mins / 60) . 'h ' . ($mins % 60) . 'm';
+				}
+				$status_map = array('present' => 'حاضر', 'absent' => 'غائب', 'leave' => 'إجازة', 'shift_approved' => 'شيفت إضافي');
+				$st_label = $status_map[$log->status] ?? $log->status;
+
+				$html .= "<tr>
+					<td>{$log->work_date}</td>
+					<td>" . ($log->check_in ?: '-') . "</td>
+					<td>" . ($log->check_out ?: '-') . "</td>
+					<td>{$duration}</td>
+					<td><span class='ac-is-capsule " . (strpos($log->status, 'absent') !== false ? 'capsule-danger' : 'capsule-success') . "'>{$st_label}</span></td>
+				</tr>";
+			}
+			$total_h = floor($total_minutes / 60);
+			$total_m = $total_minutes % 60;
+			$html .= "<tr style='background:#f8fafc; font-weight:bold;'>
+				<td colspan='3'>" . __('إجمالي الساعات العمل:', 'ac-inventory-system') . "</td>
+				<td colspan='2'>{$total_h}h {$total_m}m</td>
+			</tr>";
+		} else {
+			$html = '<tr><td colspan="5" style="text-align:center;">' . __('لا توجد سجلات', 'ac-inventory-system') . '</td></tr>';
+		}
+		wp_send_json_success( array( 'html' => $html ) );
 	}
 
 	public function search_sales() {

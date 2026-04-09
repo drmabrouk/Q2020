@@ -45,15 +45,18 @@
                 <p style="margin:0; font-size:0.7rem; opacity:0.9;"><?php _e('اضغط على "مشاركة" ثم "إضافة إلى الصفحة الرئيسية"', 'ac-inventory-system'); ?></p>
                 <span class="dashicons dashicons-share" style="margin-top:5px; font-size:16px;"></span>
             </div>
-            <div class="ac-is-sidebar-controls" style="display: flex; justify-content: space-around; align-items: center; gap: 5px;">
-                <button id="ac-is-fullscreen-btn" class="sidebar-ctrl-icon" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px;">
-                    <span class="dashicons dashicons-fullscreen-alt" style="font-size:18px;"></span>
+            <div class="ac-is-sidebar-controls" style="display: flex; justify-content: space-around; align-items: center; gap: 2px;">
+                <button id="ac-is-fullscreen-btn" class="sidebar-ctrl-icon" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
+                    <span class="dashicons dashicons-fullscreen-alt" style="font-size:18px; width:18px; height:18px;"></span>
+                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('ملء', 'ac-inventory-system'); ?></small>
                 </button>
-                <button id="ac-is-refresh-btn" class="sidebar-ctrl-icon" title="<?php _e('تحديث', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px;">
-                    <span class="dashicons dashicons-update" style="font-size:18px;"></span>
+                <button id="ac-is-refresh-btn" class="sidebar-ctrl-icon" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
+                    <span class="dashicons dashicons-update" style="font-size:18px; width:18px; height:18px;"></span>
+                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('تحديث', 'ac-inventory-system'); ?></small>
                 </button>
-                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" title="<?php _e('خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px;">
-                    <span class="dashicons dashicons-logout" style="font-size:18px;"></span>
+                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon logout" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px; flex:1; display:flex; flex-direction:column; align-items:center;">
+                    <span class="dashicons dashicons-logout" style="font-size:18px; width:18px; height:18px;"></span>
+                    <small style="font-size:0.6rem; margin-top:2px;"><?php _e('خروج', 'ac-inventory-system'); ?></small>
                 </button>
             </div>
         </div>
