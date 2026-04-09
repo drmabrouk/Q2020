@@ -43,6 +43,9 @@ class AC_IS_Shortcode {
 			case 'customers':
 				include AC_IS_PATH . 'templates/customers.php';
 				break;
+			case 'filter-tracking':
+				include AC_IS_PATH . 'templates/filter-tracking.php';
+				break;
 			case 'payroll':
 				include AC_IS_PATH . 'templates/payroll.php';
 				break;

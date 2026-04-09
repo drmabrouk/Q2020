@@ -50,6 +50,7 @@ class AC_Inventory_System {
 		require_once AC_IS_PATH . 'includes/class-payroll.php';
 		require_once AC_IS_PATH . 'includes/class-inventory.php';
 		require_once AC_IS_PATH . 'includes/class-sales.php';
+		require_once AC_IS_PATH . 'includes/class-filters.php';
 		require_once AC_IS_PATH . 'includes/class-reports.php';
 		require_once AC_IS_PATH . 'includes/class-pwa.php';
 
