@@ -191,15 +191,40 @@ jQuery(document).ready(function($) {
             customer_address: $('#ac-is-customer-address').val() || '',
             customer_email: $('#ac-is-customer-email').val() || '',
             send_email: $('#ac-is-send-email').is(':checked') ? 1 : 0,
-            warranty_years: $('#ac-is-sale-warranty').val() || 0
+            warranty_years: $('#ac-is-sale-warranty').val() || 0,
+            offline_id: Date.now()
         };
 
-        $.post(ac_is_ajax.ajax_url, data, function(res) {
-            if (res.success) {
-                window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&invoice_id=' + res.data.invoice_id + '&autoprint=1';
-            }
-        });
+        if (navigator.onLine) {
+            $.post(ac_is_ajax.ajax_url, data, function(res) {
+                if (res.success) {
+                    window.location.href = window.location.href.split('&')[0] + '&ac_view=invoice&invoice_id=' + res.data.invoice_id + '&autoprint=1';
+                }
+            });
+        } else {
+            const pending = JSON.parse(localStorage.getItem('ac_is_pending_sales') || '[]');
+            pending.push(data);
+            localStorage.setItem('ac_is_pending_sales', JSON.stringify(pending));
+            alert('تم حفظ العملية محلياً (أوفلاين). سيتم المزامنة تلقائياً عند عودة الإنترنت.');
+            cart = []; renderCart();
+        }
     });
+
+    // Auto-Sync Logic
+    setInterval(() => {
+        if (navigator.onLine) {
+            const pending = JSON.parse(localStorage.getItem('ac_is_pending_sales') || '[]');
+            if (pending.length > 0) {
+                const item = pending.shift();
+                $.post(ac_is_ajax.ajax_url, item, function(res) {
+                    if (res.success) {
+                        localStorage.setItem('ac_is_pending_sales', JSON.stringify(pending));
+                        console.log('Synced offline sale:', item.offline_id);
+                    }
+                });
+            }
+        }
+    }, 1000 * 60 * 5); // 5 minutes
 
     // --- Infrastructure & Other Logic ---
 
@@ -222,7 +247,25 @@ jQuery(document).ready(function($) {
         if (!document.fullscreenElement) {
             if (systemRoot.requestFullscreen) systemRoot.requestFullscreen();
             else if (systemRoot.webkitRequestFullscreen) systemRoot.webkitRequestFullscreen();
+            localStorage.setItem('ac_is_fullscreen', '1');
         } else {
+            $('#ac-is-unlock-overlay').css('display', 'flex').hide().fadeIn(300);
+            $('#ac-is-unlock-pass').focus();
+        }
+    });
+
+    // Auto-restore fullscreen state
+    if (localStorage.getItem('ac_is_fullscreen') === '1' && !document.fullscreenElement) {
+        // Must be triggered by user interaction, so we might need a workaround or user to click once
+        $(document).one('click', function() {
+             if (systemRoot.requestFullscreen) systemRoot.requestFullscreen();
+        });
+    }
+
+    // Block Esc key in Fullscreen
+    $(document).on('keydown', function(e) {
+        if (document.fullscreenElement && e.keyCode === 27) {
+            e.preventDefault();
             $('#ac-is-unlock-overlay').css('display', 'flex').hide().fadeIn(300);
             $('#ac-is-unlock-pass').focus();
         }
@@ -242,6 +285,7 @@ jQuery(document).ready(function($) {
                 $('#ac-is-unlock-overlay').fadeOut(300, function() {
                     if (document.exitFullscreen) document.exitFullscreen();
                     $('#ac-is-unlock-pass').val('');
+                    localStorage.removeItem('ac_is_fullscreen');
                 });
             } else {
                 alert('كلمة المرور غير صحيحة');

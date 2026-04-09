@@ -130,6 +130,17 @@ class AC_IS_Database {
 			operator_id varchar(100),
 			notes text,
 			PRIMARY KEY  (id)
+		) $charset_collate;
+
+		CREATE TABLE {$wpdb->prefix}ac_is_activity_logs (
+			id bigint(20) NOT NULL AUTO_INCREMENT,
+			user_id varchar(100) NOT NULL,
+			action_type varchar(100) NOT NULL,
+			description text,
+			device_type varchar(50),
+			device_info text,
+			action_date datetime DEFAULT CURRENT_TIMESTAMP,
+			PRIMARY KEY  (id)
 		) $charset_collate;";
 
 		if ( file_exists( ABSPATH . 'wp-admin/includes/upgrade.php' ) ) {
@@ -179,11 +190,11 @@ class AC_IS_Database {
 			}
 		}
 
-		// Seed 15 Brands per category
+		// Seed 15 Brands per category (Arabic)
 		$categories = array(
-			'ac'      => array('Carrier', 'LG', 'Samsung', 'Sharp', 'Gree', 'Media', 'Unionaire', 'Tornado', 'Fresh', 'York', 'Daikin', 'Mitsubishi', 'Haier', 'Zamil', 'Trane'),
-			'filter'  => array('Tank', 'Fresh', 'Panasonic', 'Aqua', 'Pure', 'Blue Sky', 'Water World', 'Crystal', 'Bio', 'Nano', 'Filter King', 'Eco', 'Safe', 'Magic', 'Gold'),
-			'cooling' => array('Coldaire', 'Iceberg', 'Arctic', 'Polar', 'Frosty', 'Glacier', 'Zero', 'Frigo', 'CoolTech', 'MegaCool', 'SuperIce', 'Chill', 'Nova', 'Ultra', 'Extreme')
+			'ac'      => array('كارير', 'ال جي', 'سامسونج', 'شارب', 'جري', 'ميديا', 'يونيون اير', 'تورنيدو', 'فريش', 'يورك', 'دايكن', 'ميتسوبيشي', 'هاير', 'الزامل', 'ترين'),
+			'filter'  => array('تانك', 'فريش', 'باناسونيك', 'أكوا', 'بيور', 'بلو سكاي', 'ووتر وورلد', 'كريستال', 'بيو', 'نانو', 'فلتر كينج', 'إيكو', 'سيف', 'ماجيك', 'جولد'),
+			'cooling' => array('كولداير', 'أيس بيرج', 'أركتيك', 'بولار', 'فروستي', 'جليسير', 'زيرو', 'فريجو', 'كول تك', 'ميجا كول', 'سوبر أيس', 'تشيل', 'نوفا', 'ألترا', 'إكستريم')
 		);
 
 		foreach($categories as $cat => $brands) {

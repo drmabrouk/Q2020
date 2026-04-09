@@ -24,6 +24,8 @@ $brands = AC_IS_Brands::get_brands();
                 <option value="ac" <?php selected($product ? $product->category : '', 'ac'); ?>><?php _e('مكيفات (Air Conditioners)', 'ac-inventory-system'); ?></option>
                 <option value="filter" <?php selected($product ? $product->category : '', 'filter'); ?>><?php _e('فلاتر مياه (Water Filters)', 'ac-inventory-system'); ?></option>
                 <option value="cooling" <?php selected($product ? $product->category : '', 'cooling'); ?>><?php _e('أنظمة تبريد أخرى', 'ac-inventory-system'); ?></option>
+                <option value="cartridge" <?php selected($product ? $product->category : '', 'cartridge'); ?>><?php _e('شمع فلاتر (Filter Cartridges)', 'ac-inventory-system'); ?></option>
+                <option value="spare" <?php selected($product ? $product->category : '', 'spare'); ?>><?php _e('قطع غيار (Spare Parts)', 'ac-inventory-system'); ?></option>
             </select>
         </div>
 
@@ -109,6 +111,22 @@ $brands = AC_IS_Brands::get_brands();
         <div class="ac-is-form-group">
             <label><?php _e('الرقم التسلسلي (S/N)', 'ac-inventory-system'); ?></label>
             <input type="text" name="serial_number" id="ac-is-serial-input" placeholder="<?php _e('يترك فارغاً للتوليد من الباركود', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->serial_number) : ''; ?>">
+        </div>
+
+        <div class="ac-is-form-group">
+            <label><?php _e('مدة الضمان الافتراضية', 'ac-inventory-system'); ?></label>
+            <select name="default_warranty">
+                <option value="0" <?php selected($product->default_warranty ?? 0, 0); ?>><?php _e('بدون ضمان', 'ac-inventory-system'); ?></option>
+                <option value="14d" <?php selected($product->default_warranty ?? '', '14d'); ?>><?php _e('14 يوم', 'ac-inventory-system'); ?></option>
+                <option value="1m" <?php selected($product->default_warranty ?? '', '1m'); ?>><?php _e('شهر واحد', 'ac-inventory-system'); ?></option>
+                <option value="3m" <?php selected($product->default_warranty ?? '', '3m'); ?>><?php _e('3 شهور', 'ac-inventory-system'); ?></option>
+                <option value="6m" <?php selected($product->default_warranty ?? '', '6m'); ?>><?php _e('6 شهور', 'ac-inventory-system'); ?></option>
+                <option value="1y" <?php selected($product->default_warranty ?? '', '1y'); ?>><?php _e('سنة واحدة', 'ac-inventory-system'); ?></option>
+                <option value="2y" <?php selected($product->default_warranty ?? '', '2y'); ?>><?php _e('سنتين', 'ac-inventory-system'); ?></option>
+                <option value="3y" <?php selected($product->default_warranty ?? '', '3y'); ?>><?php _e('3 سنوات', 'ac-inventory-system'); ?></option>
+                <option value="4y" <?php selected($product->default_warranty ?? '', '4y'); ?>><?php _e('4 سنوات', 'ac-inventory-system'); ?></option>
+                <option value="5y" <?php selected($product->default_warranty ?? '', '5y'); ?>><?php _e('5 سنوات', 'ac-inventory-system'); ?></option>
+            </select>
         </div>
     </div>
 
