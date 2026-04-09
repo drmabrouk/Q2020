@@ -16,6 +16,9 @@ class AC_IS_Payroll {
 		$staff_list = $wpdb->get_results( "SELECT * FROM $table_staff WHERE username != 'admin' ORDER BY name ASC" );
 		$payroll = array();
 
+		$work_start = $wpdb->get_var("SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'default_start'") ?: "09:00:00";
+		$work_end   = $wpdb->get_var("SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'default_end'") ?: "22:00:00";
+
 		foreach ( $staff_list as $staff ) {
 			$attendance = $wpdb->get_results( $wpdb->prepare(
 				"SELECT * FROM $table_attendance WHERE staff_id = %d AND work_date LIKE %s",
@@ -24,6 +27,9 @@ class AC_IS_Payroll {
 
 			$days_present = 0;
 			$total_hours  = 0;
+			$pending_shifts = 0;
+			$approved_shifts = 0;
+
 			foreach ( $attendance as $a ) {
 				if ( $a->status === 'present' ) {
 					$days_present++;
@@ -31,15 +37,16 @@ class AC_IS_Payroll {
 						$diff = strtotime($a->check_out) - strtotime($a->check_in);
 						$total_hours += ($diff / 3600);
 					}
+				} elseif ( $a->status === 'shift_request' ) {
+					$pending_shifts++;
+				} elseif ( $a->status === 'shift_approved' ) {
+					$approved_shifts++;
+					$days_present++; // Count as present for salary
 				}
 			}
 
 			$daily_rate = $staff->base_salary / ($staff->working_days ?: 26);
 			$hourly_rate = $daily_rate / ($staff->working_hours ?: 8);
-
-			// Constants for schedule
-			$work_start = "09:00:00";
-			$work_end   = "22:00:00";
 
 			// Simple deduction: base salary - (missed days * daily rate)
 			$missed_days = max(0, $staff->working_days - $days_present);
@@ -65,13 +72,15 @@ class AC_IS_Payroll {
 			$final_salary = $staff->base_salary - $deductions - $delay_deduction;
 
 			$payroll[] = (object) array(
-				'staff_id'     => $staff->id,
-				'name'         => $staff->name,
-				'base_salary'  => $staff->base_salary,
-				'days_present' => $days_present,
-				'total_hours'  => round($total_hours, 2),
-				'deductions'   => round($deductions + $delay_deduction, 2),
-				'net_salary'   => round(max(0, $final_salary), 2)
+				'staff_id'       => $staff->id,
+				'name'           => $staff->name,
+				'base_salary'    => $staff->base_salary,
+				'days_present'   => $days_present,
+				'total_hours'    => round($total_hours, 2),
+				'pending_shifts' => $pending_shifts,
+				'deductions'     => round($deductions + $delay_deduction, 2),
+				'net_salary'     => round(max(0, $final_salary), 2),
+				'working_hours'  => $staff->working_hours
 			);
 		}
 

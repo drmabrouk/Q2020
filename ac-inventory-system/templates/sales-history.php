@@ -37,32 +37,32 @@ $sales = $wpdb->get_results("
 $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
 ?>
 
-<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
+<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('سجل المبيعات والتفاصيل', 'ac-inventory-system'); ?></h2>
+
+    <div class="ac-is-compact-search" style="flex-grow: 1; max-width: 400px; position: relative;">
+        <span class="dashicons dashicons-search" style="position: absolute; right: 10px; top: 10px; color: #94a3b8;"></span>
+        <input type="text" id="ac-is-live-sales-search" placeholder="<?php _e('بحث سريع: فاتورة، عميل، منتج...', 'ac-inventory-system'); ?>" style="width: 100%; padding: 8px 35px 8px 12px; border-radius: 20px; border: 1px solid var(--ac-border); font-size: 0.85rem;">
+    </div>
 </div>
 
-<div class="ac-is-search-filters" style="background:#fff; padding:20px; border:1px solid var(--ac-border); margin-bottom:25px;">
-    <form method="get" class="ac-is-grid" style="grid-template-columns: repeat(3, 1fr); gap:15px;">
+<div class="ac-is-search-filters" style="background:#fff; padding:15px; border:1px solid var(--ac-border); margin-bottom:25px; border-radius: 8px;">
+    <form method="get" style="display: flex; gap: 15px; align-items: flex-end; flex-wrap: wrap;">
         <input type="hidden" name="ac_view" value="sales-history">
 
-        <div class="ac-is-form-group">
-            <label><?php _e('بحث شامل', 'ac-inventory-system'); ?></label>
-            <input type="text" name="sale_search" value="<?php echo esc_attr($_GET['sale_search'] ?? ''); ?>" placeholder="<?php _e('رقم الفاتورة، العميل، الهاتف، المنتج...', 'ac-inventory-system'); ?>">
+        <div class="ac-is-form-group" style="margin:0; flex:1; min-width: 150px;">
+            <label style="font-size:0.75rem; margin-bottom:4px;"><?php _e('من تاريخ', 'ac-inventory-system'); ?></label>
+            <input type="date" name="date_from" value="<?php echo esc_attr($_GET['date_from'] ?? ''); ?>" style="padding:6px 10px; font-size:0.8rem;">
         </div>
 
-        <div class="ac-is-form-group">
-            <label><?php _e('من تاريخ', 'ac-inventory-system'); ?></label>
-            <input type="date" name="date_from" value="<?php echo esc_attr($_GET['date_from'] ?? ''); ?>">
+        <div class="ac-is-form-group" style="margin:0; flex:1; min-width: 150px;">
+            <label style="font-size:0.75rem; margin-bottom:4px;"><?php _e('إلى تاريخ', 'ac-inventory-system'); ?></label>
+            <input type="date" name="date_to" value="<?php echo esc_attr($_GET['date_to'] ?? ''); ?>" style="padding:6px 10px; font-size:0.8rem;">
         </div>
 
-        <div class="ac-is-form-group">
-            <label><?php _e('إلى تاريخ', 'ac-inventory-system'); ?></label>
-            <input type="date" name="date_to" value="<?php echo esc_attr($_GET['date_to'] ?? ''); ?>">
-        </div>
-
-        <div class="ac-is-form-group">
-            <label><?php _e('الموظف', 'ac-inventory-system'); ?></label>
-            <select name="operator_id">
+        <div class="ac-is-form-group" style="margin:0; flex:1; min-width: 150px;">
+            <label style="font-size:0.75rem; margin-bottom:4px;"><?php _e('الموظف', 'ac-inventory-system'); ?></label>
+            <select name="operator_id" style="padding:6px 10px; font-size:0.8rem;">
                 <option value=""><?php _e('كل الموظفين', 'ac-inventory-system'); ?></option>
                 <?php foreach($staff_list as $s): ?>
                     <option value="<?php echo $s->id; ?>" <?php selected($_GET['operator_id'] ?? '', $s->id); ?>><?php echo esc_html($s->name); ?></option>
@@ -70,15 +70,15 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
             </select>
         </div>
 
-        <div class="ac-is-form-group" style="display:flex; align-items:flex-end; gap:10px;">
-            <button type="submit" class="ac-is-btn" style="flex:1; height:42px;"><?php _e('تطبيق الفلتر', 'ac-inventory-system'); ?></button>
-            <a href="?ac_view=sales-history" class="ac-is-btn" style="background:#64748b; height:42px;"><?php _e('إعادة تعيين', 'ac-inventory-system'); ?></a>
+        <div style="display:flex; gap:8px;">
+            <button type="submit" class="ac-is-btn" style="height:34px; padding:0 15px; font-size:0.8rem;"><?php _e('فلترة', 'ac-inventory-system'); ?></button>
+            <a href="?ac_view=sales-history" class="ac-is-btn" style="background:#64748b; height:34px; padding:0 15px; font-size:0.8rem;"><?php _e('إعادة', 'ac-inventory-system'); ?></a>
         </div>
     </form>
 </div>
 
-<div style="background:#fff; border:1px solid var(--ac-border); overflow:hidden;">
-    <table class="ac-is-table">
+<div style="background:#fff; border:1px solid var(--ac-border); overflow:hidden; border-radius: 8px;">
+    <table class="ac-is-table" id="ac-is-sales-table">
         <thead>
             <tr>
                 <th><?php _e('رقم / تاريخ', 'ac-inventory-system'); ?></th>

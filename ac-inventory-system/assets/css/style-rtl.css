@@ -50,6 +50,19 @@
     height: 100vh;
     border-radius: 0;
     z-index: 100;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+    scrollbar-color: var(--ac-sidebar-hover) transparent;
+}
+
+.ac-is-sidebar::-webkit-scrollbar {
+    width: 4px;
+}
+
+.ac-is-sidebar::-webkit-scrollbar-thumb {
+    background-color: var(--ac-sidebar-hover);
+    border-radius: 10px;
 }
 
 .ac-is-sidebar-logo {
@@ -67,7 +80,7 @@
 
 .ac-is-sidebar-nav {
     margin-top: 8px;
-    flex-grow: 1;
+    flex-grow: 0;
 }
 
 .ac-is-sidebar-nav a {
@@ -94,6 +107,15 @@
     background: var(--ac-sidebar-hover);
     color: #fff;
     border-right-color: var(--ac-primary);
+}
+
+.sidebar-ctrl-icon {
+    transition: all 0.2s ease;
+}
+
+.sidebar-ctrl-icon:hover {
+    color: #fff !important;
+    transform: scale(1.1);
 }
 
 /* Main Content Area */
