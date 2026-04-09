@@ -13,7 +13,7 @@ class AC_IS_Ajax {
 			'save_customer', 'delete_customer', 'save_brand', 'delete_brand',
 			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts',
 			'verify_fullscreen_password', 'replace_candle', 'get_brands_by_category',
-			'get_staff_logs'
+			'get_staff_logs', 'recognize_product'
 		);
 
 		foreach ( $actions as $action ) {
@@ -357,6 +357,20 @@ class AC_IS_Ajax {
 			$html = '<tr><td colspan="5" style="text-align:center;">' . __('لا توجد سجلات', 'ac-inventory-system') . '</td></tr>';
 		}
 		wp_send_json_success( array( 'html' => $html ) );
+	}
+
+	public function recognize_product() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
+
+		$barcode = sanitize_text_field( $_POST['barcode'] );
+		$product = AC_IS_Inventory::get_product_by_barcode( $barcode );
+
+		if ( $product ) {
+			wp_send_json_success( $product );
+		} else {
+			wp_send_json_error();
+		}
 	}
 
 	public function search_sales() {

@@ -91,10 +91,18 @@ $brands = AC_IS_Brands::get_brands();
         </div>
 
         <div class="ac-is-form-group">
-            <label><?php _e('الباركود (Barcode)', 'ac-inventory-system'); ?></label>
+            <label><?php _e('الباركود الداخلي (System Barcode)', 'ac-inventory-system'); ?></label>
             <div style="display:flex; gap:10px;">
-                <input type="text" name="barcode" id="ac-is-barcode-input" placeholder="<?php _e('باركود الصنف', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->barcode) : ''; ?>">
-                <button type="button" id="generate-barcode" class="ac-is-btn" style="padding: 10px; background:#475569;"><?php _e('توليد تلقائي', 'ac-inventory-system'); ?></button>
+                <input type="text" name="barcode" id="ac-is-barcode-input" placeholder="<?php _e('باركود النظام', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->barcode) : ''; ?>">
+                <button type="button" id="generate-barcode" class="ac-is-btn" style="padding: 10px; background:#475569;"><?php _e('توليد', 'ac-inventory-system'); ?></button>
+            </div>
+        </div>
+
+        <div class="ac-is-form-group">
+            <label><?php _e('باركود المصنع (Factory Barcode)', 'ac-inventory-system'); ?></label>
+            <div style="display:flex; gap:10px;">
+                <input type="text" name="factory_barcode" id="ac-is-factory-barcode-input" placeholder="<?php _e('باركود خارجي', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->factory_barcode) : ''; ?>">
+                <button type="button" id="scan-factory-barcode" class="ac-is-btn" style="padding: 10px; background:var(--ac-primary);"><span class="dashicons dashicons-camera"></span></button>
             </div>
         </div>
 
@@ -102,6 +110,15 @@ $brands = AC_IS_Brands::get_brands();
             <label><?php _e('الرقم التسلسلي (S/N)', 'ac-inventory-system'); ?></label>
             <input type="text" name="serial_number" id="ac-is-serial-input" placeholder="<?php _e('يترك فارغاً للتوليد من الباركود', 'ac-inventory-system'); ?>" value="<?php echo $product ? esc_attr($product->serial_number) : ''; ?>">
         </div>
+    </div>
+
+    <!-- Scanner Overlay for Product Form -->
+    <div id="ac-is-form-scanner-overlay" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:10015; flex-direction:column; align-items:center; justify-content:center; color:#fff;">
+        <div style="width:100%; max-width:500px; position:relative;">
+            <div id="ac-is-form-reader"></div>
+            <button type="button" id="close-form-scanner" class="ac-is-btn" style="position:absolute; top:-40px; left:0; background:#ef4444; padding:5px 15px;"><?php _e('إغلاق', 'ac-inventory-system'); ?></button>
+        </div>
+        <p style="margin-top:15px;"><?php _e('وجه الكاميرا نحو باركود المصنع للتعرف على المنتج', 'ac-inventory-system'); ?></p>
     </div>
 
     <div id="barcode-image-preview" style="margin-top:30px; text-align: center; display:none; padding:20px; border:2px dashed #ddd; background:#f9f9f9;">
