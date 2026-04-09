@@ -10,8 +10,8 @@ $table_staff     = $wpdb->prefix . 'ac_is_staff';
 $where = "1=1";
 if ( ! empty( $_GET['sale_search'] ) ) {
     $search = '%' . $wpdb->esc_like( $_GET['sale_search'] ) . '%';
-    $where .= $wpdb->prepare( " AND (c.name LIKE %s OR c.phone LIKE %s OR s.serial_number LIKE %s OR p.name LIKE %s OR p.barcode LIKE %s OR i.id = %d)",
-        $search, $search, $search, $search, $search, intval($_GET['sale_search']) );
+    $where .= $wpdb->prepare( " AND (c.name LIKE %s OR c.phone LIKE %s OR s.serial_number LIKE %s OR p.name LIKE %s OR p.barcode LIKE %s OR i.id = %s)",
+        $search, $search, $search, $search, $search, $_GET['sale_search'] );
 }
 
 if ( ! empty( $_GET['date_from'] ) ) {
@@ -19,9 +19,6 @@ if ( ! empty( $_GET['date_from'] ) ) {
 }
 if ( ! empty( $_GET['date_to'] ) ) {
     $where .= $wpdb->prepare( " AND i.invoice_date <= %s", $_GET['date_to'] . ' 23:59:59' );
-}
-if ( ! empty( $_GET['branch_id'] ) ) {
-    $where .= $wpdb->prepare( " AND i.branch_id = %d", $_GET['branch_id'] );
 }
 if ( ! empty( $_GET['operator_id'] ) ) {
     $where .= $wpdb->prepare( " AND i.operator_id = %s", $_GET['operator_id'] );
@@ -37,7 +34,6 @@ $sales = $wpdb->get_results("
     ORDER BY i.invoice_date DESC
 ");
 
-$branches = AC_IS_Inventory::get_branches();
 $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
 ?>
 
@@ -62,16 +58,6 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
         <div class="ac-is-form-group">
             <label><?php _e('إلى تاريخ', 'ac-inventory-system'); ?></label>
             <input type="date" name="date_to" value="<?php echo esc_attr($_GET['date_to'] ?? ''); ?>">
-        </div>
-
-        <div class="ac-is-form-group">
-            <label><?php _e('الفرع', 'ac-inventory-system'); ?></label>
-            <select name="branch_id">
-                <option value=""><?php _e('كل الفروع', 'ac-inventory-system'); ?></option>
-                <?php foreach($branches as $b): ?>
-                    <option value="<?php echo $b->id; ?>" <?php selected($_GET['branch_id'] ?? '', $b->id); ?>><?php echo esc_html($b->name); ?></option>
-                <?php endforeach; ?>
-            </select>
         </div>
 
         <div class="ac-is-form-group">
@@ -104,10 +90,10 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
             </tr>
         </thead>
         <tbody>
-            <?php foreach($sales as $s):
+            <?php if ( $sales ) : foreach($sales as $s):
                 $operator_name = __('غير معروف', 'ac-inventory-system');
-                if (strpos($s->operator_id, 'wp_') === 0) {
-                    $wp_id = str_replace('wp_', '', $s->operator_id);
+                if ( strpos( (string)$s->operator_id, 'wp_' ) === 0 ) {
+                    $wp_id = str_replace('wp_', '', (string)$s->operator_id);
                     $user = get_userdata($wp_id);
                     if ($user) $operator_name = $user->display_name;
                 } else {
@@ -139,8 +125,9 @@ $staff_list = $wpdb->get_results( "SELECT id, name FROM $table_staff" );
                         </div>
                     </td>
                 </tr>
-            <?php endforeach; ?>
-            <?php if(empty($sales)) echo '<tr><td colspan="6" style="text-align:center; padding:40px;">'.__('لم يتم العثور على نتائج', 'ac-inventory-system').'</td></tr>'; ?>
+            <?php endforeach; else: ?>
+                <tr><td colspan="6" style="text-align:center; padding:40px;"><?php _e('لم يتم العثور على نتائج', 'ac-inventory-system'); ?></td></tr>
+            <?php endif; ?>
         </tbody>
     </table>
 </div>

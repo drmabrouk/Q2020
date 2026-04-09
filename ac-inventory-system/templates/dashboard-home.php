@@ -2,44 +2,35 @@
 global $wpdb;
 $table_products = $wpdb->prefix . 'ac_is_products';
 $table_sales    = $wpdb->prefix . 'ac_is_sales';
+$table_invoices = $wpdb->prefix . 'ac_is_invoices';
 
 // Statistics
 $total_products = $wpdb->get_var("SELECT COUNT(*) FROM $table_products");
-$today_sales_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_sales WHERE DATE(sale_date) = CURDATE()");
-$today_sales_total = $wpdb->get_var("SELECT SUM(total_price) FROM $table_sales WHERE DATE(sale_date) = CURDATE()") ?: 0;
+$today_sales_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_invoices WHERE DATE(invoice_date) = CURDATE()");
+$today_sales_total = $wpdb->get_var("SELECT SUM(total_amount) FROM $table_invoices WHERE DATE(invoice_date) = CURDATE()") ?: 0;
 $low_stock_count = $wpdb->get_var("SELECT COUNT(*) FROM $table_products WHERE stock_quantity < 10");
 $total_stock_qty = $wpdb->get_var("SELECT SUM(stock_quantity) FROM $table_products") ?: 0;
 
-// Sales data for chart (last 7 days)
+// Monthly Sales data for chart (Last 6 months)
 $chart_data = $wpdb->get_results("
-    SELECT DATE(sale_date) as date, SUM(total_price) as total
-    FROM $table_sales
-    WHERE sale_date >= DATE_SUB(CURDATE(), INTERVAL 6 DAY)
-    GROUP BY DATE(sale_date)
-    ORDER BY date ASC
-");
-
-// Top Products
-$top_products = $wpdb->get_results("
-    SELECT p.name, SUM(s.quantity) as total_qty
-    FROM $table_sales s
-    JOIN $table_products p ON s.product_id = p.id
-    GROUP BY s.product_id
-    ORDER BY total_qty DESC
-    LIMIT 10
+    SELECT DATE_FORMAT(invoice_date, '%Y-%m') as month, SUM(total_amount) as total
+    FROM $table_invoices
+    WHERE invoice_date >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
+    GROUP BY DATE_FORMAT(invoice_date, '%Y-%m')
+    ORDER BY month ASC
 ");
 
 // Recent Activity
 $recent_sales = $wpdb->get_results("
-    SELECT s.*, p.name as product_name
-    FROM $table_sales s
-    JOIN $table_products p ON s.product_id = p.id
-    ORDER BY s.sale_date DESC
+    SELECT i.*, c.name as customer_name
+    FROM $table_invoices i
+    LEFT JOIN {$wpdb->prefix}ac_is_customers c ON i.customer_id = c.id
+    ORDER BY i.invoice_date DESC
     LIMIT 8
 ");
 ?>
 
-<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+<div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('لوحة المعلومات / التقارير', 'ac-inventory-system'); ?></h2>
     <div style="display:flex; gap:10px;">
         <a href="<?php echo add_query_arg('ac_view', 'add-product'); ?>" class="ac-is-btn"><?php _e('إضافة منتج', 'ac-inventory-system'); ?></a>
@@ -83,47 +74,28 @@ $recent_sales = $wpdb->get_results("
     </div>
 </div>
 
-<div class="ac-is-grid" style="gap:20px;">
-    <!-- Sales Chart -->
-    <div class="ac-is-card" style="grid-column: span 2;">
-        <h3><?php _e('تحليل المبيعات (7 أيام)', 'ac-inventory-system'); ?></h3>
-        <canvas id="ac-is-sales-chart" height="70"></canvas>
-    </div>
-
-    <!-- Top Products -->
-    <div class="ac-is-card">
-        <h3><?php _e('الأكثر مبيعاً', 'ac-inventory-system'); ?></h3>
-        <table class="ac-is-table">
-            <thead>
-                <tr>
-                    <th style="padding:10px;"><?php _e('المنتج', 'ac-inventory-system'); ?></th>
-                    <th style="padding:10px;"><?php _e('الكمية', 'ac-inventory-system'); ?></th>
-                </tr>
-            </thead>
-            <tbody>
-                <?php foreach($top_products as $tp): ?>
-                    <tr>
-                        <td style="padding:10px; font-size:0.8rem;"><strong><?php echo esc_html($tp->name); ?></strong></td>
-                        <td style="padding:10px;"><span class="ac-is-capsule capsule-primary" style="font-size:0.7rem;"><?php echo $tp->total_qty; ?></span></td>
-                    </tr>
-                <?php endforeach; ?>
-            </tbody>
-        </table>
+<div class="ac-is-grid" style="grid-template-columns: 1.5fr 1fr; gap:20px; align-items: stretch;">
+    <!-- Monthly Sales Chart -->
+    <div class="ac-is-card" style="display:flex; flex-direction:column;">
+        <h3><?php _e('تحليل المبيعات الشهري', 'ac-inventory-system'); ?></h3>
+        <div style="flex-grow:1; display:flex; align-items:center;">
+            <canvas id="ac-is-sales-chart" height="150"></canvas>
+        </div>
     </div>
 
     <!-- Recent Activity -->
-    <div class="ac-is-card">
+    <div class="ac-is-card" style="display:flex; flex-direction:column;">
         <h3><?php _e('آخر عمليات البيع', 'ac-inventory-system'); ?></h3>
-        <div class="ac-is-recent-list">
+        <div class="ac-is-recent-list" style="flex-grow:1;">
             <?php foreach($recent_sales as $rs): ?>
                 <div style="display:flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f1f5f9;">
                     <div style="font-size:0.8rem;">
-                        <strong><?php echo esc_html($rs->product_name); ?></strong><br>
-                        <small style="color:#94a3b8; font-size:0.7rem;"><?php echo date('H:i - d/m', strtotime($rs->sale_date)); ?></small>
+                        <strong>#<?php echo $rs->id; ?> - <?php echo esc_html($rs->customer_name ?: __('عميل سريع', 'ac-inventory-system')); ?></strong><br>
+                        <small style="color:#94a3b8; font-size:0.7rem;"><?php echo date('H:i - d/m', strtotime($rs->invoice_date)); ?></small>
                     </div>
                     <div style="text-align: left;">
-                        <span style="font-weight:700; color:var(--ac-primary); font-size:0.85rem;"><?php echo number_format($rs->total_price, 2); ?></span><br>
-                        <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'sale_id' => $rs->id)); ?>" style="font-size:0.7rem; text-decoration:none; color:#64748b;"><?php _e('عرض', 'ac-inventory-system'); ?></a>
+                        <span style="font-weight:700; color:var(--ac-primary); font-size:0.85rem;"><?php echo number_format($rs->total_amount, 2); ?></span><br>
+                        <a href="<?php echo add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $rs->id)); ?>" style="font-size:0.7rem; text-decoration:none; color:#64748b;"><?php _e('عرض', 'ac-inventory-system'); ?></a>
                     </div>
                 </div>
             <?php endforeach; ?>
@@ -136,22 +108,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('ac-is-sales-chart');
     if (ctx) {
         new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: <?php echo json_encode(array_map(function($d){ return date('m/d', strtotime($d->date)); }, $chart_data)); ?>,
+                labels: <?php echo json_encode(array_map(function($d){ return $d->month; }, $chart_data)); ?>,
                 datasets: [{
                     label: '<?php _e('المبيعات', 'ac-inventory-system'); ?>',
                     data: <?php echo json_encode(array_map(function($d){ return (float)$d->total; }, $chart_data)); ?>,
-                    borderColor: '#2563eb',
-                    backgroundColor: 'rgba(37, 99, 235, 0.1)',
-                    fill: true,
-                    tension: 0.4,
-                    pointRadius: 3,
-                    pointBackgroundColor: '#2563eb'
+                    backgroundColor: '#2563eb',
+                    borderRadius: 4
                 }]
             },
             options: {
                 responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false }
                 },
