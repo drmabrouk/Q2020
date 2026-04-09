@@ -43,13 +43,14 @@
 
     /* Invoice Layout (Default Print) */
     .invoice-container {
-        width: 100%;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 5mm !important;
-        border: none !important;
+        width: 190mm; /* A4 width minus margins */
+        margin: 10mm auto !important;
+        padding: 15mm !important;
+        border: 1px solid #eee !important;
+        box-sizing: border-box;
         page-break-after: avoid;
         page-break-inside: avoid;
+        background: #fff;
     }
 
     /* Sticker Specifics */

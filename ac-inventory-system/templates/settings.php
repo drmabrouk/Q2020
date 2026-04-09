@@ -27,6 +27,7 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
         </h3>
 
         <form id="ac-is-staff-form" style="background:#f8fafc; padding:20px; border:1px solid #e2e8f0; margin-bottom:25px;">
+            <input type="hidden" name="id" id="staff-id">
             <div class="ac-is-grid" style="grid-template-columns: repeat(2, 1fr); gap:15px;">
                 <div class="ac-is-form-group">
                     <input type="text" name="staff_username" placeholder="<?php _e('اسم المستخدم للولوج', 'ac-inventory-system'); ?>" required>
@@ -77,9 +78,12 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                         ?></span></td>
                         <td><?php echo number_format($s->base_salary, 2); ?></td>
                         <td style="text-align:left;">
-                            <?php if($s->username != 'admin'): ?>
-                                <button class="ac-is-delete-staff" data-id="<?php echo $s->id; ?>" style="background:none; border:none; color:#ef4444; cursor:pointer;"><span class="dashicons dashicons-trash"></span></button>
-                            <?php endif; ?>
+                            <div style="display:flex; gap:5px; justify-content: flex-end;">
+                                <button class="ac-is-btn ac-is-edit-staff" data-staff='<?php echo json_encode($s); ?>' style="padding:4px 8px; font-size:0.7rem; background:#3b82f6;"><span class="dashicons dashicons-edit"></span></button>
+                                <?php if($s->username != 'admin'): ?>
+                                    <button class="ac-is-btn ac-is-delete-staff" data-id="<?php echo $s->id; ?>" style="padding:4px 8px; font-size:0.7rem; background:#ef4444;"><span class="dashicons dashicons-trash"></span></button>
+                                <?php endif; ?>
+                            </div>
                         </td>
                     </tr>
                 <?php endforeach; ?>
@@ -222,18 +226,27 @@ $fullscreen_pass = $settings['fullscreen_password']->setting_value ?? '123456789
                                 <th><?php _e('المستخدم', 'ac-inventory-system'); ?></th>
                                 <th><?php _e('الإجراء', 'ac-inventory-system'); ?></th>
                                 <th><?php _e('الوصف', 'ac-inventory-system'); ?></th>
-                                <th><?php _e('الجهاز', 'ac-inventory-system'); ?></th>
+                                <th><?php _e('الجهاز / IP', 'ac-inventory-system'); ?></th>
                                 <th><?php _e('التاريخ', 'ac-inventory-system'); ?></th>
+                                <th></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php $audit_logs = AC_IS_Reports_Audit::get_logs(); foreach($audit_logs as $log): ?>
+                        <tbody id="ac-is-audit-logs-body">
+                            <?php
+                            $action_map = array('login' => 'دخول', 'failed_login' => 'فشل دخول', 'add_product' => 'إضافة صنف', 'edit_product' => 'تعديل صنف', 'sale' => 'عملية بيع');
+                            $audit_logs = AC_IS_Reports_Audit::get_logs();
+                            foreach($audit_logs as $log): ?>
                                 <tr>
                                     <td><strong><?php echo esc_html($log->user_id); ?></strong></td>
-                                    <td><span class="ac-is-capsule capsule-info"><?php echo esc_html($log->action_type); ?></span></td>
+                                    <td><span class="ac-is-capsule capsule-info"><?php echo $action_map[$log->action_type] ?? $log->action_type; ?></span></td>
                                     <td><small><?php echo esc_html($log->description); ?></small></td>
-                                    <td><small><?php echo esc_html($log->device_type); ?></small></td>
+                                    <td><small><?php echo esc_html($log->device_type); ?> / <?php echo esc_html($log->ip_address); ?></small></td>
                                     <td><?php echo date('Y-m-d H:i', strtotime($log->action_date)); ?></td>
+                                    <td>
+                                        <?php if(in_array($log->action_type, array('delete_product', 'delete_customer'))): ?>
+                                            <button class="ac-is-btn undo-action" data-id="<?php echo $log->id; ?>" style="padding:2px 8px; font-size:0.7rem; background:#f59e0b;"><?php _e('تراجع', 'ac-inventory-system'); ?></button>
+                                        <?php endif; ?>
+                                    </td>
                                 </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -287,9 +300,24 @@ jQuery(document).ready(function($) {
     // Shared Staff/Settings submit logic
     $('#ac-is-staff-form').on('submit', function(e) {
         e.preventDefault();
-        $.post(ac_is_ajax.ajax_url, $(this).serialize() + '&action=ac_is_add_staff&nonce=' + ac_is_ajax.nonce, function(res) {
+        const action = $('#staff-id').val() ? 'ac_is_save_staff' : 'ac_is_add_staff';
+        $.post(ac_is_ajax.ajax_url, $(this).serialize() + '&action=' + action + '&nonce=' + ac_is_ajax.nonce, function(res) {
             if(res.success) location.reload(); else alert(res.data);
         });
+    });
+
+    $(document).on('click', '.ac-is-edit-staff', function() {
+        const s = $(this).data('staff');
+        $('#staff-id').val(s.id);
+        $('input[name="staff_username"]').val(s.username);
+        $('input[name="staff_name"]').val(s.name);
+        $('select[name="staff_role"]').val(s.role);
+        $('input[name="base_salary"]').val(s.base_salary);
+        $('input[name="working_days"]').val(s.working_days);
+        $('input[name="working_hours"]').val(s.working_hours);
+        $('input[name="staff_password"]').attr('placeholder', '<?php _e('اتركه فارغاً للحفاظ على الحالي', 'ac-inventory-system'); ?>').prop('required', false);
+        $('#ac-is-staff-form button').text('<?php _e('تحديث بيانات الموظف', 'ac-inventory-system'); ?>');
+        window.scrollTo(0, 0);
     });
 
     $('.ac-is-system-settings-form').on('submit', function(e) {

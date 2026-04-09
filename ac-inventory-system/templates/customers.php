@@ -5,11 +5,14 @@ $can_manage = AC_IS_Auth::is_manager();
 
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('إدارة قاعدة بيانات العملاء', 'ac-inventory-system'); ?></h2>
-    <?php if($can_manage): ?>
-        <button id="ac-is-add-customer-btn" class="ac-is-btn" style="background:#1e293b;">
-            <span class="dashicons dashicons-plus-alt" style="margin-left:8px;"></span><?php _e('إضافة عميل', 'ac-inventory-system'); ?>
-        </button>
-    <?php endif; ?>
+    <div style="display:flex; gap:10px;">
+        <button id="ac-is-export-customers-pdf" class="ac-is-btn" style="background:#dc2626;"><span class="dashicons dashicons-pdf" style="margin-left:8px;"></span><?php _e('تصدير العملاء PDF', 'ac-inventory-system'); ?></button>
+        <?php if($can_manage): ?>
+            <button id="ac-is-add-customer-btn" class="ac-is-btn" style="background:#1e293b;">
+                <span class="dashicons dashicons-plus-alt" style="margin-left:8px;"></span><?php _e('إضافة عميل', 'ac-inventory-system'); ?>
+            </button>
+        <?php endif; ?>
+    </div>
 </div>
 
 <div class="ac-is-search-filters" style="margin-bottom:25px; padding:20px; background:#fff; border:1px solid var(--ac-border); display:flex; gap:15px; flex-wrap: wrap; align-items: center;">
@@ -175,5 +178,19 @@ jQuery(document).ready(function($) {
 
     $('#ac-is-customer-search').on('input', filterAndSortCustomers);
     $('#ac-is-customer-sort').on('change', filterAndSortCustomers);
+
+    $('#ac-is-export-customers-pdf').on('click', function() {
+        const element = document.getElementById('ac-is-customer-table').cloneNode(true);
+        $(element).find('th:last-child, td:last-child').remove();
+
+        const opt = {
+            margin: 10,
+            filename: 'customers-report-' + new Date().toISOString().slice(0,10) + '.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2 },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'landscape' }
+        };
+        html2pdf().set(opt).from(element).save();
+    });
 });
 </script>

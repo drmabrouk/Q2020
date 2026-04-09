@@ -420,13 +420,41 @@ jQuery(document).ready(function($) {
         });
     });
 
-    $('#scan-factory-barcode').on('click', function() {
+    $('#scan-factory-barcode, #ac-is-inventory-add-scan-btn').on('click', function() {
         $('#ac-is-form-scanner-overlay').fadeIn(300);
         if (!formQrCode) formQrCode = new Html5Qrcode("ac-is-form-reader");
         formQrCode.start({ facingMode: "environment" }, { fps: 20, qrbox: { width: 250, height: 150 } }, (text) => {
-            $('#ac-is-factory-barcode-input').val(text);
-            recognizeProductByBarcode(text);
+            const isAddMode = $(this).attr('id') === 'ac-is-inventory-add-scan-btn';
+
+            if (isAddMode) {
+                $.post(ac_is_ajax.ajax_url, { action: 'ac_is_recognize_product', barcode: text, nonce: ac_is_ajax.nonce }, function(res) {
+                    if (res.success) {
+                         window.location.href = '?ac_view=edit-product&id=' + res.data.id;
+                    } else {
+                         window.location.href = '?ac_view=add-product&factory_barcode=' + text;
+                    }
+                });
+            } else {
+                $('#ac-is-factory-barcode-input').val(text);
+                recognizeProductByBarcode(text);
+            }
             stopFormScanner();
+        }).catch(err => console.error(err));
+    });
+
+    // Bulk Scan Handler
+    $('#ac-is-inventory-bulk-scan-btn').on('click', function() {
+        $('#ac-is-form-scanner-overlay').fadeIn(300);
+        if (!formQrCode) formQrCode = new Html5Qrcode("ac-is-form-reader");
+        formQrCode.start({ facingMode: "environment" }, { fps: 15, qrbox: { width: 250, height: 150 } }, (text) => {
+            if (text !== lastScannedCode) {
+                 lastScannedCode = text;
+                 // Simple bulk add logic - open in new tab or store in queue?
+                 // For now, let's just show a notification and save to a local queue
+                 console.log('Bulk Scanned:', text);
+                 if(window.navigator.vibrate) window.navigator.vibrate(100);
+                 alert('تم مسح: ' + text);
+            }
         }).catch(err => console.error(err));
     });
 
@@ -470,16 +498,15 @@ jQuery(document).ready(function($) {
     });
 
     // Image Upload Handler
-    $('.ac-is-upload-btn').on('click', function(e) {
+    $(document).on('click', '.ac-is-upload-btn', function(e) {
         e.preventDefault();
+        const btn = $(this);
         const frame = wp.media({ title: 'اختر صورة', multiple: false }).open();
         frame.on('select', function() {
             const attachment = frame.state().get('selection').first().toJSON();
-            const target = e.target.previousElementSibling;
-            if (target && target.tagName === 'INPUT') {
-                $(target).val(attachment.url);
-            } else {
-                $('#brand-logo-url').val(attachment.url);
+            const target = btn.parent().find('input[type="text"]');
+            if (target.length) {
+                target.val(attachment.url);
             }
         });
     });
