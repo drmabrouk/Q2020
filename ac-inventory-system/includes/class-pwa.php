@@ -14,11 +14,12 @@ class AC_IS_PWA {
 		echo '<link rel="manifest" href="' . home_url( '/?ac_pwa=manifest' ) . '">' . PHP_EOL;
 		echo '<meta name="mobile-web-app-capable" content="yes">' . PHP_EOL;
 		echo '<meta name="apple-mobile-web-app-capable" content="yes">' . PHP_EOL;
+		echo '<meta name="apple-mobile-web-app-title" content="' . esc_attr( get_bloginfo('name') ) . '">' . PHP_EOL;
 
 		global $wpdb;
 		$theme_color = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'pwa_theme_color'" ) ?: '#2563eb';
 		echo '<meta name="theme-color" content="' . esc_attr( $theme_color ) . '">' . PHP_EOL;
-		echo '<meta name="apple-mobile-web-app-status-bar-style" content="default">' . PHP_EOL;
+		echo '<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">' . PHP_EOL;
 
 		$icon = $wpdb->get_var( "SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'pwa_icon_url'" );
 		if ( $icon ) {
@@ -72,12 +73,14 @@ class AC_IS_PWA {
 			$manifest['icons'][] = array(
 				'src'   => $icon_url,
 				'sizes' => '512x512',
-				'type'  => 'image/png'
+				'type'  => 'image/png',
+				'purpose' => 'any maskable'
 			);
 			$manifest['icons'][] = array(
 				'src'   => $icon_url,
 				'sizes' => '192x192',
-				'type'  => 'image/png'
+				'type'  => 'image/png',
+				'purpose' => 'any maskable'
 			);
 		}
 
@@ -89,32 +92,50 @@ class AC_IS_PWA {
 	private static function serve_service_worker() {
 		header( 'Content-Type: application/javascript' );
 		?>
-		const CACHE_NAME = 'ac-is-cache-v1';
+		const CACHE_NAME = 'ac-is-cache-v2';
 		const urlsToCache = [
 			'/',
 			'<?php echo AC_IS_URL . 'assets/css/style-rtl.css'; ?>',
-			'<?php echo AC_IS_URL . 'assets/js/scripts.js'; ?>'
+			'<?php echo AC_IS_URL . 'assets/js/scripts.js'; ?>',
+			'https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap'
 		];
 
-		self.addEventListener('install', function(event) {
+		self.addEventListener('install', (event) => {
 			event.waitUntil(
-				caches.open(CACHE_NAME)
-					.then(function(cache) {
-						return cache.addAll(urlsToCache);
-					})
+				caches.open(CACHE_NAME).then((cache) => cache.addAll(urlsToCache))
+			);
+			self.skipWaiting();
+		});
+
+		self.addEventListener('activate', (event) => {
+			event.waitUntil(
+				caches.keys().then((cacheNames) => {
+					return Promise.all(
+						cacheNames.map((cacheName) => {
+							if (cacheName !== CACHE_NAME) {
+								return caches.delete(cacheName);
+							}
+						})
+					);
+				})
 			);
 		});
 
-		self.addEventListener('fetch', function(event) {
+		// Stale-while-revalidate strategy
+		self.addEventListener('fetch', (event) => {
+			if (event.request.method !== 'GET') return;
+
 			event.respondWith(
-				caches.match(event.request)
-					.then(function(response) {
-						if (response) {
-							return response;
-						}
-						return fetch(event.request);
-					}
-				)
+				caches.open(CACHE_NAME).then((cache) => {
+					return cache.match(event.request).then((cachedResponse) => {
+						const fetchedResponse = fetch(event.request).then((networkResponse) => {
+							cache.put(event.request, networkResponse.clone());
+							return networkResponse;
+						});
+
+						return cachedResponse || fetchedResponse;
+					});
+				})
 			);
 		});
 		<?php

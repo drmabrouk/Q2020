@@ -37,6 +37,11 @@
                 <p style="margin:0 0 8px 0; font-size:0.8rem;"><?php _e('ثبت التطبيق لتجربة أسرع', 'ac-inventory-system'); ?></p>
                 <button id="ac-is-install-btn" class="ac-is-btn" style="background:#fff; color:#2563eb; width:100%; padding:5px; font-size:0.75rem;"><?php _e('تثبيت الآن', 'ac-inventory-system'); ?></button>
             </div>
+            <div id="ac-is-ios-install-banner" style="display:none; background:#2563eb; color:#fff; padding:10px; border-radius:8px; margin-bottom:10px; text-align:center;">
+                <p style="margin:0 0 8px 0; font-size:0.8rem;"><?php _e('لتثبيت التطبيق على آيفون:', 'ac-inventory-system'); ?></p>
+                <p style="margin:0; font-size:0.7rem; opacity:0.9;"><?php _e('اضغط على "مشاركة" ثم "إضافة إلى الصفحة الرئيسية"', 'ac-inventory-system'); ?></p>
+                <span class="dashicons dashicons-share" style="margin-top:5px; font-size:16px;"></span>
+            </div>
             <div class="ac-is-sidebar-controls" style="display: flex; justify-content: space-around; align-items: center; gap: 5px;">
                 <button id="ac-is-fullscreen-btn" class="sidebar-ctrl-icon" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px;">
                     <span class="dashicons dashicons-fullscreen-alt" style="font-size:18px;"></span>
