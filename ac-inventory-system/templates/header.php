@@ -32,16 +32,16 @@
             <?php endif; ?>
         </nav>
 
-        <div class="ac-is-sidebar-footer">
-            <div class="ac-is-top-controls">
-                <button id="ac-is-fullscreen-btn" class="control-btn" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>">
-                    <span class="dashicons dashicons-fullscreen-alt"></span>
+        <div class="ac-is-sidebar-footer" style="padding: 10px; border-top: 1px solid var(--ac-sidebar-hover); margin-top: auto;">
+            <div class="ac-is-sidebar-controls" style="display: flex; justify-content: space-around; align-items: center; gap: 5px;">
+                <button id="ac-is-fullscreen-btn" class="sidebar-ctrl-icon" title="<?php _e('ملء الشاشة', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px;">
+                    <span class="dashicons dashicons-fullscreen-alt" style="font-size:18px;"></span>
                 </button>
-                <button id="ac-is-refresh-btn" class="control-btn" title="<?php _e('تحديث البيانات', 'ac-inventory-system'); ?>">
-                    <span class="dashicons dashicons-update"></span>
+                <button id="ac-is-refresh-btn" class="sidebar-ctrl-icon" title="<?php _e('تحديث', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#94a3b8; cursor:pointer; padding:5px;">
+                    <span class="dashicons dashicons-update" style="font-size:18px;"></span>
                 </button>
-                <button id="ac-is-logout-btn" class="control-btn logout" title="<?php _e('تسجيل الخروج', 'ac-inventory-system'); ?>">
-                    <span class="dashicons dashicons-logout"></span>
+                <button id="ac-is-logout-btn" class="sidebar-ctrl-icon" title="<?php _e('خروج', 'ac-inventory-system'); ?>" style="background:none; border:none; color:#ef4444; cursor:pointer; padding:5px;">
+                    <span class="dashicons dashicons-logout" style="font-size:18px;"></span>
                 </button>
             </div>
         </div>

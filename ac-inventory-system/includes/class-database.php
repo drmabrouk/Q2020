@@ -60,7 +60,7 @@ class AC_IS_Database {
 			id mediumint(9) NOT NULL AUTO_INCREMENT,
 			customer_id mediumint(9),
 			total_amount decimal(10,2) NOT NULL,
-			operator_id bigint(20) UNSIGNED NOT NULL,
+			operator_id varchar(100) NOT NULL,
 			invoice_date datetime DEFAULT CURRENT_TIMESTAMP,
 			PRIMARY KEY  (id)
 		) $charset_collate;

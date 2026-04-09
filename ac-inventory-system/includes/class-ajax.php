@@ -10,12 +10,18 @@ class AC_IS_Ajax {
 			'save_product', 'delete_product', 'record_sale', 'multi_sale',
 			'search_products', 'get_customer', 'delete_invoice',
 			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
-			'save_customer', 'delete_customer', 'save_brand', 'delete_brand'
+			'save_customer', 'delete_customer', 'save_brand', 'delete_brand',
+			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts'
 		);
 
 		foreach ( $actions as $action ) {
 			add_action( 'wp_ajax_ac_is_' . $action, array( $this, $action ) );
-			add_action( 'wp_ajax_nopriv_ac_is_' . $action, array( $this, $action ) );
+			// Security: Most actions should require login
+			if ( in_array( $action, array( 'search_products', 'get_customer', 'search_sales' ) ) ) {
+				// These specifically were called out as sensitive
+			} else {
+				// add_action( 'wp_ajax_nopriv_ac_is_' . $action, array( $this, $action ) );
+			}
 		}
 
 		add_action( 'wp_ajax_nopriv_ac_is_login', array( $this, 'login' ) );
@@ -247,8 +253,92 @@ class AC_IS_Ajax {
 		wp_send_json_success();
 	}
 
+	public function update_staff_payroll() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() && ! AC_IS_Auth::is_manager() ) wp_send_json_error();
+
+		global $wpdb;
+		$wpdb->update( $wpdb->prefix . 'ac_is_staff', array(
+			'base_salary'   => floatval( $_POST['base_salary'] ),
+			'working_hours' => intval( $_POST['working_hours'] ),
+		), array( 'id' => intval( $_POST['staff_id'] ) ) );
+		wp_send_json_success();
+	}
+
+	public function save_work_settings() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error();
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'ac_is_settings';
+		$wpdb->replace( $table, array( 'setting_key' => 'default_start', 'setting_value' => sanitize_text_field( $_POST['default_start'] ) ) );
+		$wpdb->replace( $table, array( 'setting_key' => 'default_end', 'setting_value' => sanitize_text_field( $_POST['default_end'] ) ) );
+		wp_send_json_success();
+	}
+
+	public function approve_shifts() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error();
+
+		global $wpdb;
+		$wpdb->update( $wpdb->prefix . 'ac_is_attendance',
+			array( 'status' => 'shift_approved' ),
+			array( 'staff_id' => intval( $_POST['staff_id'] ), 'status' => 'shift_request' )
+		);
+		wp_send_json_success();
+	}
+
+	public function search_sales() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
+		global $wpdb;
+		$search = '%' . $wpdb->esc_like( sanitize_text_field( $_POST['query'] ) ) . '%';
+
+		$sales = $wpdb->get_results( $wpdb->prepare( "
+			SELECT s.*, i.invoice_date, c.name as customer_name, c.phone as customer_phone, p.name as product_name, i.operator_id
+			FROM {$wpdb->prefix}ac_is_sales s
+			JOIN {$wpdb->prefix}ac_is_invoices i ON s.invoice_id = i.id
+			JOIN {$wpdb->prefix}ac_is_products p ON s.product_id = p.id
+			LEFT JOIN {$wpdb->prefix}ac_is_customers c ON i.customer_id = c.id
+			WHERE (c.name LIKE %s OR c.phone LIKE %s OR s.serial_number LIKE %s OR p.name LIKE %s OR p.barcode LIKE %s OR i.id = %s)
+			ORDER BY i.invoice_date DESC LIMIT 50
+		", $search, $search, $search, $search, $search, sanitize_text_field( $_POST['query'] ) ) );
+
+		$html = '';
+		if ( $sales ) {
+			foreach ( $sales as $s ) {
+				$operator_name = __('غير معروف', 'ac-inventory-system');
+				if ( strpos( (string)$s->operator_id, 'wp_' ) === 0 ) {
+					$wp_id = str_replace('wp_', '', (string)$s->operator_id);
+					$user = get_userdata($wp_id);
+					if ($user) $operator_name = $user->display_name;
+				} else {
+					$staff = $wpdb->get_row($wpdb->prepare("SELECT name FROM {$wpdb->prefix}ac_is_staff WHERE id = %s", $s->operator_id));
+					if ($staff) $operator_name = $staff->name;
+				}
+
+				$html .= '<tr>';
+				$html .= '<td><strong>#' . $s->invoice_id . '</strong><br><small style="color:#64748b;">' . date('Y-m-d H:i', strtotime($s->invoice_date)) . '</small></td>';
+				$html .= '<td><strong>' . esc_html($s->customer_name ?: __('عميل سريع', 'ac-inventory-system')) . '</strong><br><small>' . esc_html($s->customer_phone ?: '-') . '</small></td>';
+				$html .= '<td><strong>' . esc_html($s->product_name) . '</strong><br><small>SN: ' . esc_html($s->serial_number ?: '-') . '</small></td>';
+				$html .= '<td><span style="font-weight:700; color:var(--ac-primary);">' . number_format($s->total_price, 2) . ' EGP</span></td>';
+				$html .= '<td><span class="ac-is-capsule capsule-info">' . esc_html($operator_name) . '</span></td>';
+				$html .= '<td><div style="display:flex; gap:5px;"><a href="' . add_query_arg(array('ac_view' => 'invoice', 'invoice_id' => $s->invoice_id)) . '" class="ac-is-btn" style="padding:4px 8px; font-size:0.75rem; background:#64748b;"><span class="dashicons dashicons-visibility"></span></a>';
+				if ( AC_IS_Auth::can_delete_records() ) {
+					$html .= '<button class="ac-is-btn ac-is-delete-invoice" data-id="' . $s->invoice_id . '" style="padding:4px 8px; font-size:0.75rem; background:#ef4444;"><span class="dashicons dashicons-trash"></span></button>';
+				}
+				$html .= '</div></td></tr>';
+			}
+		} else {
+			$html = '<tr><td colspan="6" style="text-align:center; padding:40px;">' . __('لم يتم العثور على نتائج', 'ac-inventory-system') . '</td></tr>';
+		}
+
+		wp_send_json_success( array( 'html' => $html ) );
+	}
+
 	public function search_products() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
 
 		$args = array(
 			'search'   => sanitize_text_field( $_POST['search'] ),
@@ -261,6 +351,8 @@ class AC_IS_Ajax {
 
 	public function get_customer() {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
+
 		$phone = sanitize_text_field( $_POST['phone'] );
 		$customer = AC_IS_Customers::get_customer_by_phone( $phone );
 		if ( $customer ) {

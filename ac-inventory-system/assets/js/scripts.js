@@ -331,4 +331,24 @@ jQuery(document).ready(function($) {
     if (window.location.search.indexOf('autoprint=1') > -1) {
         setTimeout(function() { window.print(); }, 1000);
     }
+
+    // Live Sales Search
+    let salesSearchTimeout;
+    $('#ac-is-live-sales-search').on('input', function() {
+        clearTimeout(salesSearchTimeout);
+        const query = $(this).val().trim();
+        if (query.length < 2) return;
+
+        salesSearchTimeout = setTimeout(() => {
+            $.post(ac_is_ajax.ajax_url, {
+                action: 'ac_is_search_sales',
+                query: query,
+                nonce: ac_is_ajax.nonce
+            }, function(res) {
+                if (res.success) {
+                    $('#ac-is-sales-table tbody').html(res.data.html);
+                }
+            });
+        }, 300);
+    });
 });

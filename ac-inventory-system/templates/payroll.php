@@ -10,13 +10,14 @@ $can_edit_salary = AC_IS_Auth::is_admin() || AC_IS_Auth::is_manager();
 
 <div class="ac-is-header-flex" style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 25px;">
     <h2 style="font-weight:800; font-size:1.5rem; margin:0; color:var(--ac-sidebar-bg);"><?php _e('نظام المرتبات والحضور', 'ac-inventory-system'); ?></h2>
+    <button class="ac-is-btn" id="ac-is-general-work-settings" style="background:#64748b; padding:8px;"><span class="dashicons dashicons-admin-generic"></span></button>
 </div>
 
 <div class="ac-is-grid" style="grid-template-columns: 1fr 2fr; gap:20px;">
     <!-- Attendance Entry -->
     <div class="ac-is-card">
-        <h3><?php _e('تسجيل حضور وانصراف', 'ac-inventory-system'); ?></h3>
-        <p style="font-size:0.8rem; color:#64748b; margin-bottom:15px;"><?php _e('الدوام الرسمي: 09:00 ص - 10:00 م', 'ac-inventory-system'); ?></p>
+        <h3><?php _e('تسجيل حضور وانصراف / شيفتات', 'ac-inventory-system'); ?></h3>
+        <p style="font-size:0.8rem; color:#64748b; margin-bottom:15px;"><?php _e('الدوام الافتراضي: 09:00 ص - 10:00 م', 'ac-inventory-system'); ?></p>
         <form id="ac-is-attendance-form">
             <div class="ac-is-form-group">
                 <label><?php _e('الموظف', 'ac-inventory-system'); ?></label>
@@ -41,11 +42,12 @@ $can_edit_salary = AC_IS_Auth::is_admin() || AC_IS_Auth::is_manager();
                 </div>
             </div>
             <div class="ac-is-form-group">
-                <label><?php _e('الحالة', 'ac-inventory-system'); ?></label>
+                <label><?php _e('نوع الوردية / الحالة', 'ac-inventory-system'); ?></label>
                 <select name="status">
-                    <option value="present"><?php _e('حاضر', 'ac-inventory-system'); ?></option>
+                    <option value="present"><?php _e('حاضر (وردية عادية)', 'ac-inventory-system'); ?></option>
                     <option value="absent"><?php _e('غائب', 'ac-inventory-system'); ?></option>
                     <option value="leave"><?php _e('إجازة', 'ac-inventory-system'); ?></option>
+                    <option value="shift_request"><?php _e('طلب شيفت إضافي', 'ac-inventory-system'); ?></option>
                 </select>
             </div>
             <button type="submit" class="ac-is-btn" style="width:100%; background:#1e293b;"><?php _e('حفظ السجل', 'ac-inventory-system'); ?></button>
@@ -78,12 +80,17 @@ $can_edit_salary = AC_IS_Auth::is_admin() || AC_IS_Auth::is_manager();
                     <tr>
                         <td><strong><?php echo esc_html($p->name); ?></strong></td>
                         <td><?php echo number_format($p->base_salary, 2); ?></td>
-                        <td><span class="ac-is-capsule capsule-primary"><?php echo $p->days_present; ?> <?php _e('يوم', 'ac-inventory-system'); ?></span></td>
+                        <td>
+                            <span class="ac-is-capsule capsule-primary"><?php echo $p->days_present; ?> <?php _e('يوم', 'ac-inventory-system'); ?></span>
+                            <?php if($p->pending_shifts > 0): ?>
+                                <span class="ac-is-capsule capsule-warning" style="cursor:pointer" onclick="approveShifts(<?php echo $p->staff_id; ?>)"><?php echo $p->pending_shifts; ?> <?php _e('شيفت معلق', 'ac-inventory-system'); ?></span>
+                            <?php endif; ?>
+                        </td>
                         <td><span style="color:red;"><?php echo number_format($p->deductions, 2); ?></span></td>
                         <td><span style="font-weight:800; color:#059669;"><?php echo number_format($p->net_salary, 2); ?> EGP</span></td>
                         <td>
                             <?php if($can_edit_salary): ?>
-                                <a href="<?php echo add_query_arg('ac_view', 'settings'); ?>" title="<?php _e('تعديل الراتب', 'ac-inventory-system'); ?>"><span class="dashicons dashicons-edit"></span></a>
+                                <button class="ac-is-edit-staff-payroll" data-id="<?php echo $p->staff_id; ?>" data-name="<?php echo esc_attr($p->name); ?>" data-salary="<?php echo $p->base_salary; ?>" data-hours="<?php echo $p->working_hours; ?>" style="background:none; border:none; cursor:pointer; color:var(--ac-primary);"><span class="dashicons dashicons-edit"></span></button>
                             <?php endif; ?>
                         </td>
                     </tr>
@@ -93,7 +100,68 @@ $can_edit_salary = AC_IS_Auth::is_admin() || AC_IS_Auth::is_manager();
     </div>
 </div>
 
+<!-- Modal for Staff Editing -->
+<div id="ac-is-staff-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10005; align-items:center; justify-content:center;">
+    <div class="ac-is-card" style="width:400px; background:#fff;">
+        <h3 id="modal-staff-name"><?php _e('تعديل بيانات الموظف', 'ac-inventory-system'); ?></h3>
+        <form id="ac-is-staff-edit-form">
+            <input type="hidden" name="staff_id" id="modal-staff-id">
+            <div class="ac-is-form-group">
+                <label><?php _e('الراتب الأساسي', 'ac-inventory-system'); ?></label>
+                <input type="number" name="base_salary" id="modal-staff-salary" step="0.01" required>
+            </div>
+            <div class="ac-is-form-group">
+                <label><?php _e('عدد ساعات العمل اليومية', 'ac-inventory-system'); ?></label>
+                <input type="number" name="working_hours" id="modal-staff-hours" required>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="submit" class="ac-is-btn" style="flex:1;"><?php _e('حفظ', 'ac-inventory-system'); ?></button>
+                <button type="button" class="ac-is-btn" style="flex:1; background:#64748b;" onclick="closeStaffModal()"><?php _e('إلغاء', 'ac-inventory-system'); ?></button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal for General Work Settings -->
+<div id="ac-is-general-work-modal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:10005; align-items:center; justify-content:center;">
+    <div class="ac-is-card" style="width:450px; background:#fff;">
+        <h3><?php _e('إعدادات العمل العامة', 'ac-inventory-system'); ?></h3>
+        <form id="ac-is-general-work-form">
+            <div class="ac-is-grid" style="grid-template-columns: 1fr 1fr; gap:10px;">
+                <div class="ac-is-form-group">
+                    <label><?php _e('بداية الدوام', 'ac-inventory-system'); ?></label>
+                    <input type="time" name="default_start" value="<?php echo esc_attr($wpdb->get_var("SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'default_start'") ?: '09:00'); ?>">
+                </div>
+                <div class="ac-is-form-group">
+                    <label><?php _e('نهاية الدوام', 'ac-inventory-system'); ?></label>
+                    <input type="time" name="default_end" value="<?php echo esc_attr($wpdb->get_var("SELECT setting_value FROM {$wpdb->prefix}ac_is_settings WHERE setting_key = 'default_end'") ?: '22:00'); ?>">
+                </div>
+            </div>
+            <div class="ac-is-form-group">
+                <label><?php _e('العطلة الأسبوعية', 'ac-inventory-system'); ?></label>
+                <p style="font-size:0.8rem; color:#64748b;"><?php _e('يوم الجمعة هو العطلة الرسمية، وبقية الأيام أيام عمل (الاثنين - الخميس عادية).', 'ac-inventory-system'); ?></p>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:20px;">
+                <button type="submit" class="ac-is-btn" style="flex:1;"><?php _e('حفظ الإعدادات', 'ac-inventory-system'); ?></button>
+                <button type="button" class="ac-is-btn" style="flex:1; background:#64748b;" onclick="closeGeneralWorkModal()"><?php _e('إغاء', 'ac-inventory-system'); ?></button>
+            </div>
+        </form>
+    </div>
+</div>
+
 <script>
+function closeStaffModal() { jQuery('#ac-is-staff-modal').fadeOut(200); }
+function closeGeneralWorkModal() { jQuery('#ac-is-general-work-modal').fadeOut(200); }
+
+function approveShifts(staffId) {
+    if(!confirm('<?php _e('الموافقة على جميع الشيفتات المعلقة لهذا الموظف؟', 'ac-inventory-system'); ?>')) return;
+    jQuery.post(ac_is_ajax.ajax_url, {
+        action: 'ac_is_approve_shifts',
+        staff_id: staffId,
+        nonce: ac_is_ajax.nonce
+    }, function() { location.reload(); });
+}
+
 jQuery(document).ready(function($) {
     $('#ac-is-attendance-form').on('submit', function(e) {
         e.preventDefault();
@@ -103,6 +171,33 @@ jQuery(document).ready(function($) {
                 alert('<?php _e('تم تسجيل السجل بنجاح', 'ac-inventory-system'); ?>');
                 location.reload();
             }
+        });
+    });
+
+    $('.ac-is-edit-staff-payroll').on('click', function() {
+        const d = $(this).data();
+        $('#modal-staff-id').val(d.id);
+        $('#modal-staff-name').text('<?php _e('تعديل:', 'ac-inventory-system'); ?> ' + d.name);
+        $('#modal-staff-salary').val(d.salary);
+        $('#modal-staff-hours').val(d.hours);
+        $('#ac-is-staff-modal').css('display', 'flex').hide().fadeIn(200);
+    });
+
+    $('#ac-is-staff-edit-form').on('submit', function(e) {
+        e.preventDefault();
+        $.post(ac_is_ajax.ajax_url, $(this).serialize() + '&action=ac_is_update_staff_payroll&nonce=' + ac_is_ajax.nonce, function() {
+            location.reload();
+        });
+    });
+
+    $('#ac-is-general-work-settings').on('click', function() {
+        $('#ac-is-general-work-modal').css('display', 'flex').hide().fadeIn(200);
+    });
+
+    $('#ac-is-general-work-form').on('submit', function(e) {
+        e.preventDefault();
+        $.post(ac_is_ajax.ajax_url, $(this).serialize() + '&action=ac_is_save_work_settings&nonce=' + ac_is_ajax.nonce, function() {
+            location.reload();
         });
     });
 });
