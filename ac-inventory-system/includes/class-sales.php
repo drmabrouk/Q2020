@@ -45,6 +45,26 @@ class AC_IS_Sales {
 			return false;
 		}
 
+		// Water Filter Auto-Tracking Logic
+		$product = $wpdb->get_row($wpdb->prepare("SELECT category, filter_stages FROM $table_products WHERE id = %d", $data['product_id']));
+		if ( $product && $product->category === 'filter' && $product->filter_stages > 0 ) {
+			$invoice = self::get_invoice($data['invoice_id']);
+			if ( $invoice && $invoice->customer_id ) {
+				for ( $i = 1; $i <= $product->filter_stages; $i++ ) {
+					// Logic: Stage 1 = 3 months, 2-3 = 6 months, others = 12 months (Customizable default)
+					$validity = ($i == 1) ? 3 : (($i <= 3) ? 6 : 12);
+					$wpdb->insert( $wpdb->prefix . 'ac_is_filter_tracking', array(
+						'customer_id'       => $invoice->customer_id,
+						'product_id'        => $data['product_id'],
+						'invoice_id'        => $data['invoice_id'],
+						'stage_number'      => $i,
+						'installation_date' => current_time('mysql'),
+						'expiry_date'       => date('Y-m-d', strtotime("+$validity months")),
+					) );
+				}
+			}
+		}
+
 		$wpdb->query('COMMIT');
 		return $wpdb->insert_id;
 	}

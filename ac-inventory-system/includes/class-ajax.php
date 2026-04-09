@@ -12,7 +12,7 @@ class AC_IS_Ajax {
 			'logout', 'record_attendance', 'add_staff', 'delete_staff', 'save_settings',
 			'save_customer', 'delete_customer', 'save_brand', 'delete_brand',
 			'search_sales', 'update_staff_payroll', 'save_work_settings', 'approve_shifts',
-			'verify_fullscreen_password'
+			'verify_fullscreen_password', 'replace_candle'
 		);
 
 		foreach ( $actions as $action ) {
@@ -295,6 +295,16 @@ class AC_IS_Ajax {
 		} else {
 			wp_send_json_error();
 		}
+	}
+
+	public function replace_candle() {
+		check_ajax_referer( 'ac_is_nonce', 'nonce' );
+		if ( ! AC_IS_Auth::is_logged_in() ) wp_send_json_error( 'Unauthorized' );
+
+		$id = intval( $_POST['tracking_id'] );
+		$res = AC_IS_Filters::replace_candle( $id );
+		if ( $res ) wp_send_json_success();
+		else wp_send_json_error();
 	}
 
 	public function search_sales() {

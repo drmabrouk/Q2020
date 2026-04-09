@@ -22,6 +22,9 @@
             <a href="<?php echo add_query_arg('ac_view', 'customers'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'customers') ? 'active' : ''; ?>">
                 <span class="dashicons dashicons-groups"></span> <?php _e('إدارة العملاء', 'ac-inventory-system'); ?>
             </a>
+            <a href="<?php echo add_query_arg('ac_view', 'filter-tracking'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'filter-tracking') ? 'active' : ''; ?>">
+                <span class="dashicons dashicons-filter"></span> <?php _e('متابعة الفلاتر', 'ac-inventory-system'); ?>
+            </a>
             <a href="<?php echo add_query_arg('ac_view', 'payroll'); ?>" class="<?php echo (isset($_GET['ac_view']) && $_GET['ac_view'] == 'payroll') ? 'active' : ''; ?>">
                 <span class="dashicons dashicons-money-alt"></span> <?php _e('المرتبات', 'ac-inventory-system'); ?>
             </a>

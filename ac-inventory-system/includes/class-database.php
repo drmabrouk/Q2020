@@ -105,6 +105,28 @@ class AC_IS_Database {
 			setting_key varchar(100) NOT NULL,
 			setting_value text,
 			PRIMARY KEY  (setting_key)
+		) $charset_collate;
+
+		CREATE TABLE {$wpdb->prefix}ac_is_filter_tracking (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			customer_id mediumint(9) NOT NULL,
+			product_id mediumint(9) NOT NULL,
+			invoice_id mediumint(9) NOT NULL,
+			stage_number int NOT NULL,
+			installation_date date NOT NULL,
+			expiry_date date NOT NULL,
+			status varchar(50) DEFAULT 'active',
+			PRIMARY KEY  (id)
+		) $charset_collate;
+
+		CREATE TABLE {$wpdb->prefix}ac_is_filter_logs (
+			id mediumint(9) NOT NULL AUTO_INCREMENT,
+			tracking_id mediumint(9) NOT NULL,
+			action_date datetime DEFAULT CURRENT_TIMESTAMP,
+			action_type varchar(50),
+			operator_id varchar(100),
+			notes text,
+			PRIMARY KEY  (id)
 		) $charset_collate;";
 
 		if ( file_exists( ABSPATH . 'wp-admin/includes/upgrade.php' ) ) {
