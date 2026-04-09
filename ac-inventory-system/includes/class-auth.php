@@ -6,7 +6,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 class AC_IS_Auth {
 
 	public static function init() {
-		if ( session_status() == PHP_SESSION_NONE ) {
+		if ( ! session_id() && ! headers_sent() ) {
 			session_start();
 		}
 	}
