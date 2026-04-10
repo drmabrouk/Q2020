@@ -165,11 +165,20 @@ function approveShifts(staffId) {
 jQuery(document).ready(function($) {
     $('#ac-is-attendance-form').on('submit', function(e) {
         e.preventDefault();
-        const data = $(this).serialize() + '&action=ac_is_record_attendance&nonce=' + ac_is_ajax.nonce;
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        const originalBtnText = $btn.text();
+
+        // Instant visual feedback
+        $btn.prop('disabled', true).text('<?php _e('جاري الحفظ...', 'ac-inventory-system'); ?>');
+
+        const data = $form.serialize() + '&action=ac_is_record_attendance&nonce=' + ac_is_ajax.nonce;
         $.post(ac_is_ajax.ajax_url, data, function(response) {
             if (response.success) {
-                alert('<?php _e('تم تسجيل السجل بنجاح', 'ac-inventory-system'); ?>');
+                // Immediate refresh without alert
                 location.reload();
+            } else {
+                $btn.prop('disabled', false).text(originalBtnText);
             }
         });
     });
