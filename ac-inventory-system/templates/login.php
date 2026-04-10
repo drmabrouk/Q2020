@@ -29,12 +29,24 @@
 jQuery(document).ready(function($) {
     $('#ac-is-login-form').on('submit', function(e) {
         e.preventDefault();
-        const data = $(this).serialize() + '&action=ac_is_login&nonce=' + ac_is_ajax.nonce;
+        const $form = $(this);
+        const $btn = $form.find('button[type="submit"]');
+        const $error = $('#ac-is-login-error');
+        const originalBtnText = $btn.text();
+
+        // Instant visual feedback
+        $btn.prop('disabled', true).text('<?php _e('جاري التحميل...', 'ac-inventory-system'); ?>');
+        $error.hide();
+
+        const data = $form.serialize() + '&action=ac_is_login&nonce=' + ac_is_ajax.nonce;
         $.post(ac_is_ajax.ajax_url, data, function(response) {
             if (response.success) {
-                location.reload();
+                // Instant redirection to dashboard
+                window.location.href = window.location.href.split('#')[0].split('?')[0];
             } else {
-                $('#ac-is-login-error').fadeIn(200);
+                // Instant error display and reset
+                $btn.prop('disabled', false).text(originalBtnText);
+                $error.show();
             }
         });
     });
