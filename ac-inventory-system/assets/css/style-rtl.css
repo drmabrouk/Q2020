@@ -233,40 +233,53 @@
         display: none !important;
     }
 
-    /* Mobile Dashboard Card Optimization */
+    /* Mobile Dashboard Card Optimization - HARD ENFORCED 3 PER ROW */
     .ac-is-metrics-row {
-        overflow-x: auto;
-        padding-bottom: 10px;
-        scrollbar-width: none;
-        flex-wrap: nowrap;
+        display: grid !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        padding-bottom: 15px;
+        flex-wrap: nowrap !important;
+        overflow: hidden !important;
     }
-    .ac-is-metrics-row::-webkit-scrollbar { display: none; }
 
     .ac-is-metric-card {
-        flex: 1 1 0;
-        min-width: 100px; /* Force 3 on same row */
-        padding: 10px 5px;
+        flex: none !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        padding: 8px 4px !important;
         margin-bottom: 0;
-        gap: 8px;
+        gap: 5px !important;
         border-right-width: 3px;
+        border-radius: 6px !important;
+        flex-direction: column !important;
+        text-align: center;
+        justify-content: center;
     }
 
     .ac-is-metric-icon {
-        width: 35px;
-        height: 35px;
-        font-size: 16px;
+        width: 25px !important;
+        height: 25px !important;
+        font-size: 14px !important;
+        margin: 0 auto;
     }
 
     .ac-is-metric-title {
-        font-size: 0.65rem;
+        font-size: 0.55rem !important;
+        margin-bottom: 2px !important;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 
     .ac-is-metric-value {
-        font-size: 0.9rem;
+        font-size: 0.75rem !important;
+        font-weight: 800;
     }
 
     .ac-is-metric-content div:last-child {
-        font-size: 0.6rem !important;
+        font-size: 0.5rem !important;
+        margin-top: 1px;
     }
 
     /* Water Filter Tracking Mobile Optimization */

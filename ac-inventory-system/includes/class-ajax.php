@@ -62,6 +62,10 @@ class AC_IS_Ajax {
 		if ( ! AC_IS_Auth::can_delete_products() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = intval( $_POST['id'] );
+		$product = AC_IS_Inventory::get_product( $id );
+		if ( $product ) {
+			AC_IS_Reports_Audit::log( 'delete_product', "Product: {$product->name}", $product );
+		}
 		AC_IS_Inventory::delete_product( $id );
 		wp_send_json_success( 'Product deleted' );
 	}
@@ -240,6 +244,11 @@ class AC_IS_Ajax {
 		if ( ! AC_IS_Auth::is_manager() ) wp_send_json_error( 'Unauthorized' );
 
 		$id = intval( $_POST['id'] );
+		global $wpdb;
+		$customer = $wpdb->get_row( $wpdb->prepare( "SELECT * FROM {$wpdb->prefix}ac_is_customers WHERE id = %d", $id ) );
+		if ( $customer ) {
+			AC_IS_Reports_Audit::log( 'delete_customer', "Customer: {$customer->name}", $customer );
+		}
 		AC_IS_Customers::delete_customer( $id );
 		wp_send_json_success();
 	}
@@ -393,9 +402,26 @@ class AC_IS_Ajax {
 		check_ajax_referer( 'ac_is_nonce', 'nonce' );
 		if ( ! AC_IS_Auth::is_admin() ) wp_send_json_error( 'Unauthorized' );
 
+		global $wpdb;
 		$log_id = intval( $_POST['log_id'] );
-		// Undo logic goes here (restore product, customer, etc.)
-		wp_send_json_success();
+		$log = $wpdb->get_row($wpdb->prepare("SELECT * FROM {$wpdb->prefix}ac_is_activity_logs WHERE id = %d", $log_id));
+
+		if ( ! $log || ! $log->meta_data ) wp_send_json_error( 'No undo data' );
+
+		$data = json_decode( $log->meta_data, true );
+		unset($data['id']); // Prevent ID collisions
+
+		if ( $log->action_type === 'delete_product' ) {
+			$wpdb->insert( "{$wpdb->prefix}ac_is_products", $data );
+			$wpdb->delete( "{$wpdb->prefix}ac_is_activity_logs", array( 'id' => $log_id ) );
+			wp_send_json_success();
+		} elseif ( $log->action_type === 'delete_customer' ) {
+			$wpdb->insert( "{$wpdb->prefix}ac_is_customers", $data );
+			$wpdb->delete( "{$wpdb->prefix}ac_is_activity_logs", array( 'id' => $log_id ) );
+			wp_send_json_success();
+		}
+
+		wp_send_json_error( 'Cannot undo this action' );
 	}
 
 	public function recognize_product() {
